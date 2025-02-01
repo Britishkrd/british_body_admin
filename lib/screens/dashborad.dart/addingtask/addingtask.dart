@@ -191,7 +191,7 @@ class _AddingTaskState extends State<AddingTask> {
                                       .doc(widget.email)
                                       .collection('tasks')
                                       .doc(
-                                          '${widget.email}-${DateTime.now().millisecondsSinceEpoch}')
+                                          '${widget.email}-${DateTime.now().toString()}')
                                       .set({
                                     'description': descriptioncontroller.text,
                                     'time': DateTime.now(),
