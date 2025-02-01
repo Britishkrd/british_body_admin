@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "528586385117",
+    "project_id": "british-body-admin",
+    "storage_bucket": "british-body-admin.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:528586385117:android:44223907118575cae99d34",
+        "android_client_info": {
+          "package_name": "com.example.british_body_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3pBwvcdFu_0KJBWb6UYRRVcwM1n6nQ_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
