@@ -2,6 +2,7 @@
 
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
+import 'package:british_body_admin/screens/dashborad.dart/addingrewardpunishment/choosinguser.dart';
 import 'package:british_body_admin/screens/dashborad.dart/addingtask/addingtask.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:flutter/material.dart';
@@ -77,20 +78,25 @@ class _DashboardState extends State<Dashboard> {
                         controlpanelcard(Icons.task_outlined, 'زیادکردنی ئەرک'),
                   ),
                   GestureDetector(
-                    onTap: () {},
-                    child:
-                        controlpanelcard(Icons.done_all_outlined, 'donejobs'),
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Choosinguser(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.card_giftcard_outlined, 'زیادکردنی پاداشت و سزا'),
                   ),
                   GestureDetector(
                     onTap: () {
-                      Sharedpreference.setuser(
-                          '', '', '', 'aa', 'aa', 'aa', 0, 0, false, '', false);
-                      Navigator.push(context,
+                      Sharedpreference.setuser('', '', '', 'aa', 'aa', 'aa', 0,
+                          0, 0, 0, false, '', false, []);
+                      Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {
                         return Login();
                       }));
                     },
-                    child: controlpanelcard(Icons.logout, 'logout'),
+                    child: controlpanelcard(Icons.logout, 'دەرچوون'),
                   ),
                 ],
               ),
@@ -109,7 +115,7 @@ class _DashboardState extends State<Dashboard> {
           color: Material1.primaryColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withAlpha(50),
+              color: Colors.grey.withAlpha(150),
               spreadRadius: 1,
               blurRadius: 3,
             ),

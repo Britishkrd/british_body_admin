@@ -231,12 +231,17 @@ class _LoginState extends State<Login> {
                             value.data()?['age'] ?? '',
                             latitude,
                             longtitude,
+                            value.data()?['worklat'] ?? 0.0,
+                            value.data()?['worklong'] ?? 0.0,
                             true,
                             fcm,
-                            false);
+                            false,
+                            value.data()?['permissions'] ?? []);
                         Navigator.pushReplacement(context, MaterialPageRoute(
                           builder: (context) {
-                            return Navigation(email: email,);
+                            return Navigation(
+                              email: email,
+                            );
                           },
                         ));
                       } else {

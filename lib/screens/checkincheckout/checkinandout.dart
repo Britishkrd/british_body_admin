@@ -26,15 +26,22 @@ final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
 bool checkin = true;
 double latitude = 0.0;
 double longtitude = 0.0;
+double worklatitude = 0.0;
+double worklongtitude = 0.0;
+
 TextEditingController notecontroller = TextEditingController();
 
 String email = '';
 bool checkinpage = false;
+List permissions = [];
 
 getuserinfo() async {
   final SharedPreferences preference = await SharedPreferences.getInstance();
   email = preference.getString('email') ?? '';
   checkin = preference.getBool('checkin') ?? false;
+  permissions = preference.getStringList('permissions') ?? [];
+  worklatitude = preference.getDouble('worklat') ?? 0.0;
+  worklongtitude = preference.getDouble('worklong') ?? 0.0;
 }
 
 class _CheckinandoutState extends State<Checkinandout> {
@@ -134,7 +141,53 @@ class _CheckinandoutState extends State<Checkinandout> {
                         buttoncolor: Material1.primaryColor,
                         textcolor: Colors.white,
                         function: () async {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Center(
+                                    child: Column(
+                                      children: [
+                                        CircularProgressIndicator(),
+                                        SizedBox(
+                                          height: 2.h,
+                                        ),
+                                        Text('تکایە چاوەڕێکەوە',
+                                            style: TextStyle(fontSize: 16.sp)),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              });
+                          await _getCurrentPosition();
                           await getuserinfo();
+                          double distanceInMeters = Geolocator.distanceBetween(
+                              worklatitude,
+                              worklongtitude,
+                              latitude,
+                              longtitude);
+                          if (distanceInMeters > 100) {
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text('هەڵە'),
+                                    content: Text(
+                                        'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە'),
+                                    actions: [
+                                      Material1.button(
+                                          label: 'باشە',
+                                          buttoncolor: Material1.primaryColor,
+                                          textcolor: Colors.white,
+                                          function: () {
+                                            Navigator.pop(context);
+                                            Navigator.pop(context);
+                                          }),
+                                    ],
+                                  );
+                                });
+                            return;
+                          }
                           if (checkin) {
                             showDialog(
                                 context: context,
@@ -174,7 +227,6 @@ class _CheckinandoutState extends State<Checkinandout> {
                                         buttoncolor: Material1.primaryColor,
                                         textcolor: Colors.white,
                                         function: () async {
-                                          await _getCurrentPosition();
                                           DateTime startDate =
                                               DateTime.now().toLocal();
                                           int offset = await NTP.getNtpOffset(
@@ -205,6 +257,101 @@ class _CheckinandoutState extends State<Checkinandout> {
                               });
                         }),
                   ),
+                  permissions.contains('workoutside')
+                      ? Container(
+                          margin: EdgeInsets.only(top: 3.h),
+                          height: 8.h,
+                          width: 80.w,
+                          decoration: BoxDecoration(
+                            color: Material1.primaryColor,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Material1.button(
+                              label: 'چوونەژوورەوە لە دەروەی شوێنی ئیشکردن ',
+                              child: Icon(Icons.timer, color: Colors.white),
+                              buttoncolor: Material1.primaryColor,
+                              textcolor: Colors.white,
+                              function: () async {
+                                await getuserinfo();
+                                if (checkin) {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text('هەڵە'),
+                                          content:
+                                              Text('تکایە چوونەدەرەووە بکە'),
+                                          actions: [
+                                            Material1.button(
+                                                label: 'باشە',
+                                                buttoncolor:
+                                                    Material1.primaryColor,
+                                                textcolor: Colors.white,
+                                                function: () {
+                                                  Navigator.pop(context);
+                                                }),
+                                          ],
+                                        );
+                                      });
+                                  return;
+                                }
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: Text('دڵنیاکردنەوە'),
+                                        content:
+                                            Text('دڵنیایت لە چوونەژوورەوە؟'),
+                                        actions: [
+                                          Material1.button(
+                                              label: 'پەشیمان بوونەوە',
+                                              buttoncolor:
+                                                  Material1.primaryColor,
+                                              textcolor: Colors.white,
+                                              function: () {
+                                                Navigator.pop(context);
+                                              }),
+                                          Material1.button(
+                                              label: 'چوونەژوورەوە',
+                                              buttoncolor:
+                                                  Material1.primaryColor,
+                                              textcolor: Colors.white,
+                                              function: () async {
+                                                await _getCurrentPosition();
+                                                DateTime startDate =
+                                                    DateTime.now().toLocal();
+                                                int offset =
+                                                    await NTP.getNtpOffset(
+                                                        localTime: startDate);
+                                                DateTime now = startDate.add(
+                                                    Duration(
+                                                        milliseconds: offset));
+                                                FirebaseFirestore.instance
+                                                    .collection('user')
+                                                    .doc(email)
+                                                    .collection(
+                                                        'checkincheckouts')
+                                                    .add({
+                                                  'latitude': latitude,
+                                                  'longtitude': longtitude,
+                                                  'time': now,
+                                                  'note': notecontroller.text,
+                                                  'checkout': false,
+                                                  'checkin': true,
+                                                });
+                                                Sharedpreference.checkin(
+                                                    now.toString(),
+                                                    latitude,
+                                                    longtitude,
+                                                    true);
+                                                Navigator.pop(context);
+                                              }),
+                                        ],
+                                      );
+                                    });
+                              }),
+                        )
+                      : const SizedBox.shrink(),
                 ],
               )
             : Column(
