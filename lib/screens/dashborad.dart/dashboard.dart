@@ -2,6 +2,7 @@
 
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
+import 'package:british_body_admin/screens/dashborad.dart/addingtask/addingtask.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -63,8 +64,17 @@ class _DashboardState extends State<Dashboard> {
                         return AbsentManagement(email: email);
                       }));
                     },
+                    child: controlpanelcard(Icons.more_time, 'ئیجازە'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return AddingTask(email: email);
+                      }));
+                    },
                     child:
-                        controlpanelcard(Icons.more_time, 'absent management'),
+                        controlpanelcard(Icons.task_outlined, 'زیادکردنی ئەرک'),
                   ),
                   GestureDetector(
                     onTap: () {},
