@@ -1,24 +1,23 @@
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/createabsent.dart';
+import 'package:british_body_admin/screens/dashborad.dart/loan/requestingloan.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:intl/intl.dart';
 
-class AbsentManagement extends StatefulWidget {
+class LoanManagement extends StatefulWidget {
   final String email;
-  const AbsentManagement({super.key, required this.email});
+  const LoanManagement({super.key, required this.email});
 
   @override
-  State<AbsentManagement> createState() => _AbsentManagementState();
+  State<LoanManagement> createState() => _LoanManagementState();
 }
 
-class _AbsentManagementState extends State<AbsentManagement> {
+class _LoanManagementState extends State<LoanManagement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('مۆڵەت'),
+        title: const Text('سولفە'),
         centerTitle: true,
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
@@ -30,9 +29,8 @@ class _AbsentManagementState extends State<AbsentManagement> {
             width: 100.w,
             child: StreamBuilder(
                 stream: FirebaseFirestore.instance
-                    .collection('user')
-                    .doc(widget.email)
-                    .collection('absentmanagement')
+                    .collection('loanmanagement')
+                    .where('requestedby', isEqualTo: widget.email)
                     .snapshots(),
                 builder: (BuildContext context,
                     AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -65,26 +63,10 @@ class _AbsentManagementState extends State<AbsentManagement> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                      "گرنگی : ${snapshot.data!.docs[index]['urgency'] == 'emergency' ? 'زۆر گرنگ' : snapshot.data!.docs[index]['urgency'] == 'urgent' ? 'گرنگ' : 'ئاسایی'}",
+                                      "${snapshot.data!.docs[index]['amount']} : بڕ",
                                       style: TextStyle(
                                           fontSize: 16.sp,
                                           fontWeight: FontWeight.bold)),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      Text(
-                                          "${DateFormat('MMM d, h:mm a').format(snapshot.data!.docs[index]['end'].toDate())} بۆ",
-                                          style: TextStyle(
-                                            fontSize: 16.sp,
-                                          )),
-                                      Text(
-                                          "${DateFormat('MMM d, h:mm a').format(snapshot.data!.docs[index]['start'].toDate())}  لە",
-                                          style: TextStyle(
-                                            fontSize: 16.sp,
-                                          )),
-                                    ],
-                                  ),
                                   SizedBox(
                                     height: 3.h,
                                     child: Text(
@@ -118,7 +100,7 @@ class _AbsentManagementState extends State<AbsentManagement> {
             child: GestureDetector(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return Createabsent(email: widget.email);
+                  return RequestingLoan(email: widget.email);
                 }));
               },
               child: Container(
@@ -139,7 +121,7 @@ class _AbsentManagementState extends State<AbsentManagement> {
                 ),
                 child: Center(
                   child: Text(
-                    'داواکردنی مۆڵەت',
+                    'داواکردنی سولفە',
                     style: TextStyle(color: Colors.white, fontSize: 16.sp),
                   ),
                 ),

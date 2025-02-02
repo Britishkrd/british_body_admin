@@ -2,7 +2,9 @@
 
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
+import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/acceptingabsence.dart';
 import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/choosinguser.dart';
+import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
@@ -11,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../material/materials.dart';
+import 'loan/loan.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -66,7 +69,16 @@ class _DashboardState extends State<Dashboard> {
                         return AbsentManagement(email: email);
                       }));
                     },
-                    child: controlpanelcard(Icons.more_time, 'ئیجازە'),
+                    child: controlpanelcard(Icons.more_time, 'مۆڵەت'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Acceptingabsence();
+                      }));
+                    },
+                    child: controlpanelcard(Icons.more_time, 'قبوڵکردنی مۆڵەت'),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -97,6 +109,25 @@ class _DashboardState extends State<Dashboard> {
                     },
                     child: controlpanelcard(
                         Icons.card_giftcard_outlined, 'زیادکردنی پاداشت و سزا'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return LoanManagement(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(Icons.money, 'سولفە'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return AcceptingLoan(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.monetization_on_outlined, 'قبۆڵکردنی سولفە'),
                   ),
                   GestureDetector(
                     onTap: () {

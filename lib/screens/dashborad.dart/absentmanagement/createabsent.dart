@@ -48,7 +48,7 @@ class _CreateabsentState extends State<Createabsent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('داواکردنی ئیجازە'),
+        title: const Text('داواکردنی مۆڵەت'),
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
       ),
@@ -59,7 +59,7 @@ class _CreateabsentState extends State<Createabsent> {
                 EdgeInsets.only(top: 2.h, left: 5.w, right: 5.w, bottom: 1.h),
             alignment: Alignment.topRight,
             child: Text(
-              'هەڵبژاردنی گرنگی ئیجازە',
+              'هەڵبژاردنی گرنگی مۆڵەت',
               style: TextStyle(
                   color: Material1.primaryColor,
                   fontSize: 20.sp,
@@ -213,7 +213,7 @@ class _CreateabsentState extends State<Createabsent> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('هەڵبژاردنی کاتی ئیجازە',
+                    Text('هەڵبژاردنی کاتی مۆڵەت',
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 16.sp,
@@ -248,7 +248,7 @@ class _CreateabsentState extends State<Createabsent> {
                   if (start == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('تکایە کاتی ئیجازە هەڵبژێرە'),
+                        content: Text('تکایە کاتی مۆڵەت هەڵبژێرە'),
                       ),
                     );
                     return;
@@ -264,7 +264,7 @@ class _CreateabsentState extends State<Createabsent> {
                   if (!isEmergency && !isUregent && !isNormal) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('تکایە گرنگی ئیجازە هەڵبژێرە'),
+                        content: Text('تکایە گرنگی مۆڵەت هەڵبژێرە'),
                       ),
                     );
                     return;
@@ -273,8 +273,8 @@ class _CreateabsentState extends State<Createabsent> {
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: Text('داواکردنی ئیجازە'),
-                          content: Text('دڵنییایت لە داواکردنی ئیجازە؟'),
+                          title: Text('داواکردنی مۆڵەت'),
+                          content: Text('دڵنییایت لە داواکردنی مۆڵەت؟'),
                           actions: [
                             Material1.button(
                                 label: 'نەخێر',
@@ -317,7 +317,7 @@ class _CreateabsentState extends State<Createabsent> {
                                           .showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                              'ئیجازەکە بەسەرکەوتویی داواکرا'),
+                                              'مۆڵەتکە بەسەرکەوتویی داواکرا'),
                                         ),
                                       );
                                       Navigator.popUntil(
