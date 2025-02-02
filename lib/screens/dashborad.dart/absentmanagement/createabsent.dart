@@ -1,8 +1,8 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:sizer/sizer.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 
 class Createabsent extends StatefulWidget {
@@ -27,7 +27,7 @@ TextEditingController notecontroller = TextEditingController();
 DateTime? start;
 DateTime? end;
 String formatDate(DateTime? date) {
-  final DateFormat formatter = DateFormat('dd/MM/yyyy');
+  final DateFormat formatter = DateFormat('dd/MM/yyyy HH:mm');
   return formatter.format(date ?? DateTime.now());
 }
 
@@ -159,49 +159,49 @@ class _CreateabsentState extends State<Createabsent> {
             ),
           ),
           GestureDetector(
-            onTap: () {
-              showDialog<String>(
-                  context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                          title: Text(''),
-                          content: SizedBox(
-                            height: 60.h,
-                            width: 100.w,
-                            child: SfDateRangePicker(
-                              view: DateRangePickerView.month,
-                              selectionMode: DateRangePickerSelectionMode.range,
-                              enablePastDates: false,
-                              onSelectionChanged: (args) {
-                                if (args.value.startDate != null &&
-                                    args.value.endDate == null) {
-                                  start = args.value.startDate;
-                                  end = args.value.startDate;
-                                  setState(() {});
-                                } else if (args.value.startDate != null &&
-                                    args.value.endDate != null) {
-                                  start = args.value.startDate;
-                                  end = args.value.endDate;
-                                  setState(() {});
-                                }
-                              },
-                              selectionColor: Material1.primaryColor,
-                              endRangeSelectionColor: Material1.primaryColor,
-                              rangeSelectionColor: Colors.blue[200],
-                              startRangeSelectionColor: Material1.primaryColor,
-                              todayHighlightColor: Colors.blue[200],
-                            ),
-                          ),
-                          actions: <Widget>[
-                            Material1.button(
-                              fontsize: 16.sp,
-                              label: 'هەڵبژاردن',
-                              buttoncolor: Material1.primaryColor,
-                              function: () async {
-                                Navigator.pop(context);
-                              },
-                              textcolor: Colors.white,
-                            ),
-                          ]));
+            onTap: () async {
+              List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
+                context: context,
+                startInitialDate: DateTime.now(),
+                startFirstDate:
+                    DateTime(1600).subtract(const Duration(days: 3652)),
+                startLastDate: DateTime.now().add(
+                  const Duration(days: 3652),
+                ),
+                endInitialDate: DateTime.now(),
+                endFirstDate:
+                    DateTime(1600).subtract(const Duration(days: 3652)),
+                endLastDate: DateTime.now().add(
+                  const Duration(days: 3652),
+                ),
+                is24HourMode: false,
+                isShowSeconds: false,
+                minutesInterval: 1,
+                secondsInterval: 1,
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                constraints: const BoxConstraints(
+                  maxWidth: 350,
+                  maxHeight: 650,
+                ),
+                transitionBuilder: (context, anim1, anim2, child) {
+                  return FadeTransition(
+                    opacity: anim1.drive(
+                      Tween(
+                        begin: 0,
+                        end: 1,
+                      ),
+                    ),
+                    child: child,
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 200),
+                barrierDismissible: true,
+              );
+              if (dateTimeList != null) {
+                start = dateTimeList[0];
+                end = dateTimeList[1];
+                setState(() {});
+              }
             },
             child: Container(
                 margin: EdgeInsets.only(top: 3.h, left: 5.w, right: 5.w),

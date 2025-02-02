@@ -48,7 +48,7 @@ dependencies:
   ntp: ^2.0.0
   month_picker_dialog: ^6.0.3
   local_auth: ^2.3.0
-  syncfusion_flutter_datepicker: ^28.2.3
+  omni_datetime_picker: ^2.0.6
 
 dev_dependencies:
   flutter_test:
