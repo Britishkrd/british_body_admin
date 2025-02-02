@@ -1,3 +1,4 @@
+import 'package:british_body_admin/sendingnotification.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
@@ -126,6 +127,18 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                                             .docs[index].id)
                                                         .update({
                                                       'status': 'accepted'
+                                                    }).then((value) {
+                                                      FirebaseFirestore.instance
+                                                          .collection('user')
+                                                          .doc(email)
+                                                          .get()
+                                                          .then((value) {
+                                                        sendingnotification(
+                                                            'مۆڵەت',
+                                                            'مۆڵەتەکەت قبوڵکرا',
+                                                            value.data()?[
+                                                                'token']);
+                                                      });
                                                     });
                                                   },
                                                   child: Text('قبوڵکردن',
@@ -144,6 +157,18 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                                             .docs[index].id)
                                                         .update({
                                                       'status': 'rejected'
+                                                    }).then((value) {
+                                                      FirebaseFirestore.instance
+                                                          .collection('user')
+                                                          .doc(email)
+                                                          .get()
+                                                          .then((value) {
+                                                        sendingnotification(
+                                                            'مۆڵەت',
+                                                            'مۆڵەتەکەت ڕەتکرایەوە',
+                                                            value.data()?[
+                                                                'token']);
+                                                      });
                                                     });
                                                   },
                                                   child: Text('ڕەتکردنەوە',

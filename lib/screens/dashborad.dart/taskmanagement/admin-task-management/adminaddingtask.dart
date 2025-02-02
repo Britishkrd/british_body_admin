@@ -5,6 +5,8 @@ import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../sendingnotification.dart';
+
 class AdminAddingTask extends StatefulWidget {
   final String adminemail;
   final String email;
@@ -45,7 +47,7 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
         children: [
           GestureDetector(
             onTap: () async {
-                           List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
+              List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
                 context: context,
                 startInitialDate: DateTime.now(),
                 startFirstDate:
@@ -85,7 +87,7 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
               start = dateTimeList?[0] ?? DateTime.now();
               end = dateTimeList?[1] ?? DateTime.now();
               setState(() {});
-                        },
+            },
             child: Container(
                 margin: EdgeInsets.only(top: 3.h, left: 5.w, right: 5.w),
                 height: 10.h,
@@ -223,6 +225,17 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                     'name': namecontroller.text,
                                     'isdaily': isDaily,
                                     'addedby': widget.adminemail,
+                                  }).then((value) {
+                                    FirebaseFirestore.instance
+                                        .collection('user')
+                                        .doc(widget.email)
+                                        .get()
+                                        .then((value) {
+                                      sendingnotification(
+                                          'کار ',
+                                          'کارێکت بۆ زیاد کرا',
+                                          value.data()?['token']);
+                                    });
                                   }).then(
                                     (value) {
                                       ScaffoldMessenger.of(context)

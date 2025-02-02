@@ -50,6 +50,7 @@ dependencies:
   local_auth: ^2.3.0
   omni_datetime_picker: ^2.0.6
   googleapis_auth: ^1.6.0
+  chips_choice: ^3.0.1
 
 dev_dependencies:
   flutter_test:
