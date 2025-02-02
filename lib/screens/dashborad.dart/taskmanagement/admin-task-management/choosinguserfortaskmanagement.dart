@@ -1,18 +1,21 @@
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/screens/dashborad.dart/addingrewardpunishment/addingrewardpunishment.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/adminaddingtask.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/admintaskdeletion.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-class Choosinguser extends StatefulWidget {
+class ChoosingUserFoTaskManagement extends StatefulWidget {
   final String email;
-  const Choosinguser({super.key, required this.email});
+  const ChoosingUserFoTaskManagement({super.key, required this.email});
 
   @override
-  State<Choosinguser> createState() => _ChoosinguserState();
+  State<ChoosingUserFoTaskManagement> createState() =>
+      _ChoosingUserFoTaskManagementState();
 }
 
-class _ChoosinguserState extends State<Choosinguser> {
+class _ChoosingUserFoTaskManagementState
+    extends State<ChoosingUserFoTaskManagement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,12 +36,38 @@ class _ChoosinguserState extends State<Choosinguser> {
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return AddingRewardPunishment(
-                          adminemail: widget.email,
-                          email: snapshot.data!.docs[index]['email']);
-                    }));
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text(
+                                'دەتەوێت چی لە ئەرکی ئەم کارمەندە بکەیت'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) {
+                                      return AdminAddingTask(
+                                          adminemail: widget.email,
+                                          email: snapshot.data!.docs[index]
+                                              ['email']);
+                                    }));
+                                  },
+                                  child: const Text('زیادکردنی کار')),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) {
+                                      return AdminTaskDeletion(
+                                          email: snapshot.data!.docs[index]
+                                              ['email']);
+                                    }));
+                                  },
+                                  child: const Text('سڕینەوەی کار',
+                                      style: TextStyle(color: Colors.red))),
+                            ],
+                          );
+                        });
                   },
                   child: SizedBox(
                       height: 15.h,

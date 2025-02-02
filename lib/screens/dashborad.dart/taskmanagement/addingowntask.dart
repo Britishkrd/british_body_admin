@@ -5,15 +5,15 @@ import 'package:sizer/sizer.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 
-class AddingTask extends StatefulWidget {
+class AddingOwnTask extends StatefulWidget {
   final String email;
-  const AddingTask({
+  const AddingOwnTask({
     super.key,
     required this.email,
   });
 
   @override
-  State<AddingTask> createState() => _AddingTaskState();
+  State<AddingOwnTask> createState() => _AddingOwnTaskState();
 }
 
 bool checkin = true;
@@ -29,7 +29,7 @@ String formatDate(DateTime? date) {
   return formatter.format(date ?? DateTime.now());
 }
 
-class _AddingTaskState extends State<AddingTask> {
+class _AddingOwnTaskState extends State<AddingOwnTask> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,7 +134,7 @@ class _AddingTaskState extends State<AddingTask> {
             width: 90.w,
             height: 8.h,
             child: Material1.button(
-                label: 'داواکردن',
+                label: 'زیادکردن',
                 function: () async {
                   if (start == null) {
                     ScaffoldMessenger.of(context).showSnackBar(

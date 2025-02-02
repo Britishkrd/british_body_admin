@@ -2,8 +2,9 @@
 
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
-import 'package:british_body_admin/screens/dashborad.dart/addingrewardpunishment/choosinguser.dart';
-import 'package:british_body_admin/screens/dashborad.dart/addingtask/addingtask.dart';
+import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/choosinguser.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,11 +72,21 @@ class _DashboardState extends State<Dashboard> {
                     onTap: () {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
-                        return AddingTask(email: email);
+                        return AddingOwnTask(email: email);
                       }));
                     },
-                    child:
-                        controlpanelcard(Icons.task_outlined, 'زیادکردنی ئەرک'),
+                    child: controlpanelcard(
+                        Icons.task_outlined, 'زیادکردنی ئەرک بۆ خۆم'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return ChoosingUserFoTaskManagement(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.task_alt, 'زیادکردنی ئەرک وەک ئەدمین'),
                   ),
                   GestureDetector(
                     onTap: () {
