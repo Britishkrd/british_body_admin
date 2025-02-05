@@ -4,6 +4,9 @@ import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/acceptingabsence.dart';
 import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/choosinguser.dart';
+import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/viewingrewardpunishment.dart';
+import 'package:british_body_admin/screens/dashborad.dart/givingsalary/choosingusertogivesalary.dart';
+import 'package:british_body_admin/screens/dashborad.dart/givingsalary/receivingsalary/choosingmonthtoreceiversalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
@@ -35,6 +38,7 @@ class _DashboardState extends State<Dashboard> {
   String city = '';
   String job = 'job';
   String email = '';
+  bool chekedin = false;
 
   getuserinfo() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
@@ -42,6 +46,7 @@ class _DashboardState extends State<Dashboard> {
       name = preference.getString('name') ?? '';
       phonenumber = preference.getString('phonenumber') ?? '';
       email = preference.getString('email') ?? '';
+      chekedin = preference.getBool('checkin') ?? false;
     });
   }
 
@@ -53,7 +58,7 @@ class _DashboardState extends State<Dashboard> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
-              height: 75.h,
+              height: 80.h,
               child: GridView(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -114,6 +119,16 @@ class _DashboardState extends State<Dashboard> {
                     onTap: () {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
+                        return Viewingrewardpunishment(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.card_giftcard_sharp, 'بینینی پاداشت و سزاکانت'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
                         return LoanManagement(email: email);
                       }));
                     },
@@ -130,7 +145,50 @@ class _DashboardState extends State<Dashboard> {
                         Icons.monetization_on_outlined, 'قبۆڵکردنی سولفە'),
                   ),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ChoosingUserForGivingSalary(email: email)));
+                    },
+                    child:
+                        controlpanelcard(Icons.monetization_on, 'پێدانی موچە'),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ChoosingMonthToReceiveSalary(email: email)));
+                    },
+                    child:
+                        controlpanelcard(Icons.attach_money, 'وەرگرتنی موچە'),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      await getuserinfo();
+                      if (chekedin) {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text('هەڵە'),
+                                content: Text('تکایە چوونەدەرەووە بکە'),
+                                actions: [
+                                  Material1.button(
+                                      label: 'باشە',
+                                      buttoncolor: Material1.primaryColor,
+                                      textcolor: Colors.white,
+                                      function: () {
+                                        Navigator.pop(context);
+                                      }),
+                                ],
+                              );
+                            });
+                        return;
+                      }
                       Sharedpreference.setuser('', '', '', 'aa', 'aa', 'aa', 0,
                           0, 0, 0, false, '', false, []);
                       Navigator.pushReplacement(context,

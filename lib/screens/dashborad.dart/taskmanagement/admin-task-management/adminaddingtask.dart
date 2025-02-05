@@ -25,6 +25,8 @@ double latitude = 0.0;
 double longtitude = 0.0;
 TextEditingController descriptioncontroller = TextEditingController();
 TextEditingController namecontroller = TextEditingController();
+TextEditingController deductionamountcontroller = TextEditingController();
+TextEditingController rewardamountcontroller = TextEditingController();
 
 DateTime? start;
 DateTime? end;
@@ -132,6 +134,26 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                 controller: descriptioncontroller,
                 textColor: Material1.primaryColor),
           ),
+          Container(
+            margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+            width: 90.w,
+            height: 8.h,
+            child: Material1.textfield(
+                hint: 'بڕی وغەرامە',
+                inputType: TextInputType.number,
+                controller: deductionamountcontroller,
+                textColor: Material1.primaryColor),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+            width: 90.w,
+            height: 8.h,
+            child: Material1.textfield(
+                hint: 'بڕی پاداشت',
+                inputType: TextInputType.number,
+                controller: rewardamountcontroller,
+                textColor: Material1.primaryColor),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -184,6 +206,22 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                     );
                     return;
                   }
+                  if (deductionamountcontroller.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('تکایە بڕی وغەرامە بنووسە'),
+                      ),
+                    );
+                    return;
+                  }
+                  if (rewardamountcontroller.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('تکایە بڕی پاداشت بنووسە'),
+                      ),
+                    );
+                    return;
+                  }
                   showDialog(
                       context: context,
                       builder: (context) {
@@ -225,6 +263,10 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                     'name': namecontroller.text,
                                     'isdaily': isDaily,
                                     'addedby': widget.adminemail,
+                                    'deductionamount':
+                                        deductionamountcontroller.text,
+                                    'rewardamount': rewardamountcontroller.text,
+                                    'isowntask': false
                                   }).then((value) {
                                     FirebaseFirestore.instance
                                         .collection('user')

@@ -3,7 +3,6 @@ import 'package:british_body_admin/screens/checkincheckout/checkinandout.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/dashboard.dart';
 import 'package:british_body_admin/screens/profile/profile.dart';
-import 'package:british_body_admin/screens/salary/salary.dart';
 import 'package:british_body_admin/screens/tasks/tasks.dart';
 import 'package:flutter/material.dart';
 
@@ -55,18 +54,7 @@ class _NavigationState extends State<Navigation> {
                         ? Tasks(
                             email: widget.email,
                           )
-                        : Salary(email: email)
-        //  _bottomNavIndex == 3
-        //     ? Messeges(phonenumber: phonenumber)
-        //     : _bottomNavIndex == 2
-        //         ? const Home()
-        //         : _bottomNavIndex == 1
-        //             ? Jobs(phonenumber: phonenumber, city: city)
-        //             : _bottomNavIndex == 0
-        //                 ? Alerts(
-        //                     phonenumber: phonenumber,
-        //                   )
-        //                 : const Profile()
+                        : Dashboard()
         );
   }
 }

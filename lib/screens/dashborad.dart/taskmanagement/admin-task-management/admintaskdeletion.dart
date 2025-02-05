@@ -27,6 +27,7 @@ class _AdminTaskDeletionState extends State<AdminTaskDeletion> {
             .collection('user')
             .doc(widget.email)
             .collection('tasks')
+            .where('isowntask', isNotEqualTo: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

@@ -280,7 +280,7 @@ class _AddingRewardPunishmentState extends State<AddingRewardPunishment> {
                                   FirebaseFirestore.instance
                                       .collection('user')
                                       .doc(widget.email)
-                                      .collection('salary')
+                                      .collection('rewardpunishment')
                                       .doc(
                                           '${isreward ? 'reward' : 'punishment'}-${widget.adminemail}-${DateTime.now().toString()}')
                                       .set({

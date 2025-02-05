@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:sizer/sizer.dart';
 
@@ -17,14 +18,18 @@ class Material1 {
           bool? readonly,
           double? fontsize,
           Color? hintcolor,
+          List<TextInputFormatter>? inputFormatters,
+          Function(String)? onchange,
           validation,
           TextInputType? inputType}) =>
       Directionality(
           textDirection: TextDirection.rtl,
           child: TextFormField(
+            inputFormatters: inputFormatters,
             validator: validation,
             controller: controller,
             keyboardType: inputType,
+            onChanged: onchange,
             readOnly: readonly ?? false,
             style: TextStyle(
                 color: textColor,

@@ -7,9 +7,11 @@ import 'package:intl/intl.dart';
 
 class Taskdetails extends StatefulWidget {
   final QueryDocumentSnapshot<Object?> task;
+  final String email;
   const Taskdetails({
     super.key,
     required this.task,
+    required this.email,
   });
 
   @override
@@ -108,7 +110,7 @@ class _TaskdetailsState extends State<Taskdetails> {
               ],
             ),
           ),
-          !widget.task['isdaily']
+          !widget.task['isdaily'] && widget.task['status'] != 'done'
               ? Container(
                   margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
                   width: 90.w,
@@ -119,7 +121,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                       textColor: Material1.primaryColor),
                 )
               : const SizedBox.shrink(),
-          !widget.task['isdaily']
+          (!widget.task['isdaily'] && widget.task['status'] != 'done')
               ? Container(
                   margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
                   width: 90.w,
@@ -129,6 +131,29 @@ class _TaskdetailsState extends State<Taskdetails> {
                           ? 'دەستپێکردن'
                           : 'کۆتایی پێهێنان',
                       function: () async {
+                        if (widget.task['start']
+                            .toDate()
+                            .isAfter(DateTime.now())) {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text('هەڵە'),
+                                  content: Text(
+                                      'لەکاتی دیاری کراو دەست بە کارەکە بکە'),
+                                  actions: [
+                                    Material1.button(
+                                        label: 'باشە',
+                                        buttoncolor: Material1.primaryColor,
+                                        textcolor: Colors.white,
+                                        function: () {
+                                          Navigator.pop(context);
+                                        }),
+                                  ],
+                                );
+                              });
+                          return;
+                        }
                         showDialog(
                             context: context,
                             builder: (context) {
@@ -168,15 +193,38 @@ class _TaskdetailsState extends State<Taskdetails> {
                                           'time': DateTime.now(),
                                           'latitude': latitude,
                                           'longtitude': longtitude,
+                                          'action':
+                                              widget.task['status'] == 'pending'
+                                                  ? 'start'
+                                                  : 'finish'
                                         }).then(
-                                          (value) {
+                                          (value) async{
                                             if (widget.task['status'] ==
                                                 'pending') {
                                               widget.task.reference
                                                   .update({'status': 'active'});
                                             } else {
-                                              widget.task.reference
-                                                  .update({'status': 'done'});
+                                              String reward = '0';
+                                              try {
+                                                reward =
+                                                    widget.task['rewardamount'];
+                                              } catch (e) {
+                                                reward = '0';
+                                              }
+                                              await FirebaseFirestore.instance
+                                                  .collection('user')
+                                                  .doc(widget.email)
+                                                  .collection(
+                                                      'rewardpunishment')
+                                                  .doc(
+                                                      'reward-${widget.task['name']}${DateTime.now()}')
+                                                  .set({
+                                                    'addedby':widget.email,
+                                                     'amount':reward,
+                                                     'date':DateTime.now(),
+                                                     'reason':'doing task ${widget.task['name']}',
+                                                     'type':'reward'
+                                                  });
                                             }
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(

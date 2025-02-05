@@ -237,20 +237,29 @@ class _CheckinandoutState extends State<Checkinandout> {
                                               .collection('user')
                                               .doc(email)
                                               .collection('checkincheckouts')
-                                              .add({
+                                              .doc(now.toIso8601String())
+                                              .set({
                                             'latitude': latitude,
                                             'longtitude': longtitude,
                                             'time': now,
                                             'note': notecontroller.text,
                                             'checkout': false,
                                             'checkin': true,
+                                          }).then((value) {
+                                            FirebaseFirestore.instance
+                                                .collection('user')
+                                                .doc(email)
+                                                .update({'checkin': true}).then(
+                                                    (value) {
+                                              Sharedpreference.checkin(
+                                                  now.toString(),
+                                                  latitude,
+                                                  longtitude,
+                                                  true);
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
+                                            });
                                           });
-                                          Sharedpreference.checkin(
-                                              now.toString(),
-                                              latitude,
-                                              longtitude,
-                                              true);
-                                          Navigator.pop(context);
                                         }),
                                   ],
                                 );
@@ -317,7 +326,29 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                   Material1.primaryColor,
                                               textcolor: Colors.white,
                                               function: () async {
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return AlertDialog(
+                                                        title: Center(
+                                                          child: Column(
+                                                            children: [
+                                                              CircularProgressIndicator(),
+                                                              SizedBox(
+                                                                height: 2.h,
+                                                              ),
+                                                              Text(
+                                                                  'تکایە چاوەڕێکەوە',
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          16.sp)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    });
                                                 await _getCurrentPosition();
+                                                await getuserinfo();
                                                 DateTime startDate =
                                                     DateTime.now().toLocal();
                                                 int offset =
@@ -331,21 +362,31 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                     .doc(email)
                                                     .collection(
                                                         'checkincheckouts')
-                                                    .add({
+                                                    .doc(now.toIso8601String())
+                                                    .set({
                                                   'latitude': latitude,
                                                   'longtitude': longtitude,
                                                   'time': now,
                                                   'note': notecontroller.text,
                                                   'checkout': false,
                                                   'checkin': true,
+                                                }).then((value) {
+                                                  FirebaseFirestore.instance
+                                                      .collection('user')
+                                                      .doc(email)
+                                                      .update({
+                                                    'checkin': true
+                                                  }).then((value) {
+                                                    Sharedpreference.checkin(
+                                                        now.toString(),
+                                                        latitude,
+                                                        longtitude,
+                                                        true);
+                                                    Navigator.pop(context);
+                                                    Navigator.pop(context);
+                                                  });
                                                 });
-                                                Sharedpreference.checkin(
-                                                    now.toString(),
-                                                    latitude,
-                                                    longtitude,
-                                                    true);
-                                                Navigator.pop(context);
-                                              }),
+                                              })
                                         ],
                                       );
                                     });
@@ -382,7 +423,26 @@ class _CheckinandoutState extends State<Checkinandout> {
                         buttoncolor: Material1.primaryColor,
                         textcolor: Colors.white,
                         function: () async {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Center(
+                                    child: Column(
+                                      children: [
+                                        CircularProgressIndicator(),
+                                        SizedBox(
+                                          height: 2.h,
+                                        ),
+                                        Text('تکایە چاوەڕێکەوە',
+                                            style: TextStyle(fontSize: 16.sp)),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              });
                           await getuserinfo();
+                          await _getCurrentPosition();
                           if (!checkin) {
                             showDialog(
                                 context: context,
@@ -422,7 +482,6 @@ class _CheckinandoutState extends State<Checkinandout> {
                                         buttoncolor: Material1.primaryColor,
                                         textcolor: Colors.white,
                                         function: () async {
-                                          await _getCurrentPosition();
                                           DateTime startDate =
                                               DateTime.now().toLocal();
                                           int offset = await NTP.getNtpOffset(
@@ -433,21 +492,30 @@ class _CheckinandoutState extends State<Checkinandout> {
                                               .collection('user')
                                               .doc(email)
                                               .collection('checkincheckouts')
-                                              .add({
+                                              .doc(now.toIso8601String())
+                                              .set({
                                             'latitude': latitude,
                                             'longtitude': longtitude,
                                             'time': now,
                                             'note': notecontroller.text,
                                             'checkout': true,
                                             'checkin': false,
+                                          }).then((value) {
+                                            FirebaseFirestore.instance
+                                                .collection('user')
+                                                .doc(email)
+                                                .update({
+                                              'checkin': false
+                                            }).then((value) {
+                                              Sharedpreference.checkin(
+                                                  now.toString(),
+                                                  latitude,
+                                                  longtitude,
+                                                  false);
+                                              Navigator.pop(context);
+                                            });
                                           });
-                                          Sharedpreference.checkin(
-                                              now.toString(),
-                                              latitude,
-                                              longtitude,
-                                              false);
-                                          Navigator.pop(context);
-                                        }),
+                                        })
                                   ],
                                 );
                               });

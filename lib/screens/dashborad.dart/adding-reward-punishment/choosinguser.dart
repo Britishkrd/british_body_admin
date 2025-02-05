@@ -1,5 +1,6 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/addingrewardpunishment.dart';
+import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/deleterewardpunishments.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
@@ -33,12 +34,38 @@ class _ChoosinguserState extends State<Choosinguser> {
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return AddingRewardPunishment(
-                          adminemail: widget.email,
-                          email: snapshot.data!.docs[index]['email']);
-                    }));
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text(
+                                'دەتەوێت پاداشت / سزا زیاد بکەیت'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) {
+                                      return AddingRewardPunishment(
+                                          adminemail: widget.email,
+                                          email: snapshot.data!.docs[index]
+                                              ['email']);
+                                    }));
+                                  },
+                                  child: const Text('زیادکردنی پاداشت / سزا')),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) {
+                                      return Deleterewardpunishments(
+                                          email: snapshot.data!.docs[index]
+                                              ['email']);
+                                    }));
+                                  },
+                                  child: const Text('سڕینەوەی پاداشت / سزا',
+                                      style: TextStyle(color: Colors.red))),
+                            ],
+                          );
+                        });
                   },
                   child: SizedBox(
                       height: 15.h,

@@ -197,7 +197,8 @@ class _AddingOwnTaskState extends State<AddingOwnTask> {
                                     'end': end,
                                     'status': 'pending',
                                     'name': namecontroller.text,
-                                    'isdaily': false
+                                    'isdaily': false,
+                                    'isowntask': true
                                   }).then(
                                     (value) {
                                       ScaffoldMessenger.of(context)

@@ -235,7 +235,7 @@ class _LoginState extends State<Login> {
                             value.data()?['worklong'] ?? 0.0,
                             true,
                             fcm,
-                            false,
+                            value.data()?['checkin'] ?? false,
                             value.data()?['permissions'] ?? []);
                         Navigator.pushReplacement(context, MaterialPageRoute(
                           builder: (context) {
