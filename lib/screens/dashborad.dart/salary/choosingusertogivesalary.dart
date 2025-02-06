@@ -1,5 +1,5 @@
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/screens/dashborad.dart/givingsalary/givingsalary.dart';
+import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
