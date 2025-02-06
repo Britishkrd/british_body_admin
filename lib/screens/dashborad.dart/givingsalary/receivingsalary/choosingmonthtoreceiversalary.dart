@@ -2,7 +2,6 @@ import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/givingsalary/receivingsalary/receivingsalary.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:sizer/sizer.dart';
 
 class ChoosingMonthToReceiveSalary extends StatefulWidget {
@@ -42,7 +41,6 @@ class _ChoosingMonthToReceiveSalaryState
                       .collection('user')
                       .doc(widget.email)
                       .collection('salary')
-                      .where('isreceived', isEqualTo: false)
                       .snapshots(),
                   builder: (BuildContext context,
                       AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -58,9 +56,26 @@ class _ChoosingMonthToReceiveSalaryState
                               showDialog(
                                   context: context,
                                   builder: (context) {
+                                    if (snapshot.data!.docs[index]
+                                        ['isreceived']) {
+                                      return AlertDialog(
+                                        title: Text(
+                                            'موچەی ${snapshot.data!.docs[index]['date'].toDate().month} وەرگیراوە'),
+                                        actions: [
+                                          Material1.button(
+                                              label: 'گەڕانەوە',
+                                              buttoncolor:
+                                                  Material1.primaryColor,
+                                              textcolor: Colors.white,
+                                              function: (() {
+                                                Navigator.pop(context);
+                                              }))
+                                        ],
+                                      );
+                                    }
                                     return AlertDialog(
                                       title: Text(
-                                          'دڵنیاییت لە وەرگرتنی موچەی ${snapshot.data!.docs[index]['date'].toDate().month}'),
+                                          'دڵنیاییت لە وەرگرتنی موچەی مانگی ${snapshot.data!.docs[index]['date'].toDate().month}'),
                                       actions: [
                                         Material1.button(
                                             label: 'بەڵێ',
@@ -77,7 +92,14 @@ class _ChoosingMonthToReceiveSalaryState
                                                                   .docs[index],
                                                               email: widget
                                                                   .email)));
-                                            })
+                                            }),
+                                        Material1.button(
+                                            label: 'نەخێر',
+                                            buttoncolor: Material1.primaryColor,
+                                            textcolor: Colors.white,
+                                            function: () {
+                                              Navigator.pop(context);
+                                            }),
                                       ],
                                     );
                                   });
@@ -109,11 +131,11 @@ class _ChoosingMonthToReceiveSalaryState
                                             MainAxisAlignment.end,
                                         children: [
                                           Text(
-                                              "${snapshot.data!.docs[index]['date'].toDate().month} ",
+                                              "${snapshot.data!.docs[index]['date'].toDate().year}-${snapshot.data!.docs[index]['date'].toDate().month} ",
                                               style: TextStyle(
                                                   fontSize: 16.sp,
                                                   fontWeight: FontWeight.bold)),
-                                          Text(": موچەی مانگی",
+                                          Text(": موچەی",
                                               style: TextStyle(
                                                   fontSize: 16.sp,
                                                   fontWeight: FontWeight.bold)),
@@ -141,7 +163,6 @@ class _ChoosingMonthToReceiveSalaryState
                         });
                   }),
             ),
-
           ],
         ),
       ),

@@ -156,22 +156,15 @@ class _ReceivingSalaryState extends State<ReceivingSalary> {
                             return AlertDialog(
                               title: Text('وەرگرتنی موچە'),
                               content: Text(
-                                  '''دڵنیایت لە وەرگرتنی موچەی ${DateTime.now()} کە  دینارە ؟ '''),
+                                  '''دڵنیایت لە وەرگرتنی موچەی مانگی ${widget.salary['date'].toDate().month} کە ${NumberFormat("#,###").format(widget.salary['givensalary'])}دینارە ؟  '''),
                               actions: [
                                 TextButton(
                                     onPressed: () {
-                                      FirebaseFirestore.instance
-                                          .collection('user')
-                                          .doc(widget.email)
-                                          .collection('receiving salary')
-                                          .doc(
-                                              "receiving salary ${DateTime.now()}")
-                                          .set({
-                                        'salary-date': DateTime.now(),
-                                        'description': 'وەرگرتنی موچە',
-                                        'date': DateTime.now(),
+                                      widget.salary.reference.update({
                                         'isauthenticated':
-                                            didAuthenticate.toString()
+                                            didAuthenticate.toString(),
+                                        'receivingdate': DateTime.now(),
+                                        'isreceived': true
                                       }).then((value) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
