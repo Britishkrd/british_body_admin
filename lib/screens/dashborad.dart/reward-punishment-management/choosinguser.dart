@@ -1,6 +1,6 @@
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/addingrewardpunishment.dart';
-import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/deleterewardpunishments.dart';
+import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/addingrewardpunishment.dart';
+import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/deleterewardpunishments.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';

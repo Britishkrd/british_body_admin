@@ -3,9 +3,9 @@
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/acceptingabsence.dart';
-import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/choosinguser.dart';
-import 'package:british_body_admin/screens/dashborad.dart/adding-reward-punishment/viewingrewardpunishment.dart';
-import 'package:british_body_admin/screens/dashborad.dart/salary/choosingusertogivesalary.dart';
+import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/choosinguser.dart';
+import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/viewingrewardpunishment.dart';
+import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/choosingusertogivesalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/receivingsalary/choosingmonthtoreceiversalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
