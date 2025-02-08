@@ -3,6 +3,8 @@
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/acceptingabsence.dart';
+import 'package:british_body_admin/screens/dashborad.dart/loginlogout/choosinguseroforloginlogout.dart';
+import 'package:british_body_admin/screens/dashborad.dart/loginlogout/viewingselfloginlogout.dart';
 import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/choosinguser.dart';
 import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/viewingrewardpunishment.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/choosingusertogivesalary.dart';
@@ -12,6 +14,7 @@ import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingo
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:flutter/material.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
@@ -168,6 +171,29 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   GestureDetector(
                     onTap: () async {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ChoosingUseroForLoginLogout(email: email)));
+                    },
+                    child: controlpanelcard(
+                        Icons.login_sharp, 'چوونەژوورەوە / دەرچوونەوە'),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) {
+                        return ChoosingUseroForLoginLogout(
+                          email: email,
+                        );
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.login, 'بینینی چوونەژوورەوە / دەرچوونەوە'),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
                       await getuserinfo();
                       if (chekedin) {
                         showDialog(
@@ -223,15 +249,21 @@ class _DashboardState extends State<Dashboard> {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
               height: 10.h,
               child: Icon(icon, color: Material1.secondary, size: 30.sp),
             ),
-            Text(
-              name,
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+            Container(
+              alignment: Alignment.center,
+              width: 100.w,
+              height: 6.h,
+              child: Text(
+                name,
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+              ),
             ),
           ],
         ));
