@@ -107,7 +107,6 @@ class _TasksState extends State<Tasks> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 return ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
                     itemCount: snapshot.data?.docs.length ?? 0,
                     itemBuilder: (BuildContext context, int index) {
                       String deduction = '';

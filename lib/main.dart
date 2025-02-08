@@ -5,6 +5,7 @@ import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/navigator.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 // import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +15,6 @@ import 'package:sizer/sizer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:upgrader/upgrader.dart';
 import 'firebase_options.dart';
-
 
 Future<void> _firebaseMessaginBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -46,7 +46,31 @@ Future<void> main() async {
     provisional: false,
     sound: true,
   );
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('app_icon');
+  final DarwinInitializationSettings initializationSettingsDarwin =
+      DarwinInitializationSettings(
+    requestSoundPermission: true,
+    requestBadgePermission: false,
+    requestAlertPermission: true,
+  );
 
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsDarwin,
+  );
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>()
+      ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
   // try {
   //   await AppBadgePlus.updateBadge(0);
   // } catch (e) {
@@ -55,9 +79,31 @@ Future<void> main() async {
   //   }
   // }
 
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true, badge: true, sound: true);
 
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse:
+        (NotificationResponse notificationResponse) async {
+      // ...
+    },
+    onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+  );
+  const AndroidNotificationDetails androidNotificationDetails =
+      AndroidNotificationDetails('your channel id', 'your channel name',
+          channelDescription: 'your channel description',
+          importance: Importance.max,
+          priority: Priority.high,
+          ticker: 'ticker');
+  const NotificationDetails notificationDetails =
+      NotificationDetails(android: androidNotificationDetails);
+  await flutterLocalNotificationsPlugin.show(
+      0, 'plain title', 'plain body', notificationDetails,
+      payload: 'item x');
   SharedPreferences preference = await SharedPreferences.getInstance();
 
   logedin = preference.getBool('logedin') ?? false;
@@ -72,7 +118,51 @@ Future<void> main() async {
   );
 }
 
+void onDidReceiveNotificationResponse(
+    NotificationResponse notificationResponse) async {
+  final String? payload = notificationResponse.payload;
+  if (notificationResponse.payload != null) {
+    debugPrint('notification payload: $payload');
+  }
+  await navigatorKey.currentState?.push(
+    MaterialPageRoute<void>(builder: (context) => Navigator()),
+  );
+}
 
+final DarwinInitializationSettings initializationSettingsDarwin =
+    DarwinInitializationSettings(
+  requestSoundPermission: true,
+  notificationCategories: [
+    DarwinNotificationCategory(
+      'demoCategory',
+      actions: <DarwinNotificationAction>[
+        DarwinNotificationAction.plain('id_1', 'Action 1'),
+        DarwinNotificationAction.plain(
+          'id_2',
+          'Action 2',
+          options: <DarwinNotificationActionOption>{
+            DarwinNotificationActionOption.destructive,
+          },
+        ),
+        DarwinNotificationAction.plain(
+          'id_3',
+          'Action 3',
+          options: <DarwinNotificationActionOption>{
+            DarwinNotificationActionOption.foreground,
+          },
+        ),
+      ],
+      options: <DarwinNotificationCategoryOption>{
+        DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
+      },
+    )
+  ],
+);
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  // handle action
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -245,7 +335,7 @@ class _MyAppState extends State<MyApp> {
             routes: {
               '/': (context) {
                 islogeding();
-                return logedin ?  Navigation(email:email) : const Login();
+                return logedin ? Navigation(email: email) : const Login();
               }
             },
           ),

@@ -10,10 +10,14 @@ import '../../../../sendingnotification.dart';
 class AdminAddingTask extends StatefulWidget {
   final String adminemail;
   final String email;
+  final bool isbatch;
+  final List<String> selectedUsers;
   const AdminAddingTask({
     super.key,
     required this.email,
     required this.adminemail,
+    required this.selectedUsers,
+    required this.isbatch,
   });
 
   @override
@@ -239,64 +243,123 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                             Material1.button(
                                 label: 'بەڵێ',
                                 function: () async {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Center(
-                                              child:
-                                                  const CircularProgressIndicator()),
-                                        );
+                                  if (widget.isbatch) {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Center(
+                                                child:
+                                                    const CircularProgressIndicator()),
+                                          );
+                                        });
+                                    for (int i = 0;
+                                        i < widget.selectedUsers.length;
+                                        i++) {
+                                      FirebaseFirestore.instance
+                                          .collection('user')
+                                          .doc(widget.selectedUsers[i])
+                                          .collection('tasks')
+                                          .doc(
+                                              '${widget.adminemail}-${DateTime.now().toString()}')
+                                          .set({
+                                        'description':
+                                            descriptioncontroller.text,
+                                        'time': DateTime.now(),
+                                        'start': start,
+                                        'end': end,
+                                        'status': 'pending',
+                                        'name': namecontroller.text,
+                                        'isdaily': isDaily,
+                                        'addedby': widget.adminemail,
+                                        'deductionamount':
+                                            deductionamountcontroller.text,
+                                        'rewardamount':
+                                            rewardamountcontroller.text,
+                                        'isowntask': false
+                                      }).then((value) {
+                                        FirebaseFirestore.instance
+                                            .collection('user')
+                                            .doc(widget.selectedUsers[i])
+                                            .get()
+                                            .then((value) {
+                                          sendingnotification(
+                                              'کار ',
+                                              'کارێکت بۆ زیاد کرا',
+                                              value.data()?['token']);
+                                        });
                                       });
-                                  FirebaseFirestore.instance
-                                      .collection('user')
-                                      .doc(widget.email)
-                                      .collection('tasks')
-                                      .doc(
-                                          '${widget.adminemail}-${DateTime.now().toString()}')
-                                      .set({
-                                    'description': descriptioncontroller.text,
-                                    'time': DateTime.now(),
-                                    'start': start,
-                                    'end': end,
-                                    'status': 'pending',
-                                    'name': namecontroller.text,
-                                    'isdaily': isDaily,
-                                    'addedby': widget.adminemail,
-                                    'deductionamount':
-                                        deductionamountcontroller.text,
-                                    'rewardamount': rewardamountcontroller.text,
-                                    'isowntask': false
-                                  }).then((value) {
+                                    }
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text('کارەکە بەسەرکەوتویی زیادکرا'),
+                                      ),
+                                    );
+                                    Navigator.popUntil(
+                                        context, (route) => route.isFirst);
+                                  } else {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Center(
+                                                child:
+                                                    const CircularProgressIndicator()),
+                                          );
+                                        });
                                     FirebaseFirestore.instance
                                         .collection('user')
                                         .doc(widget.email)
-                                        .get()
-                                        .then((value) {
-                                      sendingnotification(
-                                          'کار ',
-                                          'کارێکت بۆ زیاد کرا',
-                                          value.data()?['token']);
-                                    });
-                                  }).then(
-                                    (value) {
+                                        .collection('tasks')
+                                        .doc(
+                                            '${widget.adminemail}-${DateTime.now().toString()}')
+                                        .set({
+                                      'description': descriptioncontroller.text,
+                                      'time': DateTime.now(),
+                                      'start': start,
+                                      'end': end,
+                                      'status': 'pending',
+                                      'name': namecontroller.text,
+                                      'isdaily': isDaily,
+                                      'addedby': widget.adminemail,
+                                      'deductionamount':
+                                          deductionamountcontroller.text,
+                                      'rewardamount':
+                                          rewardamountcontroller.text,
+                                      'isowntask': false
+                                    }).then((value) {
+                                      FirebaseFirestore.instance
+                                          .collection('user')
+                                          .doc(widget.email)
+                                          .get()
+                                          .then((value) {
+                                        sendingnotification(
+                                            'کار ',
+                                            'کارێکت بۆ زیاد کرا',
+                                            value.data()?['token']);
+                                      });
+                                    }).then(
+                                      (value) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'کارەکە بەسەرکەوتویی زیادکرا'),
+                                          ),
+                                        );
+                                        Navigator.popUntil(
+                                            context, (route) => route.isFirst);
+                                      },
+                                    ).catchError((error) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              'کارەکە بەسەرکەوتویی زیادکرا'),
+                                        const SnackBar(
+                                          content: Text('هەڵەیەک هەیە'),
                                         ),
                                       );
-                                      Navigator.popUntil(
-                                          context, (route) => route.isFirst);
-                                    },
-                                  ).catchError((error) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('هەڵەیەک هەیە'),
-                                      ),
-                                    );
-                                  });
+                                    });
+                                  }
                                 },
                                 textcolor: Colors.white,
                                 buttoncolor: Material1.primaryColor),

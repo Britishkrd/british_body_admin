@@ -198,7 +198,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                   ? 'start'
                                                   : 'finish'
                                         }).then(
-                                          (value) async{
+                                          (value) async {
                                             if (widget.task['status'] ==
                                                 'pending') {
                                               widget.task.reference
@@ -219,12 +219,13 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                   .doc(
                                                       'reward-${widget.task['name']}${DateTime.now()}')
                                                   .set({
-                                                    'addedby':widget.email,
-                                                     'amount':reward,
-                                                     'date':DateTime.now(),
-                                                     'reason':'doing task ${widget.task['name']}',
-                                                     'type':'reward'
-                                                  });
+                                                'addedby': widget.email,
+                                                'amount': reward,
+                                                'date': DateTime.now(),
+                                                'reason':
+                                                    'doing task ${widget.task['name']}',
+                                                'type': 'reward'
+                                              });
                                             }
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
