@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ViewingTaskDeatsilsupdates extends StatefulWidget {
   final QueryDocumentSnapshot<Object?> task;
@@ -97,8 +98,16 @@ class _ViewingTaskDeatsilsupdatesState
               ],
             ),
           ),
+          Container(
+            alignment: Alignment.centerRight,
+            height: 4.h,
+            width: 100.w,
+            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+            child: Text('دەستپێکرند و کۆتایی پێهێنانەکان ',
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+          ),
           SizedBox(
-            height: 40.h,
+            height: 70.h,
             child: StreamBuilder(
               stream: widget.task.reference.collection('updates').snapshots(),
               builder: (context, snapshot) {
@@ -109,7 +118,7 @@ class _ViewingTaskDeatsilsupdatesState
                     itemCount: snapshot.data?.docs.length ?? 0,
                     itemBuilder: (BuildContext context, int index) {
                       return SizedBox(
-                          height: 23.h,
+                          height: 30.h,
                           width: 90.w,
                           child: Container(
                             margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
@@ -128,14 +137,14 @@ class _ViewingTaskDeatsilsupdatesState
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  "${snapshot.data!.docs[index]['action']} : کار",
+                                  "${snapshot.data!.docs[index]['stage']} : بەشی",
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  "${snapshot.data!.docs[index]['note']} : تێبینی",
+                                  "${snapshot.data!.docs[index]['action']} : کار",
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -158,6 +167,62 @@ class _ViewingTaskDeatsilsupdatesState
                                   "${snapshot.data!.docs[index]['longtitude']} : پانایی",
                                   style: const TextStyle(
                                     fontSize: 14,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () async {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text('لینک'),
+                                            content: Text(
+                                                "دڵنییایت لە کردنەوەی لینکەکە"),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text('نەخێر')),
+                                              TextButton(
+                                                  onPressed: () async {
+                                                    if (!await launchUrl(Uri.parse(
+                                                        "${snapshot.data?.docs[index]['link']}"))) {
+                                                      throw Exception(
+                                                          'Could not launch ');
+                                                    }
+                                                  },
+                                                  child: const Text('بەڵێ')),
+                                            ],
+                                          );
+                                        });
+                                  },
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          "${snapshot.data?.docs[index]['link'] ?? ''}",
+                                          style: const TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        Text(
+                                          ": لینک",
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  "${snapshot.data!.docs[index]['note']} : تێبینی",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],

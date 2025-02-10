@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/navigator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -15,6 +16,9 @@ import 'package:sizer/sizer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:upgrader/upgrader.dart';
 import 'firebase_options.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 Future<void> _firebaseMessaginBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -29,6 +33,140 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 bool logedin = true;
 String email = '';
 String city = '';
+@pragma('vm:entry-point')
+Future<void> settinglocalnotifications(String notification) async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Asia/Baghdad'));
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  SharedPreferences preference = await SharedPreferences.getInstance();
+  email = preference.getString('email') ?? '';
+  if (email.isEmpty) {
+    return;
+  }
+  FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('tasks')
+      .where('isnotificationset', isEqualTo: false)
+      .get()
+      .then((value) async {
+    for (var doc in value.docs) {
+      if (doc['isdaily']) {
+        const AndroidNotificationDetails androidDetails =
+            AndroidNotificationDetails(
+          'daily_channel_id',
+          'Daily Notifications',
+          channelDescription: 'Sends notifications at a fixed time every day',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
+
+        const NotificationDetails notificationDetails =
+            NotificationDetails(android: androidDetails);
+
+        final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+        tz.TZDateTime scheduledDate = tz.TZDateTime(
+            tz.local,
+            now.year,
+            now.month,
+            now.day,
+            (doc['start'].toDate().hour).subtract(const Duration(minutes: 10)));
+
+        if (scheduledDate.isBefore(now)) {
+          scheduledDate = scheduledDate.add(Duration(days: 1));
+        }
+
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          (doc['time'].seconds + 72).toInt(),
+          doc['name'],
+          "١٠ خولەک یان کەمتری ماوە دەست پێبکات ${doc['name']} ئەرکی",
+          scheduledDate,
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      } else {
+        for (var i = 0; i < doc['startnotificationdates'].length; i++) {
+          if (doc['startnotificationdates'][i]
+              .toDate()
+              .isBefore(DateTime.now())) {
+            continue;
+          }
+          flutterLocalNotificationsPlugin.zonedSchedule(
+            (doc['time'].seconds + i).toInt(),
+            doc['name'],
+            "١٠ خولەک یان کەمتری ماوە دەست پێبکات ${doc['name']} ئەرکی",
+            tz.TZDateTime(
+                tz.local,
+                doc['startnotificationdates'][i].toDate().year,
+                doc['startnotificationdates'][i].toDate().month,
+                doc['startnotificationdates'][i].toDate().day,
+                doc['startnotificationdates'][i].toDate().hour,
+                doc['startnotificationdates'][i].toDate().minute),
+            const NotificationDetails(
+                android: AndroidNotificationDetails(
+                    'your channel id', 'your channel name',
+                    channelDescription: 'your channel description')),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
+        }
+        for (var i = 0; i < doc['endnotificationdates'].length; i++) {
+          if (doc['startnotificationdates'][i]
+              .toDate()
+              .isBefore(DateTime.now())) {
+            continue;
+          }
+          flutterLocalNotificationsPlugin.zonedSchedule(
+            (doc['time'].seconds + doc['startnotificationdates'].length + 1 + i)
+                .toInt(),
+            doc['name'],
+            "١٠ خولەک یان کەمتری ماوە کۆتایی پێبێت ${doc['name']} ئەرکی",
+            tz.TZDateTime(
+                tz.local,
+                doc['endnotificationdates'][i].toDate().year,
+                doc['endnotificationdates'][i].toDate().month,
+                doc['endnotificationdates'][i].toDate().day,
+                doc['endnotificationdates'][i].toDate().hour,
+                doc['endnotificationdates'][i].toDate().minute),
+            const NotificationDetails(
+                android: AndroidNotificationDetails(
+                    'your channel id', 'your channel name',
+                    channelDescription: 'your channel description')),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
+        }
+      }
+    }
+  }).then((value) {
+    FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .collection('tasks')
+        .where('isnotificationset', isEqualTo: false)
+        .get()
+        .then((value) {
+      for (var doc in value.docs) {
+        FirebaseFirestore.instance
+            .collection('user')
+            .doc(email)
+            .collection('tasks')
+            .doc(doc.id)
+            .update({'isnotificationset': true});
+      }
+    });
+  });
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -93,17 +231,7 @@ Future<void> main() async {
     },
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
   );
-  const AndroidNotificationDetails androidNotificationDetails =
-      AndroidNotificationDetails('your channel id', 'your channel name',
-          channelDescription: 'your channel description',
-          importance: Importance.max,
-          priority: Priority.high,
-          ticker: 'ticker');
-  const NotificationDetails notificationDetails =
-      NotificationDetails(android: androidNotificationDetails);
-  await flutterLocalNotificationsPlugin.show(
-      0, 'plain title', 'plain body', notificationDetails,
-      payload: 'item x');
+
   SharedPreferences preference = await SharedPreferences.getInstance();
 
   logedin = preference.getBool('logedin') ?? false;
@@ -226,6 +354,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    FlutterIsolate.spawn(settinglocalnotifications, "hello world");
     // locationsfunction();
 
     // if (Platform.isAndroid) {

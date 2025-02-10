@@ -13,7 +13,7 @@ class Tasks extends StatefulWidget {
   State<Tasks> createState() => _TasksState();
 }
 
-int tag = 1;
+int tag = 0;
 List<String> options = [
   'هەموو',
   'لە چاوەڕوانی',
@@ -168,11 +168,19 @@ class _TasksState extends State<Tasks> {
                                 });
                             return;
                           }
+                          int stages = 0;
+                          try {
+                            stages = snapshot
+                                    .data!.docs[index]['endstagedates'].length;
+                          } catch (e) {
+                            stages = 0;
+                          }
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
                             return Taskdetails(
                                 email: widget.email,
-                                task: snapshot.data!.docs[index]);
+                                task: snapshot.data!.docs[index],
+                                stages: stages);
                           }));
                         },
                         child: SizedBox(

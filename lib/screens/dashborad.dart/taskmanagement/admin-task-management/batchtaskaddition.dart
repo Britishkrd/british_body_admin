@@ -45,11 +45,14 @@ class _BatchTaskAdditionState extends State<BatchTaskAddition> {
                 textcolor: Colors.white,
                 function: () {
                   if (selectedUsers.isEmpty) {
-                    FirebaseFirestore.instance.collection('user').get().then(
-                        (QuerySnapshot querySnapshot) =>
-                            querySnapshot.docs.forEach((doc) {
-                              selectedUsers.add(doc['email']);
-                            }));
+                    FirebaseFirestore.instance
+                        .collection('user')
+                        .get()
+                        .then((QuerySnapshot querySnapshot) {
+                      for (var doc in querySnapshot.docs) {
+                        selectedUsers.add(doc['email']);
+                      }
+                    });
                   } else {
                     selectedUsers.clear();
                   }

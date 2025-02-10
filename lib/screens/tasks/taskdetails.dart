@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
+import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class Taskdetails extends StatefulWidget {
   final QueryDocumentSnapshot<Object?> task;
   final String email;
+  final int stages;
   const Taskdetails({
     super.key,
     required this.task,
     required this.email,
+    required this.stages,
   });
 
   @override
@@ -30,9 +33,31 @@ final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
 bool checkin = true;
 double latitude = 0.0;
 double longtitude = 0.0;
+double listviewheight = 0;
 TextEditingController notecontroller = TextEditingController();
+TextEditingController linkcontroller = TextEditingController();
+List<TextEditingController> notecontrollers = [];
+List<TextEditingController> linkcontrollers = [];
 
 class _TaskdetailsState extends State<Taskdetails> {
+  @override
+  void initState() {
+    for (var i = 0; i < widget.stages; i++) {
+      notecontrollers.add(TextEditingController());
+      linkcontrollers.add(TextEditingController());
+    }
+    try {
+      listviewheight = ((widget.task['endstages']
+                  .where((element) => element == false)
+                  .length)
+              .toDouble() *
+          20);
+    } catch (e) {
+      listviewheight = 0;
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,6 +135,249 @@ class _TaskdetailsState extends State<Taskdetails> {
               ],
             ),
           ),
+          widget.stages != 0
+              ? Container(
+                  margin: EdgeInsets.fromLTRB(5.w, 3.h, 5.w, 1.h),
+                  child: StepProgressIndicator(
+                    totalSteps: widget.stages,
+                    currentStep: widget.task['endstages']
+                        .where((element) => element == true)
+                        .length,
+                    selectedColor: Material1.primaryColor,
+                    unselectedColor: Colors.grey,
+                  ),
+                )
+              : const SizedBox.shrink(),
+          widget.stages != 0
+              ? Container(
+                  alignment: Alignment.topRight,
+                  margin: EdgeInsets.fromLTRB(5.w, 3.h, 5.w, 1.h),
+                  child: Text('بەشەکان',
+                      style: TextStyle(
+                          fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                )
+              : const SizedBox.shrink(),
+          widget.stages != 0
+              ? SizedBox(
+                  height: listviewheight.h,
+                  child: ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: widget.stages,
+                      itemBuilder: (context, index) {
+                        if (widget.task['endstages'][index] == true) {
+                          return const SizedBox.shrink();
+                        }
+                        return Column(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                  top: 5.h, left: 5.w, right: 5.w),
+                              width: 90.w,
+                              height: 8.h,
+                              child: Material1.textfield(
+                                  hint: 'تێبینی بۆ بەشی ${index + 1}',
+                                  controller: notecontrollers[index],
+                                  textColor: Material1.primaryColor),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(
+                                  top: 5.h, left: 5.w, right: 5.w),
+                              width: 90.w,
+                              height: 8.h,
+                              child: Material1.textfield(
+                                  hint: 'لینک بۆ بەشی ${index + 1}',
+                                  controller: linkcontrollers[index],
+                                  textColor: Material1.primaryColor),
+                            ),
+                            Container(
+                              child: Material1.button(
+                                  label:
+                                      widget.task['startstages'][index] == false
+                                          ? 'دەستپێکردنی بەشی ${index + 1}'
+                                          : 'کۆتایی پێهێنانی بەشی ${index + 1}',
+                                  buttoncolor: Material1.primaryColor,
+                                  textcolor: Colors.white,
+                                  function: () {
+                                    if (DateTime.now().isBefore(widget
+                                        .task['startstagedates'][index]
+                                        .toDate())) {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text('هەڵە'),
+                                              content: Text(
+                                                  'لەکاتی دیاری کراو دەست بە کارەکە بکە'),
+                                              actions: [
+                                                Material1.button(
+                                                    label: 'باشە',
+                                                    buttoncolor:
+                                                        Material1.primaryColor,
+                                                    textcolor: Colors.white,
+                                                    function: () {
+                                                      Navigator.pop(context);
+                                                    }),
+                                              ],
+                                            );
+                                          });
+                                      return;
+                                    }
+                                    if (DateTime.now().isAfter(widget
+                                        .task['endstagedates'][index]
+                                        .toDate())) {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text('هەڵە'),
+                                              content: Text(
+                                                  'لەکاتی دیاری کراو کۆتایی بە کارەکە بێنە'),
+                                              actions: [
+                                                Material1.button(
+                                                    label: 'باشە',
+                                                    buttoncolor:
+                                                        Material1.primaryColor,
+                                                    textcolor: Colors.white,
+                                                    function: () {
+                                                      Navigator.pop(context);
+                                                    }),
+                                              ],
+                                            );
+                                          });
+                                      return;
+                                    }
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Text(widget
+                                                            .task['startstages']
+                                                        [index] ==
+                                                    false
+                                                ? 'دەستێکردنی بەشی ${index + 1}'
+                                                : 'تەواوکردنی بەشی ${index + 1}'),
+                                            content: Text(widget
+                                                            .task['startstages']
+                                                        [index] ==
+                                                    false
+                                                ? 'دڵنیایتتت لە دەستپێکردنی بەشی ${index + 1}؟'
+                                                : 'دڵنیایتتت لە تەواوکردنی بەشی ${index + 1}؟'),
+                                            actions: [
+                                              Material1.button(
+                                                  label: 'نەخێر',
+                                                  function: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  textcolor: Colors.white,
+                                                  buttoncolor:
+                                                      Material1.primaryColor),
+                                              Material1.button(
+                                                  label: 'بەڵێ',
+                                                  function: () async {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (context) {
+                                                          return AlertDialog(
+                                                            title: Center(
+                                                                child:
+                                                                    const CircularProgressIndicator()),
+                                                          );
+                                                        });
+                                                    await _getCurrentPosition();
+                                                    if (widget.task[
+                                                                'startstages']
+                                                            [index] ==
+                                                        false) {}
+                                                    widget.task.reference
+                                                        .collection('updates')
+                                                        .doc(widget.task[
+                                                                        'startstages']
+                                                                    [index] ==
+                                                                false
+                                                            ? "start-stage${index + 1}"
+                                                            : "end-stage${index + 1}")
+                                                        .set({
+                                                      'note':
+                                                          notecontrollers[index]
+                                                              .text,
+                                                      'time': DateTime.now(),
+                                                      'latitude': latitude,
+                                                      'longtitude': longtitude,
+                                                      'action':
+                                                          widget.task['startstages']
+                                                                      [index] ==
+                                                                  false
+                                                              ? 'start'
+                                                              : 'finish',
+                                                      'stage': "${index + 1}",
+                                                      'link': linkcontrollers[index]
+                                                          .text
+                                                    }).then((value) async {
+                                                      List<bool> startstages =
+                                                          List<bool>.from(widget.task[
+                                                              'startstages']);
+                                                      List<bool> endstages =
+                                                          List<bool>.from(widget.task[
+                                                              'endstages']);
+                                                      if (widget.task[
+                                                                  'startstages']
+                                                              [index] ==
+                                                          false) {
+                                                        startstages[index] =
+                                                            true;
+                                                      } else {
+                                                        endstages[index] = true;
+                                                      }
+                                                      widget.task.reference
+                                                          .update({
+                                                        'endstages': endstages,
+                                                        'startstages':
+                                                            startstages,
+                                                      });
+                                                    }).then(
+                                                      (value) {
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(widget
+                                                                            .task['startstages']
+                                                                        [
+                                                                        index] ==
+                                                                    false
+                                                                ? 'دەستکرا بە بەشی ${index + 1}'
+                                                                : 'کۆتایی هات بە بەشی ${index + 1}'),
+                                                          ),
+                                                        );
+                                                        Navigator.popUntil(
+                                                            context,
+                                                            (route) =>
+                                                                route.isFirst);
+                                                      },
+                                                    ).catchError((error) {
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text(
+                                                              'هەڵەیەک هەیە'),
+                                                        ),
+                                                      );
+                                                    });
+                                                  },
+                                                  textcolor: Colors.white,
+                                                  buttoncolor:
+                                                      Material1.primaryColor),
+                                            ],
+                                          );
+                                        });
+                                  }),
+                            )
+                          ],
+                        );
+                      }),
+                )
+              : const SizedBox.shrink(),
           !widget.task['isdaily'] && widget.task['status'] != 'done'
               ? Container(
                   margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
@@ -118,6 +386,17 @@ class _TaskdetailsState extends State<Taskdetails> {
                   child: Material1.textfield(
                       hint: 'تێبینی',
                       controller: notecontroller,
+                      textColor: Material1.primaryColor),
+                )
+              : const SizedBox.shrink(),
+          !widget.task['isdaily'] && widget.task['status'] != 'done'
+              ? Container(
+                  margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+                  width: 90.w,
+                  height: 8.h,
+                  child: Material1.textfield(
+                      hint: 'لینک',
+                      controller: linkcontroller,
                       textColor: Material1.primaryColor),
                 )
               : const SizedBox.shrink(),
@@ -196,7 +475,9 @@ class _TaskdetailsState extends State<Taskdetails> {
                                           'action':
                                               widget.task['status'] == 'pending'
                                                   ? 'start'
-                                                  : 'finish'
+                                                  : 'finish',
+                                          'stage': 'main task',
+                                          'link': linkcontroller.text
                                         }).then(
                                           (value) async {
                                             if (widget.task['status'] ==
@@ -211,6 +492,11 @@ class _TaskdetailsState extends State<Taskdetails> {
                                               } catch (e) {
                                                 reward = '0';
                                               }
+                                             List<bool> endstages =
+                                                          List<bool>.from(widget.task[
+                                                              'endstages']);
+                                              if (!(endstages.contains(false)) && int.parse(reward) > 0) {
+                                                
                                               await FirebaseFirestore.instance
                                                   .collection('user')
                                                   .doc(widget.email)
@@ -226,6 +512,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                     'doing task ${widget.task['name']}',
                                                 'type': 'reward'
                                               });
+                                              }
                                             }
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(

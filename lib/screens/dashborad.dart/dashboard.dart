@@ -242,27 +242,28 @@ class _DashboardState extends State<Dashboard> {
                       FlutterLocalNotificationsPlugin
                           flutterLocalNotificationsPlugin =
                           FlutterLocalNotificationsPlugin();
-                      // await flutterLocalNotificationsPlugin.zonedSchedule(
-                      //     0,
-                      //     'scheduled title',
-                      //     'scheduled body',
-                      //     tz.TZDateTime(
-                      //         tz.local,
-                      //         DateTime.now().year,
-                      //         DateTime.now().month,
-                      //         DateTime.now().day,
-                      //         DateTime.now().hour,
-                      //         DateTime.now().minute + 5),
-                      //     const NotificationDetails(
-                      //         android: AndroidNotificationDetails(
-                      //             'your channel id', 'your channel name',
-                      //             channelDescription:
-                      //                 'your channel description')),
-                      //     androidScheduleMode:
-                      //         AndroidScheduleMode.exactAllowWhileIdle,
-                      //     uiLocalNotificationDateInterpretation:
-                      //         UILocalNotificationDateInterpretation
-                      //             .absoluteTime);
+                      await flutterLocalNotificationsPlugin.zonedSchedule(
+                          0,
+                          'scheduled title',
+                          'scheduled body',
+                          tz.TZDateTime(
+                              tz.local,
+                              DateTime.now().year,
+                              DateTime.now().month,
+                              DateTime.now().day,
+                              DateTime.now().hour,
+                              DateTime.now().minute,
+                              DateTime.now().second + 10),
+                          const NotificationDetails(
+                              android: AndroidNotificationDetails(
+                                  'your channel id', 'your channel name',
+                                  channelDescription:
+                                      'your channel description')),
+                          androidScheduleMode:
+                              AndroidScheduleMode.exactAllowWhileIdle,
+                          uiLocalNotificationDateInterpretation:
+                              UILocalNotificationDateInterpretation
+                                  .absoluteTime);
 // Schedule a notification that specifies a different schedule time than the default
 
                       const AndroidNotificationDetails androidDetails =
@@ -281,12 +282,7 @@ class _DashboardState extends State<Dashboard> {
                       // Set the time for 1:00 AM
                       final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
                       tz.TZDateTime scheduledDate = tz.TZDateTime(
-                          tz.local,
-                          now.year,
-                          now.month,
-                          now.day,
-                          21,
-                          22);
+                          tz.local, now.year, now.month, now.day, 21, 22);
 
                       if (scheduledDate.isBefore(now)) {
                         scheduledDate = scheduledDate.add(Duration(days: 1));

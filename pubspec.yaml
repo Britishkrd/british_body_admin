@@ -53,6 +53,9 @@ dependencies:
   chips_choice: ^3.0.1
   flutter_local_notifications: ^18.0.1
   flutter_timezone: ^4.1.0
+  flutter_isolate: ^2.1.0
+  step_progress_indicator: ^1.0.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

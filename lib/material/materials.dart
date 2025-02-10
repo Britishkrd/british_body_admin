@@ -18,6 +18,7 @@ class Material1 {
           bool? readonly,
           double? fontsize,
           Color? hintcolor,
+          int? maxLines,
           List<TextInputFormatter>? inputFormatters,
           Function(String)? onchange,
           validation,
@@ -31,6 +32,7 @@ class Material1 {
             keyboardType: inputType,
             onChanged: onchange,
             readOnly: readonly ?? false,
+            maxLines: maxLines ?? 1,
             style: TextStyle(
                 color: textColor,
                 fontSize: fontsize ?? 16.sp,
