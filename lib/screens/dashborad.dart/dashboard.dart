@@ -15,6 +15,8 @@ import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-mana
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/choosingusertogivesalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/receivingsalary/choosingmonthtoreceiversalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
+import 'package:british_body_admin/screens/dashborad.dart/target/admintarget/choosinguserfortarget.dart';
+import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/selftargetview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
@@ -241,6 +243,30 @@ class _DashboardState extends State<Dashboard> {
                     },
                     child: controlpanelcard(
                         Icons.feedback, 'ڕەخنە و پێشنیار بۆ ئەدمین'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Selftargetview(
+                          email: email,
+                        );
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.track_changes_outlined, 'تارگێتەکان'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Choosinguserfortarget(
+                          email: email,
+                        );
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.track_changes_outlined, 'تارگێت بۆ ئەدمین'),
                   ),
                   GestureDetector(
                     onTap: () async {
