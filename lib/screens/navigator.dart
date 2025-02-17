@@ -2,6 +2,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:british_body_admin/screens/checkincheckout/checkinandout.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/dashboard.dart';
+import 'package:british_body_admin/screens/email/email.dart';
 import 'package:british_body_admin/screens/profile/profile.dart';
 import 'package:british_body_admin/screens/tasks/tasks.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context) {
     final List<IconData> iconList = <IconData>[
-      Icons.attach_money_rounded,
+      Icons.email,
       Icons.task,
       Icons.timelapse,
       Icons.person,
@@ -54,7 +55,8 @@ class _NavigationState extends State<Navigation> {
                         ? Tasks(
                             email: widget.email,
                           )
-                        : Dashboard()
-        );
+                        : Email(
+                            email: widget.email,
+                          ));
   }
 }

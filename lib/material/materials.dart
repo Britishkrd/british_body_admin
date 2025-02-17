@@ -49,6 +49,7 @@ class Material1 {
               hintText: hint,
             ),
             obscureText: obscure ?? false,
+            
           ));
 
   static button(

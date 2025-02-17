@@ -31,6 +31,10 @@
 	<string>We need access to your location to run in the background.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs background location access.</string>
+    <key>NSCameraUsageDescription</key>
+	<string>for the user to upload their image of the porblem</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>for the user to upload their image of the porblem</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
