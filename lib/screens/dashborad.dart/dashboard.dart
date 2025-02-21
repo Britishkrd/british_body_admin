@@ -1,11 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:math';
-
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/acceptingabsence.dart';
-import 'package:british_body_admin/screens/dashborad.dart/feedback/adminfeedback.dart/admincreatedfeedback.dart';
+import 'package:british_body_admin/screens/dashborad.dart/addingnotes/choosingtaskforaddingnotes.dart';
+import 'package:british_body_admin/screens/dashborad.dart/alert/viewingalerts.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/adminfeedback.dart/adminfeedback.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/employeefeedback/employeefeedback.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/choosinguseroforloginlogout.dart';
@@ -20,16 +19,16 @@ import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/self
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
+import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
+import 'package:british_body_admin/screens/dashborad.dart/worktime/changeworktimerequest.dart';
+import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 import '../../../material/materials.dart';
+import 'alert/choosinguserforalerts.dart';
 import 'loan/loan.dart';
 
 class Dashboard extends StatefulWidget {
@@ -113,6 +112,16 @@ class _DashboardState extends State<Dashboard> {
                     onTap: () {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
+                        return Choosingtaskforaddingnotes(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.note_add, 'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
                         return ChoosingUserFoTaskManagement(email: email);
                       }));
                     },
@@ -128,6 +137,45 @@ class _DashboardState extends State<Dashboard> {
                     },
                     child: controlpanelcard(
                         Icons.task_alt, 'بینینی وردەکاری کارەکان'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Viewingalerts(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(Icons.alarm_add, 'ئاگاداریەکان'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Choosingforalerts(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.alarm_add, 'ناردنی ئاگادارکردنەوە'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Viewchangeworktimerequest(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.work_history, 'گۆڕینی کارتی کار'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Adminacceptingchangeworktime();
+                      }));
+                    },
+                    child: controlpanelcard(
+                        Icons.work_history, 'گۆڕینی کارتی کار بۆ ئەدمین'),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -299,123 +347,6 @@ class _DashboardState extends State<Dashboard> {
                       }));
                     },
                     child: controlpanelcard(Icons.logout, 'دەرچوون'),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      // final FirebaseFirestore firestore =
-                      //     FirebaseFirestore.instance;
-                      // final CollectionReference checkinCheckouts = firestore
-                      //     .collection('user')
-                      //     .doc(email)
-                      //     .collection('checkincheckouts');
-
-                      // final DateTime startDate =
-                      //     DateTime(2024, 8, 1); // Start date (6 months ago)
-                      // final DateTime endDate =
-                      //     DateTime(2025, 2, 1); // End date (current date)
-                      // final Duration oneDay = Duration(days: 1);
-                      // final Duration workDayDuration =
-                      //     Duration(hours: 8); // 8-hour workday
-
-                      // DateTime currentDate = startDate;
-
-                      // while (currentDate.isBefore(endDate)) {
-                      //   if (currentDate.weekday != DateTime.friday) {
-                      //     // Simulate check-in
-                      //     await checkinCheckouts
-                      //         .doc(currentDate.toIso8601String())
-                      //         .set({
-                      //       'checkin': true,
-                      //       'checkout': false,
-                      //       'latitude': 35.5830867,
-                      //       'longtitude': 45.4259767,
-                      //       'note': 'test',
-                      //       'time': Timestamp.fromDate(currentDate),
-                      //     });
-
-                      //     // Simulate check-out
-                      //     await checkinCheckouts
-                      //         .doc((currentDate.add(workDayDuration))
-                      //             .toIso8601String())
-                      //         .set({
-                      //       'checkin': false,
-                      //       'checkout': true,
-                      //       'latitude': 35.5830867,
-                      //       'longtitude': 45.4259767,
-                      //       'note': 'test',
-                      //       'time': Timestamp.fromDate(
-                      //           currentDate.add(workDayDuration)),
-                      //     });
-                      //   }
-
-                      //   currentDate = currentDate.add(oneDay);
-                      // }
-                    },
-//                       tz.initializeTimeZones();
-//                       tz.setLocalLocation(tz.getLocation('Asia/Baghdad'));
-//                       FlutterLocalNotificationsPlugin
-//                           flutterLocalNotificationsPlugin =
-//                           FlutterLocalNotificationsPlugin();
-//                       await flutterLocalNotificationsPlugin.zonedSchedule(
-//                           0,
-//                           'scheduled title',
-//                           'scheduled body',
-//                           tz.TZDateTime(
-//                               tz.local,
-//                               DateTime.now().year,
-//                               DateTime.now().month,
-//                               DateTime.now().day,
-//                               DateTime.now().hour,
-//                               DateTime.now().minute,
-//                               DateTime.now().second + 10),
-//                           const NotificationDetails(
-//                               android: AndroidNotificationDetails(
-//                                   'your channel id', 'your channel name',
-//                                   channelDescription:
-//                                       'your channel description')),
-//                           androidScheduleMode:
-//                               AndroidScheduleMode.exactAllowWhileIdle,
-//                           uiLocalNotificationDateInterpretation:
-//                               UILocalNotificationDateInterpretation
-//                                   .absoluteTime);
-// // Schedule a notification that specifies a different schedule time than the default
-
-//                       const AndroidNotificationDetails androidDetails =
-//                           AndroidNotificationDetails(
-//                         'daily_channel_id',
-//                         'Daily Notifications',
-//                         channelDescription:
-//                             'Sends notifications at a fixed time every day',
-//                         importance: Importance.high,
-//                         priority: Priority.high,
-//                       );
-
-//                       const NotificationDetails notificationDetails =
-//                           NotificationDetails(android: androidDetails);
-
-//                       // Set the time for 1:00 AM
-//                       final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-//                       tz.TZDateTime scheduledDate = tz.TZDateTime(
-//                           tz.local, now.year, now.month, now.day, 21, 22);
-
-//                       if (scheduledDate.isBefore(now)) {
-//                         scheduledDate = scheduledDate.add(Duration(days: 1));
-//                       }
-
-//                       await flutterLocalNotificationsPlugin.zonedSchedule(
-//                         5, // Notification ID
-//                         'Daily Reminder',
-//                         'This is your scheduled notification!',
-//                         scheduledDate,
-//                         notificationDetails,
-//                         androidScheduleMode:
-//                             AndroidScheduleMode.exactAllowWhileIdle,
-//                         uiLocalNotificationDateInterpretation:
-//                             UILocalNotificationDateInterpretation.absoluteTime,
-//                         matchDateTimeComponents: DateTimeComponents.time,
-//                       );
-                    // },
-                    child: controlpanelcard(Icons.logout, 'notification'),
                   ),
                 ],
               ),

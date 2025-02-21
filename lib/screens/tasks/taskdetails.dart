@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -36,15 +38,15 @@ double longtitude = 0.0;
 double listviewheight = 0;
 TextEditingController notecontroller = TextEditingController();
 TextEditingController linkcontroller = TextEditingController();
-List<TextEditingController> notecontrollers = [];
-List<TextEditingController> linkcontrollers = [];
+List<List<TextEditingController>> linkcontrollerslist = [];
+List<List<TextEditingController>> notecontrollerslist = [];
 
 class _TaskdetailsState extends State<Taskdetails> {
   @override
   void initState() {
     for (var i = 0; i < widget.stages; i++) {
-      notecontrollers.add(TextEditingController());
-      linkcontrollers.add(TextEditingController());
+      notecontrollerslist.add([TextEditingController()]);
+      linkcontrollerslist.add([TextEditingController()]);
     }
     try {
       listviewheight = ((widget.task['endstages']
@@ -56,6 +58,21 @@ class _TaskdetailsState extends State<Taskdetails> {
       listviewheight = 0;
     }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    for (var i = 0; i < widget.stages; i++) {
+      for (var j = 0; j < notecontrollerslist[i].length; j++) {
+        notecontrollerslist[i][j].dispose();
+      }
+      for (var j = 0; j < linkcontrollerslist[i].length; j++) {
+        linkcontrollerslist[i][j].dispose();
+      }
+    }
+    linkcontrollerslist = [];
+    notecontrollerslist = [];
+    super.dispose();
   }
 
   @override
@@ -169,27 +186,157 @@ class _TaskdetailsState extends State<Taskdetails> {
                         }
                         return Column(
                           children: [
-                            Container(
-                              margin: EdgeInsets.only(
-                                  top: 5.h, left: 5.w, right: 5.w),
-                              width: 90.w,
-                              height: 8.h,
-                              child: Material1.textfield(
-                                  hint: 'تێبینی بۆ بەشی ${index + 1}',
-                                  controller: notecontrollers[index],
-                                  textColor: Material1.primaryColor),
+                            SizedBox(
+                              height:
+                                  ((notecontrollerslist[index].length * 8) + 5)
+                                      .h,
+                              child: ListView.builder(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: notecontrollerslist[index].length,
+                                  itemBuilder: (context, index1) {
+                                    return Container(
+                                      margin: EdgeInsets.only(
+                                          top: 0.h, left: 5.w, right: 5.w),
+                                      width: 90.w,
+                                      height: 8.h,
+                                      child: Material1.textfield(
+                                          hint:
+                                              'تێبینی ${index1 + 1} بۆ بەشی ${index + 1}',
+                                          controller: notecontrollerslist[index]
+                                              [index1],
+                                          textColor: Material1.primaryColor),
+                                    );
+                                  }),
+                            ),
+                            SizedBox(
+                              height:
+                                  ((linkcontrollerslist[index].length * 8) + 5)
+                                      .h,
+                              child: ListView.builder(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: linkcontrollerslist[index].length,
+                                  itemBuilder: (context, index1) {
+                                    return Container(
+                                      margin: EdgeInsets.only(
+                                          top: 0.h, left: 5.w, right: 5.w),
+                                      width: 90.w,
+                                      height: 8.h,
+                                      child: Material1.textfield(
+                                          hint:
+                                              'لینکی ${index1 + 1} بۆ بەشی ${index + 1}',
+                                          controller: linkcontrollerslist[index]
+                                              [index1],
+                                          textColor: Material1.primaryColor),
+                                    );
+                                  }),
+                            ),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    linkcontrollerslist[index]
+                                        .add(TextEditingController());
+                                    int note = 0;
+                                    for (var i = 0;
+                                        i < notecontrollerslist.length;
+                                        i++) {
+                                      note += notecontrollerslist[i].length;
+                                    }
+                                    int link = 0;
+                                    for (var i = 0;
+                                        i < linkcontrollerslist.length;
+                                        i++) {
+                                      link += linkcontrollerslist[i].length;
+                                    }
+                                    setState(() {
+                                      listviewheight = ((widget
+                                                      .task['endstages']
+                                                      .where((element) =>
+                                                          element == false)
+                                                      .length)
+                                                  .toDouble() *
+                                              20) +
+                                          (9 * link) +
+                                          (9 * note);
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 40.w,
+                                    height: 6.h,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Colors.grey[200],
+                                    ),
+                                    margin:
+                                        EdgeInsets.only(left: 5.w, right: 5.w),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.add, color: Colors.black),
+                                        Text('زیادکردنی لینک',
+                                            style: TextStyle(
+                                                fontSize: 16.sp,
+                                                color: Colors.black)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    notecontrollerslist[index]
+                                        .add(TextEditingController());
+                                    int note = 0;
+                                    for (var i = 0;
+                                        i < notecontrollerslist.length;
+                                        i++) {
+                                      note += notecontrollerslist[i].length;
+                                    }
+                                    int link = 0;
+                                    for (var i = 0;
+                                        i < linkcontrollerslist.length;
+                                        i++) {
+                                      link += linkcontrollerslist[i].length;
+                                    }
+                                    setState(() {
+                                      listviewheight = ((widget
+                                                      .task['endstages']
+                                                      .where((element) =>
+                                                          element == false)
+                                                      .length)
+                                                  .toDouble() *
+                                              20) +
+                                          (9 * link) +
+                                          (9 * note);
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 40.w,
+                                    height: 6.h,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Colors.grey[200],
+                                    ),
+                                    margin:
+                                        EdgeInsets.only(left: 5.w, right: 5.w),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.add, color: Colors.black),
+                                        Text('زیادکردنی تێبینی',
+                                            style: TextStyle(
+                                                fontSize: 16.sp,
+                                                color: Colors.black)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             Container(
                               margin: EdgeInsets.only(
-                                  top: 5.h, left: 5.w, right: 5.w),
-                              width: 90.w,
-                              height: 8.h,
-                              child: Material1.textfield(
-                                  hint: 'لینک بۆ بەشی ${index + 1}',
-                                  controller: linkcontrollers[index],
-                                  textColor: Material1.primaryColor),
-                            ),
-                            Container(
+                                  top: 2.h, left: 5.w, right: 5.w),
                               child: Material1.button(
                                   label:
                                       widget.task['startstages'][index] == false
@@ -223,8 +370,10 @@ class _TaskdetailsState extends State<Taskdetails> {
                                       return;
                                     }
                                     if (DateTime.now().isAfter(widget
-                                        .task['endstagedates'][index]
-                                        .toDate())) {
+                                            .task['endstagedates'][index]
+                                            .toDate()) &&
+                                        widget.task['startstages'][index] ==
+                                            true) {
                                       showDialog(
                                           context: context,
                                           builder: (context) {
@@ -274,6 +423,31 @@ class _TaskdetailsState extends State<Taskdetails> {
                                               Material1.button(
                                                   label: 'بەڵێ',
                                                   function: () async {
+                                                    log('test ${linkcontrollerslist[index].toList()}');
+                                                    List<String> links = [];
+                                                    List<String> notes = [];
+                                                    for (var i = 0;
+                                                        i <
+                                                            linkcontrollerslist[
+                                                                    index]
+                                                                .length;
+                                                        i++) {
+                                                      links.add(
+                                                          linkcontrollerslist[
+                                                                  index][i]
+                                                              .text);
+                                                    }
+                                                    for (var i = 0;
+                                                        i <
+                                                            notecontrollerslist[
+                                                                    index]
+                                                                .length;
+                                                        i++) {
+                                                      notes.add(
+                                                          notecontrollerslist[
+                                                                  index][i]
+                                                              .text);
+                                                    }
                                                     showDialog(
                                                         context: context,
                                                         builder: (context) {
@@ -297,9 +471,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                             ? "start-stage${index + 1}"
                                                             : "end-stage${index + 1}")
                                                         .set({
-                                                      'note':
-                                                          notecontrollers[index]
-                                                              .text,
+                                                      'note': notes,
                                                       'time': DateTime.now(),
                                                       'latitude': latitude,
                                                       'longtitude': longtitude,
@@ -310,15 +482,16 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                               ? 'start'
                                                               : 'finish',
                                                       'stage': "${index + 1}",
-                                                      'link': linkcontrollers[index]
-                                                          .text
+                                                      'link': links
                                                     }).then((value) async {
                                                       List<bool> startstages =
-                                                          List<bool>.from(widget.task[
+                                                          List<bool>.from(widget
+                                                                  .task[
                                                               'startstages']);
                                                       List<bool> endstages =
-                                                          List<bool>.from(widget.task[
-                                                              'endstages']);
+                                                          List<bool>.from(
+                                                              widget.task[
+                                                                  'endstages']);
                                                       if (widget.task[
                                                                   'startstages']
                                                               [index] ==
@@ -355,6 +528,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                                 route.isFirst);
                                                       },
                                                     ).catchError((error) {
+                                                      log("test ${error}");
                                                       ScaffoldMessenger.of(
                                                               context)
                                                           .showSnackBar(
@@ -492,26 +666,27 @@ class _TaskdetailsState extends State<Taskdetails> {
                                               } catch (e) {
                                                 reward = '0';
                                               }
-                                             List<bool> endstages =
-                                                          List<bool>.from(widget.task[
-                                                              'endstages']);
-                                              if (!(endstages.contains(false)) && int.parse(reward) > 0) {
-                                                
-                                              await FirebaseFirestore.instance
-                                                  .collection('user')
-                                                  .doc(widget.email)
-                                                  .collection(
-                                                      'rewardpunishment')
-                                                  .doc(
-                                                      'reward-${widget.task['name']}${DateTime.now()}')
-                                                  .set({
-                                                'addedby': widget.email,
-                                                'amount': reward,
-                                                'date': DateTime.now(),
-                                                'reason':
-                                                    'doing task ${widget.task['name']}',
-                                                'type': 'reward'
-                                              });
+                                              List<bool> endstages =
+                                                  List<bool>.from(
+                                                      widget.task['endstages']);
+                                              if (!(endstages
+                                                      .contains(false)) &&
+                                                  int.parse(reward) > 0) {
+                                                await FirebaseFirestore.instance
+                                                    .collection('user')
+                                                    .doc(widget.email)
+                                                    .collection(
+                                                        'rewardpunishment')
+                                                    .doc(
+                                                        'reward-${widget.task['name']}${DateTime.now()}')
+                                                    .set({
+                                                  'addedby': widget.email,
+                                                  'amount': reward,
+                                                  'date': DateTime.now(),
+                                                  'reason':
+                                                      'doing task ${widget.task['name']}',
+                                                  'type': 'reward'
+                                                });
                                               }
                                             }
                                             ScaffoldMessenger.of(context)
@@ -524,10 +699,9 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                     : 'کارەکە کۆتایی پێهات'),
                                               ),
                                             );
-                                            Navigator.popUntil(context,
-                                                (route) => route.isFirst);
                                           },
                                         ).catchError((error) {
+                                          log("test ${error}");
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(
@@ -535,6 +709,8 @@ class _TaskdetailsState extends State<Taskdetails> {
                                             ),
                                           );
                                         });
+                                        Navigator.popUntil(
+                                            context, (route) => route.isFirst);
                                       },
                                       textcolor: Colors.white,
                                       buttoncolor: Material1.primaryColor),

@@ -21,6 +21,14 @@ class ViewingTaskDeatsilsupdates extends StatefulWidget {
 
 class _ViewingTaskDeatsilsupdatesState
     extends State<ViewingTaskDeatsilsupdates> {
+  int heightfunction(int length, int height) {
+    return length * height;
+  }
+
+  int sizedboxheight(int lengthlinks, int lengthnotes, int height) {
+    return (lengthlinks * 4) + (lengthnotes * 4) + height;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,97 +37,127 @@ class _ViewingTaskDeatsilsupdatesState
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
       ),
-      body: ListView(
-        children: [
-          SizedBox(
-              height: 10.h,
-              width: 90.w,
-              child: Container(
-                margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-                padding: EdgeInsets.all(1.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(5),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 5,
-                    )
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text("${widget.task['name']} : ئەرک",
-                        style: TextStyle(
-                            fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(
-                            "${DateFormat('MMM d, h:mm a').format(widget.task['end'].toDate())} بۆ",
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                            )),
-                        Text(
-                            "${DateFormat('MMM d, h:mm a').format(widget.task['start'].toDate())}  لە",
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                            )),
-                      ],
-                    ),
-                  ],
-                ),
-              )),
-          Container(
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            padding: EdgeInsets.all(1.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.grey,
-                  blurRadius: 5,
-                )
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(": وردەکاری",
-                    style: TextStyle(
-                        fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                Text(widget.task['description'],
-                    style: TextStyle(
-                        fontSize: 16.sp, fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-          Container(
-            alignment: Alignment.centerRight,
-            height: 4.h,
-            width: 100.w,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Text('دەستپێکرند و کۆتایی پێهێنانەکان ',
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-          ),
-          SizedBox(
-            height: 70.h,
-            child: StreamBuilder(
-              stream: widget.task.reference.collection('updates').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                return ListView.builder(
-                    itemCount: snapshot.data?.docs.length ?? 0,
-                    itemBuilder: (BuildContext context, int index) {
-                      return SizedBox(
-                          height: 30.h,
-                          width: 90.w,
+      body: SizedBox(
+        height: 100.h,
+        child: StreamBuilder(
+          stream: widget.task.reference
+              .collection('updates')
+              .orderBy('time', descending: true )
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return ListView.builder(
+                itemCount: snapshot.data?.docs.length ?? 0,
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      index == 0
+                          ? Column(
+                              children: [
+                                SizedBox(
+                                    height: 10.h,
+                                    width: 100.w,
+                                    child: Container(
+                                      margin: EdgeInsets.fromLTRB(
+                                          5.w, 1.h, 5.w, 1.h),
+                                      padding: EdgeInsets.all(1.h),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(5),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Colors.grey,
+                                            blurRadius: 5,
+                                          )
+                                        ],
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text("${widget.task['name']} : ئەرک",
+                                              style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.bold)),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Text(
+                                                  "${DateFormat('MMM d, h:mm a').format(widget.task['end'].toDate())} بۆ",
+                                                  style: TextStyle(
+                                                    fontSize: 16.sp,
+                                                  )),
+                                              Text(
+                                                  "${DateFormat('MMM d, h:mm a').format(widget.task['start'].toDate())}  لە",
+                                                  style: TextStyle(
+                                                    fontSize: 16.sp,
+                                                  )),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    )),
+                                Container(
+                                  width: 100.w,
+                                  height: 10.h,
+                                  margin:
+                                      EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+                                  padding: EdgeInsets.all(1.h),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(5),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.grey,
+                                        blurRadius: 5,
+                                      )
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(": وردەکاری",
+                                          style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold)),
+                                      Text(widget.task['description'],
+                                          style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  alignment: Alignment.centerRight,
+                                  height: 4.h,
+                                  width: 100.w,
+                                  margin:
+                                      EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+                                  child: Text(
+                                      'دەستپێکرند و کۆتایی پێهێنانەکان ',
+                                      style: TextStyle(
+                                          fontSize: 18.sp,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            )
+                          : const SizedBox(),
+                      SizedBox(
+                          height: sizedboxheight(
+                                  snapshot.data?.docs[index]['note'].length ??
+                                      0,
+                                  snapshot.data?.docs[index]['link'].length ??
+                                      0,
+                                  30)
+                              .h,
+                          width: 100.w,
                           child: Container(
                             margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
                             padding: EdgeInsets.all(1.h),
@@ -134,6 +172,7 @@ class _ViewingTaskDeatsilsupdatesState
                               ],
                             ),
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
@@ -157,16 +196,47 @@ class _ViewingTaskDeatsilsupdatesState
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
-                                  "${snapshot.data!.docs[index]['latitude']} : درێژایی",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                Text(
-                                  "${snapshot.data!.docs[index]['longtitude']} : پانایی",
-                                  style: const TextStyle(
-                                    fontSize: 14,
+                                GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text('شوێن'),
+                                            content:
+                                                Text("دڵنییایت لە بینینی شوێن"),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text('نەخێر')),
+                                              TextButton(
+                                                  onPressed: () async {
+                                                    if (!await launchUrl(Uri.parse(
+                                                        'https://www.google.com/maps/search/?api=1&query=${snapshot.data!.docs[index]['latitude']},${snapshot.data!.docs[index]['longtitude']}'))) {
+                                                      throw Exception(
+                                                          'Could not launch ');
+                                                    }
+                                                  },
+                                                  child: const Text('بەڵێ')),
+                                            ],
+                                          );
+                                        });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        "${snapshot.data!.docs[index]['latitude']}-${snapshot.data!.docs[index]['longtitude']}",
+                                        style: const TextStyle(
+                                            fontSize: 14, color: Colors.blue),
+                                      ),
+                                      Text(
+                                        " : شوێن",
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 GestureDetector(
@@ -197,42 +267,101 @@ class _ViewingTaskDeatsilsupdatesState
                                           );
                                         });
                                   },
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          "${snapshot.data?.docs[index]['link'] ?? ''}",
-                                          style: const TextStyle(
-                                            color: Colors.blue,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          ": لینک",
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                  child: SizedBox(
+                                    width: 100.w,
+                                    height: heightfunction(
+                                            ((snapshot.data?.docs[index]['link']
+                                                .length)),
+                                            4)
+                                        .h,
+                                    child: ListView.builder(
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: snapshot.data
+                                                ?.docs[index]['link'].length ??
+                                            0,
+                                        itemBuilder: (context, index1) {
+                                          return Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                (snapshot.data?.docs[index]
+                                                                        ['link']
+                                                                    [index1] ??
+                                                                '')
+                                                            .toString()
+                                                            .length >
+                                                        39
+                                                    ? (snapshot.data?.docs[index]
+                                                                    ['link']
+                                                                [index1] ??
+                                                            '')
+                                                        .toString()
+                                                        .substring(0, 40)
+                                                    : (snapshot.data?.docs[
+                                                                        index]
+                                                                    ['link']
+                                                                [index1] ??
+                                                            '')
+                                                        .toString(),
+                                                style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                              Text(
+                                                ": لینک ${index1 + 1}",
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        }),
                                   ),
                                 ),
-                                Text(
-                                  "${snapshot.data!.docs[index]['note']} : تێبینی",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                SizedBox(
+                                  height: heightfunction(
+                                          ((snapshot.data?.docs[index]['note']
+                                              .length)),
+                                          4)
+                                      .h,
+                                  child: ListView.builder(
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: snapshot.data
+                                              ?.docs[index]['note'].length ??
+                                          0,
+                                      itemBuilder: (context, index1) {
+                                        return Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              "${(snapshot.data?.docs[index]['note'][index1] ?? '')}",
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            Text(
+                                              ": تێبینی ${index1 + 1}",
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      }),
                                 ),
                               ],
                             ),
-                          ));
-                    });
-              },
-            ),
-          )
-        ],
+                          )),
+                    ],
+                  );
+                });
+          },
+        ),
       ),
     );
   }
