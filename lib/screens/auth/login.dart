@@ -154,29 +154,26 @@ class _LoginState extends State<Login> {
                             })
                       ]);
                     }
-                    if (userCredential?.user == null) {
-                      return;
-                    }
                     FirebaseFirestore.instance
                         .collection('user')
                         .doc(email)
                         .get()
                         .then((value) async {
                       if (value.exists) {
-                        // if (value.data()?['password'] !=
-                        //     password.text) {
-                        //   Material1.showdialog(
-                        //       context, 'Error', 'password is not correct', [
-                        //     Material1.button(
-                        //         label: 'ok',
-                        //         buttoncolor: Material1.primaryColor,
-                        //         textcolor: Colors.white,
-                        //         function: () {
-                        //           Navigator.pop(context);
-                        //         })
-                        //   ]);
-                        //   return;
-                        // }
+                        if (value.data()?['password'] != password ||
+                            userCredential?.user == null) {
+                          Material1.showdialog(
+                              context, 'Error', 'password is not correct', [
+                            Material1.button(
+                                label: 'ok',
+                                buttoncolor: Material1.primaryColor,
+                                textcolor: Colors.white,
+                                function: () {
+                                  Navigator.pop(context);
+                                })
+                          ]);
+                          return;
+                        }
                         if (value.data()?['email'] != email) {
                           Material1.showdialog(
                               context, 'Error', 'email is not correct', [
