@@ -167,6 +167,7 @@ class _DashboardState extends State<Dashboard> {
                           MaterialPageRoute(builder: (context) {
                         return Selftargetview(
                           email: email,
+                          adminview: false,
                         );
                       }));
                     },

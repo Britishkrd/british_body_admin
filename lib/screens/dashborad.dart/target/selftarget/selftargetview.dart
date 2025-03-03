@@ -7,7 +7,9 @@ import 'package:sizer/sizer.dart';
 
 class Selftargetview extends StatefulWidget {
   final String email;
-  const Selftargetview({super.key, required this.email});
+  final bool adminview;
+  const Selftargetview(
+      {super.key, required this.email, required this.adminview});
 
   @override
   State<Selftargetview> createState() => _SelftargetviewState();
@@ -74,6 +76,17 @@ class _SelftargetviewState extends State<Selftargetview> {
                       itemBuilder: (BuildContext context, int index) {
                         return GestureDetector(
                           onTap: () {
+                            List<String> notes = [];
+                            List<String> links = [];
+                            snapshot.data!.docs[index].reference
+                                .collection('update')
+                                .get()
+                                .then((value) {
+                              for (var element in value.docs) {
+                                notes = List<String>.from(element['note']);
+                                links = List<String>.from(element['link']);
+                              }
+                            });
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
                               return Selftargetdetails(
@@ -92,6 +105,9 @@ class _SelftargetviewState extends State<Selftargetview> {
                                 end: snapshot.data!.docs[index]['end'].toDate(),
                                 reward: snapshot.data!.docs[index]['reward'],
                                 reference: snapshot.data!.docs[index].reference,
+                                adminview: widget.adminview,
+                                notes: notes,
+                                links: links,
                               );
                             }));
                           },

@@ -72,7 +72,7 @@ class _ChoosinguserfortargetState extends State<Choosinguserfortarget> {
                                       Navigator.pop(context);
                                       Navigator.push(context,
                                           MaterialPageRoute(builder: (context) {
-                                        return Selftargetview(email: snapshot.data!.docs[index]['email']);
+                                        return Selftargetview(email: snapshot.data!.docs[index]['email'],adminview: true,);
                                       }));
                                     },
                                     child: const Text('بینینی تارگێت',

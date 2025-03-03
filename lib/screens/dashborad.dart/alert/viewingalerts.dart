@@ -25,6 +25,7 @@ class _ViewingalertsState extends State<Viewingalerts> {
         stream: FirebaseFirestore.instance
             .collection('alert')
             .where('to', arrayContains: widget.email)
+            .orderBy('time', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
