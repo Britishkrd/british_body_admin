@@ -42,7 +42,7 @@ class _ViewingTaskDeatsilsupdatesState
         child: StreamBuilder(
           stream: widget.task.reference
               .collection('updates')
-              .orderBy('time', descending: true )
+              .orderBy('time', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -257,7 +257,7 @@ class _ViewingTaskDeatsilsupdatesState
                                               TextButton(
                                                   onPressed: () async {
                                                     if (!await launchUrl(Uri.parse(
-                                                        "${snapshot.data?.docs[index]['link']}"))) {
+                                                        "${snapshot.data?.docs[index]['link'][index]}"))) {
                                                       throw Exception(
                                                           'Could not launch ');
                                                     }

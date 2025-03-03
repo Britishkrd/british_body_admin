@@ -47,13 +47,13 @@ class _ChoosingtaskforaddingnotesState
                           context,
                           MaterialPageRoute(
                               builder: (context) => Addingnotes(
-                                email:widget.email,
-                                reference: snapshot.data!.docs[index].reference,
-
-                              )));
+                                    email: widget.email,
+                                    reference:
+                                        snapshot.data!.docs[index].reference,
+                                  )));
                     },
                     child: SizedBox(
-                        height: 20.h,
+                        height: 10.h,
                         width: 90.w,
                         child: Container(
                           margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
@@ -81,16 +81,6 @@ class _ChoosingtaskforaddingnotesState
                                               .isBefore(DateTime.now())
                                           ? TextDecoration.lineThrough
                                           : null,
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.bold)),
-                              Text(
-                                  "بڕی غەرامە : ${snapshot.data!.docs[index]['deductionamount']}",
-                                  style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.bold)),
-                              Text(
-                                  "بڕی پاداشت : ${snapshot.data!.docs[index]['rewardamount']}",
-                                  style: TextStyle(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.bold)),
                               Row(

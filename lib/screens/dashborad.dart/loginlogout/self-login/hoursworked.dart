@@ -84,6 +84,17 @@ class _HoursworkedState extends State<Hoursworked> {
                   ),
                 )
               : const SizedBox.shrink(),
+          Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
+              child: Material1.button(
+                  label: 'داواکردنی ئۆڤەر تایم',
+                  buttoncolor: Material1.primaryColor,
+                  textcolor: Colors.white,
+                  function: () {
+                    
+                  }))
         ],
       ),
     );

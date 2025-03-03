@@ -126,7 +126,7 @@ class _TasksState extends State<Tasks> {
                       }
                       if (snapshot.data!.docs[index]['end']
                           .toDate()
-                          .isBefore(DateTime.now())) {
+                          .isBefore(DateTime.now()) && snapshot.data!.docs[index]['status'] != 'done') {
                         FirebaseFirestore.instance
                             .collection('user')
                             .doc(widget.email)

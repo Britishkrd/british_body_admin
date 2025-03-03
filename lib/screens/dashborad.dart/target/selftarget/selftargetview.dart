@@ -91,6 +91,7 @@ class _SelftargetviewState extends State<Selftargetview> {
                                     .toDate(),
                                 end: snapshot.data!.docs[index]['end'].toDate(),
                                 reward: snapshot.data!.docs[index]['reward'],
+                                reference: snapshot.data!.docs[index].reference,
                               );
                             }));
                           },

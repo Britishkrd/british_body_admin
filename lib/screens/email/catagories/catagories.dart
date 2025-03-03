@@ -3,7 +3,6 @@ import 'package:british_body_admin/screens/email/catagories/createcatagory.dart'
 import 'package:british_body_admin/screens/email/emaildeatial.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:sizer/sizer.dart';
 
 class Catagories extends StatefulWidget {

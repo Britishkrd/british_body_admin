@@ -605,7 +605,7 @@ class _SendingemailState extends State<Sendingemail> {
                           'from': widget.email,
                           'to': emailList,
                           'cc': ccList,
-                          'id': counter,
+                          'id': counter+ 1,
                           'subject': subjectcontroller.text,
                           'content': contentcontroller.text,
                           'subjects': subjects,

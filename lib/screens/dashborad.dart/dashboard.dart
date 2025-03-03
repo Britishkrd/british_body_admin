@@ -116,16 +116,6 @@ class _DashboardState extends State<Dashboard> {
                     onTap: () {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
-                        return ChoosingUserToViewTaskDetails(email: email);
-                      }));
-                    },
-                    child: controlpanelcard(
-                        Icons.task_alt, 'بینینی وردەکاری کارەکان'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
                         return Viewingalerts(email: email);
                       }));
                     },
@@ -256,6 +246,19 @@ class _DashboardState extends State<Dashboard> {
                           },
                           child: controlpanelcard(
                               Icons.more_time, 'قبوڵکردنی مۆڵەت'),
+                        )
+                      : const SizedBox.shrink(),
+                  permissions.contains('viewing task detail')
+                      ? GestureDetector(
+                          onTap: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return ChoosingUserToViewTaskDetails(
+                                  email: email);
+                            }));
+                          },
+                          child: controlpanelcard(
+                              Icons.task_alt, 'بینینی وردەکاری کارەکان'),
                         )
                       : const SizedBox.shrink(),
                   permissions.contains('adding task')

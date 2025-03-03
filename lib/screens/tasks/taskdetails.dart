@@ -528,7 +528,6 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                                 route.isFirst);
                                                       },
                                                     ).catchError((error) {
-                                                      log("test ${error}");
                                                       ScaffoldMessenger.of(
                                                               context)
                                                           .showSnackBar(
@@ -642,7 +641,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                                             .collection('updates')
                                             .doc(DateTime.now().toString())
                                             .set({
-                                          'note': notecontroller.text,
+                                          'note': [notecontroller.text],
                                           'time': DateTime.now(),
                                           'latitude': latitude,
                                           'longtitude': longtitude,
@@ -651,7 +650,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                   ? 'start'
                                                   : 'finish',
                                           'stage': 'main task',
-                                          'link': linkcontroller.text
+                                          'link': [linkcontroller.text]
                                         }).then(
                                           (value) async {
                                             if (widget.task['status'] ==
@@ -688,6 +687,8 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                   'type': 'reward'
                                                 });
                                               }
+                                              widget.task.reference
+                                                  .update({'status': 'done'});
                                             }
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
@@ -701,7 +702,6 @@ class _TaskdetailsState extends State<Taskdetails> {
                                             );
                                           },
                                         ).catchError((error) {
-                                          log("test ${error}");
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(

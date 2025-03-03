@@ -493,66 +493,6 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
             child: Material1.button(
                 label: 'زیادکردن',
                 function: () async {
-                  for (var i = 0; i < startsstagedates.length; i++) {
-                    if (startsstagedates[i] == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('تکایە کاتی بەشی ${i + 1} بەڕاستی هەڵبژێرە'),
-                        ),
-                      );
-                      return;
-                    } else if (endsstagedates[i] == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('تکایە کاتی بەشی ${i + 1} بەڕاستی هەڵبژێرە'),
-                        ),
-                      );
-                      return;
-                    } else if (startsstagedates[i]!
-                        .isAfter(endsstagedates[i]!)) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('تکایە کاتی بەشی ${i + 1} بەڕاستی هەڵبژێرە'),
-                        ),
-                      );
-                      return;
-                    } else if (startsstagedates[i]!.isBefore(DateTime.now())) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('تکایە کاتی بەشی ${i + 1} بەڕاستی هەڵبژێرە'),
-                        ),
-                      );
-                      return;
-                    } else if (endsstagedates[i]!.isBefore(DateTime.now())) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('تکایە کاتی بەشی ${i + 1} بەڕاستی هەڵبژێرە'),
-                        ),
-                      );
-                      return;
-                    } else if (startsstagedates[i]!.isBefore(start!)) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('تکایە کاتی بەشی ${i + 1} بەڕاستی هەڵبژێرە'),
-                        ),
-                      );
-                      return;
-                    } else if (endsstagedates[i]!.isAfter(end!)) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('تکایە کاتی بەشی ${i + 1} بەڕاستی هەڵبژێرە'),
-                        ),
-                      );
-                      return;
-                    }
-                  }
                   if (start == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

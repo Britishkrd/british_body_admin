@@ -81,11 +81,7 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                               style: TextStyle(
                                                   fontSize: 16.sp,
                                                   fontWeight: FontWeight.bold)),
-                                          Text(
-                                              "بڕی داواکراو: ${snapshot.data!.docs[index]['amount']}",
-                                              style: TextStyle(
-                                                  fontSize: 16.sp,
-                                                  fontWeight: FontWeight.bold)),
+                                         
                                           SizedBox(
                                             height: 3.h,
                                             child: Text(

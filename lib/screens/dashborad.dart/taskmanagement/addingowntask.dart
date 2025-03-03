@@ -198,7 +198,19 @@ class _AddingOwnTaskState extends State<AddingOwnTask> {
                                     'status': 'pending',
                                     'name': namecontroller.text,
                                     'isdaily': false,
-                                    'isowntask': true
+                                    'isowntask': true,
+                                      'addedby':widget.email,
+                                      'deductionamount':'0',
+                                      'rewardamount':'0',
+                                      'startstagedates': [],
+                                      'endstagedates': [],
+                                      'startnotificationdates':
+                                          [],
+                                      'endnotificationdates':
+                                          [],
+                                      'isnotificationset': false,
+                                      'startstages': [],
+                                      'endstages': []
                                   }).then(
                                     (value) {
                                       ScaffoldMessenger.of(context)
