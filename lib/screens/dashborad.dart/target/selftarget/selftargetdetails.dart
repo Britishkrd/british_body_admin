@@ -47,7 +47,7 @@ class _SelftargetdetailsState extends State<Selftargetdetails> {
   }
 
   int sizedboxheight(int lengthlinks, int lengthnotes, int height) {
-    return (lengthlinks * 4) + (lengthnotes * 4) + height;
+    return (lengthlinks * 2) + (lengthnotes * 2) + height;
   }
 
   @override

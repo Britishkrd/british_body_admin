@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/selftargetdetails.dart';
 import 'package:chips_choice/chips_choice.dart';
@@ -86,30 +88,35 @@ class _SelftargetviewState extends State<Selftargetview> {
                                 notes = List<String>.from(element['note']);
                                 links = List<String>.from(element['link']);
                               }
+                            }).then((value) {
+                              log(notes.toString());
+                              log(links.toString());
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return Selftargetdetails(
+                                  title: snapshot.data!.docs[index]['title'],
+                                  description: snapshot.data!.docs[index]
+                                      ['description'],
+                                  date: snapshot.data!.docs[index]['date']
+                                      .toDate()
+                                      .toString(),
+                                  email: snapshot.data!.docs[index]['email'],
+                                  adminemail: snapshot.data!.docs[index]
+                                      ['adminemail'],
+                                  target: snapshot.data!.docs[index]['target'],
+                                  start: snapshot.data!.docs[index]['start']
+                                      .toDate(),
+                                  end: snapshot.data!.docs[index]['end']
+                                      .toDate(),
+                                  reward: snapshot.data!.docs[index]['reward'],
+                                  reference:
+                                      snapshot.data!.docs[index].reference,
+                                  adminview: widget.adminview,
+                                  notes: notes,
+                                  links: links,
+                                );
+                              }));
                             });
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Selftargetdetails(
-                                title: snapshot.data!.docs[index]['title'],
-                                description: snapshot.data!.docs[index]
-                                    ['description'],
-                                date: snapshot.data!.docs[index]['date']
-                                    .toDate()
-                                    .toString(),
-                                email: snapshot.data!.docs[index]['email'],
-                                adminemail: snapshot.data!.docs[index]
-                                    ['adminemail'],
-                                target: snapshot.data!.docs[index]['target'],
-                                start: snapshot.data!.docs[index]['start']
-                                    .toDate(),
-                                end: snapshot.data!.docs[index]['end'].toDate(),
-                                reward: snapshot.data!.docs[index]['reward'],
-                                reference: snapshot.data!.docs[index].reference,
-                                adminview: widget.adminview,
-                                notes: notes,
-                                links: links,
-                              );
-                            }));
                           },
                           child: Container(
                             margin: EdgeInsets.only(
