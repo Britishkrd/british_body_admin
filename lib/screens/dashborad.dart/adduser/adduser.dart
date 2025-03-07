@@ -36,7 +36,8 @@ class _AdduserState extends State<Adduser> {
     'login and logout',
     'setting target',
     'add user',
-    'changing worker phone'
+    'changing worker phone',
+    'adding rules'
   ];
   List<String> selectedpermissions = [];
 

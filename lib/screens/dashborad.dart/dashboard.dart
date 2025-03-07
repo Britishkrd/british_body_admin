@@ -12,6 +12,8 @@ import 'package:british_body_admin/screens/dashborad.dart/loginlogout/choosingus
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/self-login/viewingselfloginlogout.dart';
 import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/choosinguser.dart';
 import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/viewingrewardpunishment.dart';
+import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/adminrules.dart';
+import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/choosingdept.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/choosingusertogivesalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/receivingsalary/choosingmonthtoreceiversalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
@@ -173,6 +175,19 @@ class _DashboardState extends State<Dashboard> {
                     },
                     child: controlpanelcard(
                         Icons.track_changes_outlined, 'تارگێتەکان'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Choosingdepttoaddsub(
+                          isaddingrule: false,
+                          email: email,
+                          isemployee: true,
+                        );
+                      }));
+                    },
+                    child: controlpanelcard(Icons.rule, 'یاسا و ڕێساکان'),
                   ),
                   GestureDetector(
                     onTap: () async {
@@ -403,6 +418,20 @@ class _DashboardState extends State<Dashboard> {
                           },
                           child: controlpanelcard(
                               Icons.phone_iphone, 'گۆڕینی مۆبایلی کارمەند'),
+                        )
+                      : const SizedBox.shrink(),
+                  permissions.contains('adding rules')
+                      ? GestureDetector(
+                          onTap: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return Adminrules(
+                                email: email,
+                              );
+                            }));
+                          },
+                          child:
+                              controlpanelcard(Icons.category_sharp, 'یاساکان'),
                         )
                       : const SizedBox.shrink(),
                 ],

@@ -58,7 +58,8 @@ class _EdituserrState extends State<Edituserr> {
     'login and logout',
     'setting target',
     'add user',
-    'changing worker phone'
+    'changing worker phone',
+    'adding rules'
   ];
   List<String> selectedpermissions = [];
 

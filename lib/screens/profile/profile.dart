@@ -45,7 +45,11 @@ class _ProfileState extends State<Profile> {
           height: 80.h,
           width: 100.w,
           child: FutureBuilder(
-              future: FirebaseFirestore.instance.collection('company').get(),
+              future: FirebaseFirestore.instance
+                  .collection('company')
+                  .doc('department')
+                  .collection('department')
+                  .get(),
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -63,51 +67,11 @@ class _ProfileState extends State<Profile> {
                               color: Colors.red, size: 20.sp),
                           title: Text(snapshot.data?.docs[index]['name'] ?? ''),
                           children: [
-                            Container(
-                              margin: EdgeInsets.only(
-                                  left: 10.w, bottom: 1.h, right: 10.w),
-                              height:
-                                  ((snapshot.data?.docs.length ?? 0) * 50).h,
-                              child: FutureBuilder(
-                                  future: snapshot.data?.docs[index].reference
-                                      .collection(snapshot.data?.docs[index]
-                                              ['name'] ??
-                                          'name')
-                                      .get(),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<QuerySnapshot> snapshot1) {
-                                    if (snapshot1.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    }
-                                    return SizedBox(
-                                      height:
-                                          ((snapshot1.data?.docs.length ?? 0) *
-                                                  40)
-                                              .h,
-                                      child: ListView.builder(
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                          itemCount:
-                                              snapshot1.data?.docs.length ?? 0,
-                                          itemBuilder: (BuildContext context,
-                                              int index1) {
-                                            return ExpansionTile(
-                                              leading: Icon(
-                                                  Icons.add_box_outlined,
-                                                  color: Colors.red,
-                                                  size: 18.sp),
-                                              title: Text(
-                                                  snapshot1.data?.docs[index1]
-                                                          ['location'] ??
-                                                      ''),
-                                              children: [
-                                                SizedBox(
-                                                  height: (double.parse((snapshot1
+                            SizedBox(
+                                                  height: (double.parse((snapshot
                                                                       .data
                                                                       ?.docs[
-                                                                          index1]
+                                                                          index]
                                                                           [
                                                                           'departments']
                                                                       .length ??
@@ -118,9 +82,9 @@ class _ProfileState extends State<Profile> {
                                                   child: ListView.builder(
                                                       physics:
                                                           NeverScrollableScrollPhysics(),
-                                                      itemCount: snapshot1
+                                                      itemCount: snapshot
                                                               .data
-                                                              ?.docs[index1][
+                                                              ?.docs[index][
                                                                   'departments']
                                                               .length ??
                                                           0,
@@ -140,8 +104,8 @@ class _ProfileState extends State<Profile> {
                                                                   color: Colors
                                                                       .red,
                                                                   size: 16.sp),
-                                                              Text(snapshot1.data
-                                                                              ?.docs[index1]
+                                                              Text(snapshot.data
+                                                                              ?.docs[index]
                                                                           [
                                                                           'departments']
                                                                       [
@@ -152,12 +116,6 @@ class _ProfileState extends State<Profile> {
                                                         );
                                                       }),
                                                 ),
-                                              ],
-                                            );
-                                          }),
-                                    );
-                                  }),
-                            ),
                           ],
                         ),
                       );
