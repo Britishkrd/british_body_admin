@@ -184,6 +184,8 @@ class _DashboardState extends State<Dashboard> {
                           isaddingrule: false,
                           email: email,
                           isemployee: true,
+                          isdelete: false,
+                          isdeprtmentdelete: false,
                         );
                       }));
                     },
@@ -252,188 +254,169 @@ class _DashboardState extends State<Dashboard> {
                     },
                     child: controlpanelcard(Icons.logout, 'دەرچوون'),
                   ),
-                  permissions.contains('accepting absence')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Acceptingabsence();
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.more_time, 'قبوڵکردنی مۆڵەت'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('viewing task detail')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return ChoosingUserToViewTaskDetails(
-                                  email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.task_alt, 'بینینی وردەکاری کارەکان'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('adding task')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return ChoosingUserFoTaskManagement(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.task_alt, 'زیادکردنی ئەرک وەک ئەدمین'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('sending alert')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Choosingforalerts(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.alarm_add, 'ناردنی ئاگادارکردنەوە'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('accepting change time')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Adminacceptingchangeworktime();
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.work_history, 'گۆڕینی کارتی کار بۆ ئەدمین'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('reward and punishment')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Choosinguser(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(Icons.card_giftcard_outlined,
-                              'زیادکردنی پاداشت و سزا'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('accepting loan')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return AcceptingLoan();
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.monetization_on_outlined,
-                              'قبۆڵکردنی سولفە'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('giving salary')
-                      ? GestureDetector(
-                          onTap: () async {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChoosingUserForGivingSalary(
-                                            email: email)));
-                          },
-                          child: controlpanelcard(
-                              Icons.monetization_on, 'پێدانی موچە'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('login and logout')
-                      ? GestureDetector(
-                          onTap: () async {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChoosingUseroForLoginLogout(
-                                            email: email)));
-                          },
-                          child: controlpanelcard(
-                              Icons.login_sharp, 'چوونەژوورەوە / دەرچوونەوە'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('setting feedback')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Adminfeedback(
-                                email: email,
-                              );
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.feedback, 'ڕەخنە و پێشنیار بۆ ئەدمین'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('setting target')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Choosinguserfortarget(
-                                email: email,
-                              );
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.track_changes_outlined, 'تارگێت بۆ ئەدمین'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('add user')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Choosinguserforusermanagement(
-                                email: email,
-                              );
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.group_add, 'زیاد کردنی بەکار هێنەر'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('changing worker phone')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Changingworkerphone();
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.phone_iphone, 'گۆڕینی مۆبایلی کارمەند'),
-                        )
-                      : const SizedBox.shrink(),
-                  permissions.contains('adding rules')
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Adminrules(
-                                email: email,
-                              );
-                            }));
-                          },
-                          child:
-                              controlpanelcard(Icons.category_sharp, 'یاساکان'),
-                        )
-                      : const SizedBox.shrink(),
+                  if (permissions.contains('accepting absence'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Acceptingabsence();
+                        }));
+                      },
+                      child:
+                          controlpanelcard(Icons.more_time, 'قبوڵکردنی مۆڵەت'),
+                    ),
+                  if (permissions.contains('viewing task detail'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return ChoosingUserToViewTaskDetails(email: email);
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.task_alt, 'بینینی وردەکاری کارەکان'),
+                    ),
+                  if (permissions.contains('adding task'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return ChoosingUserFoTaskManagement(email: email);
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.task_alt, 'زیادکردنی ئەرک وەک ئەدمین'),
+                    ),
+                  if (permissions.contains('sending alert'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Choosingforalerts(email: email);
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.alarm_add, 'ناردنی ئاگادارکردنەوە'),
+                    ),
+                  if (permissions.contains('accepting change time'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Adminacceptingchangeworktime();
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.work_history, 'گۆڕینی کارتی کار بۆ ئەدمین'),
+                    ),
+                  if (permissions.contains('reward and punishment'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Choosinguser(email: email);
+                        }));
+                      },
+                      child: controlpanelcard(Icons.card_giftcard_outlined,
+                          'زیادکردنی پاداشت و سزا'),
+                    ),
+                  if (permissions.contains('accepting loan'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return AcceptingLoan();
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.monetization_on_outlined, 'قبۆڵکردنی سولفە'),
+                    ),
+                  if (permissions.contains('giving salary'))
+                    GestureDetector(
+                      onTap: () async {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ChoosingUserForGivingSalary(email: email)));
+                      },
+                      child: controlpanelcard(
+                          Icons.monetization_on, 'پێدانی موچە'),
+                    ),
+                  if (permissions.contains('login and logout'))
+                    GestureDetector(
+                      onTap: () async {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ChoosingUseroForLoginLogout(email: email)));
+                      },
+                      child: controlpanelcard(
+                          Icons.login_sharp, 'چوونەژوورەوە / دەرچوونەوە'),
+                    ),
+                  if (permissions.contains('setting feedback'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Adminfeedback(
+                            email: email,
+                          );
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.feedback, 'ڕەخنە و پێشنیار بۆ ئەدمین'),
+                    ),
+                  if (permissions.contains('setting target'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Choosinguserfortarget(
+                            email: email,
+                          );
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.track_changes_outlined, 'تارگێت بۆ ئەدمین'),
+                    ),
+                  if (permissions.contains('add user'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Choosinguserforusermanagement(
+                            email: email,
+                          );
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.group_add, 'زیاد کردنی بەکار هێنەر'),
+                    ),
+                  if (permissions.contains('changing worker phone'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Changingworkerphone();
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.phone_iphone, 'گۆڕینی مۆبایلی کارمەند'),
+                    ),
+                  if (permissions.contains('adding rules'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Adminrules(
+                            email: email,
+                          );
+                        }));
+                      },
+                      child: controlpanelcard(Icons.category_sharp, 'یاساکان'),
+                    ),
                 ],
               ),
             ),
@@ -463,13 +446,15 @@ class _DashboardState extends State<Dashboard> {
           children: [
             SizedBox(
               height: 10.h,
-              child: Icon(icon, color: Material1.secondary, size: 30.sp),
+              child: Icon(icon,
+                  color: const Color.fromARGB(205, 26, 26, 26), size: 30.sp),
             ),
             Container(
-              alignment: Alignment.center,
+              margin: EdgeInsets.only(top: 0.5.h),
               width: 100.w,
               height: 6.h,
               child: Text(
+                textAlign: TextAlign.center,
                 name,
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.w500),

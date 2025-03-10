@@ -29,7 +29,24 @@ List<Stream<QuerySnapshot<Map<String, dynamic>>>> streams = [
       .where('status', isEqualTo: 'rejected')
       .snapshots()
 ];
-
+const List<String> list = <String>[
+  'default1',
+  'annoying',
+  'annoying1',
+  'arabic',
+  'laughing',
+  'longfart',
+  'mild',
+  'oud',
+  'rooster',
+  'salawat',
+  'shortfart',
+  'soft2',
+  'softalert',
+  'srusht',
+  'witch',
+];
+String dropdownValue = 'default1';
 class _AcceptingLoanState extends State<AcceptingLoan> {
   @override
   Widget build(BuildContext context) {
@@ -107,7 +124,7 @@ class _AcceptingLoanState extends State<AcceptingLoan> {
                                                   sendingnotification(
                                                       'سولفە ',
                                                       'سولفەکەت قبوڵکرا',
-                                                      value.data()?['token']);
+                                                      value.data()?['token'],dropdownValue);
                                                 });
                                               });
                                             });
@@ -136,7 +153,7 @@ class _AcceptingLoanState extends State<AcceptingLoan> {
                                                 sendingnotification(
                                                     'سولفە ',
                                                     'سولفەکەت رەتکرایەوە',
-                                                    value.data()?['token']);
+                                                    value.data()?['token'],dropdownValue);
                                               });
                                             });
                                             Navigator.pop(context);
@@ -149,7 +166,7 @@ class _AcceptingLoanState extends State<AcceptingLoan> {
                                 });
                           },
                           child: SizedBox(
-                              height: 25.h,
+                              height: 35.h,
                               width: 90.w,
                               child: Container(
                                 margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
@@ -189,6 +206,45 @@ class _AcceptingLoanState extends State<AcceptingLoan> {
                                         style: TextStyle(
                                             fontSize: 16.sp,
                                             fontWeight: FontWeight.bold)),
+                                                      Container(
+            margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+            height: 8.h,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 6.h,
+                  width: 30.w,
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: dropdownValue,
+                    icon: const Icon(
+                      Icons.arrow_downward,
+                      color: Colors.black,
+                    ),
+                    elevation: 16,
+                    style: TextStyle(color: Material1.primaryColor),
+                    underline:
+                        Container(height: 2, color: Material1.primaryColor),
+                    onChanged: (String? value) {
+                      setState(() {
+                        dropdownValue = value!;
+                      });
+                    },
+                    items: list.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                          value: value, child: Text(value));
+                    }).toList(),
+                  ),
+                ),
+                SizedBox(
+                    height: 6.h,
+                    width: 30.w,
+                    child: Center(child: Text('هەڵبژاردنی دەنگ'))),
+              ],
+            ),
+          ),
                                   ],
                                 ),
                               )),

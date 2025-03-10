@@ -42,8 +42,10 @@ class _AdminaddingdepartmentState extends State<Adminaddingdepartment> {
                           .doc('department')
                           .collection('department')
                           .doc(departmentcontroller.text)
-                          .set({'name': departmentcontroller.text},
-                              SetOptions(merge: true));
+                          .set({
+                        'name': departmentcontroller.text,
+                        'departments': []
+                      }, SetOptions(merge: true));
                       Navigator.pop(context);
                     }
                   }))

@@ -55,6 +55,45 @@ class _CheckinandoutState extends State<Checkinandout> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        if (checkin)
+          Container(
+            height: 8.h,
+            width: 90.w,
+            decoration: BoxDecoration(
+              color: Material1.primaryColor,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            margin: EdgeInsets.only(top: 3.h),
+            child: Center(
+              child: Text(
+                "${email} : بەکارهێنەر",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        Container(
+          height: 8.h,
+          width: 90.w,
+          decoration: BoxDecoration(
+            color: Material1.primaryColor,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          margin: EdgeInsets.only(top: 3.h),
+          child: Center(
+            child: Text(
+              checkin
+                  ? 'تۆ لە ئێستادا لەکاردایت'
+                  : 'تۆ لە ئێستادا لەکاردا نیت تکایە چوونەژوورەوە بکە',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -258,6 +297,9 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                   true);
                                               Navigator.pop(context);
                                               Navigator.pop(context);
+                                              setState(() {
+                                                checkin = true;
+                                              });
                                             });
                                           });
                                         }),
@@ -384,6 +426,9 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                         true);
                                                     Navigator.pop(context);
                                                     Navigator.pop(context);
+                                                    setState(() {
+                                                      checkin = true;
+                                                    });
                                                   });
                                                 });
                                               })
@@ -513,6 +558,10 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                   longtitude,
                                                   false);
                                               Navigator.pop(context);
+                                              Navigator.pop(context);
+                                              setState(() {
+                                                checkin = false;
+                                              });
                                             });
                                           });
                                         })

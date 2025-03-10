@@ -17,12 +17,34 @@
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 <uses-permission android:name="android.permission.RECEIVE_NOTIFICATIONS"/>
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
+<!-- Samsung -->
+<uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
+<uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
 
+<!-- HTC -->
+<uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
+<uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
+
+<!-- Sony -->
+<uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
+<uses-permission android:name="com.sonymobile.home.permission.PROVIDER_INSERT_BADGE"/>
+
+<!-- Apex -->
+<uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
+
+<!-- Solid -->
+<uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
+
+<!-- Huawei -->
+<uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE" />
+<uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS" />
+<uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS" />
     <application
         android:label="british body admin"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-
+        <meta-data  android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/notification_icon" />
 
         <service
         android:name=".MyMediaPlaybackService"

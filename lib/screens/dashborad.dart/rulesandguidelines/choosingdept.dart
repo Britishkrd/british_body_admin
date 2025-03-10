@@ -11,7 +11,15 @@ class Choosingdepttoaddsub extends StatefulWidget {
   final bool isaddingrule;
   final String email;
   final bool isemployee;
-  const Choosingdepttoaddsub({super.key, required this.isaddingrule, required this.email, required this.isemployee});
+  final bool isdelete;
+  final bool isdeprtmentdelete;
+  const Choosingdepttoaddsub(
+      {super.key,
+      required this.isaddingrule,
+      required this.email,
+      required this.isemployee,
+      required this.isdelete,
+      required this.isdeprtmentdelete});
 
   @override
   State<Choosingdepttoaddsub> createState() => _ChoosingdepttoaddsubState();
@@ -42,17 +50,22 @@ class _ChoosingdepttoaddsubState extends State<Choosingdepttoaddsub> {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
+                      if (widget.isdeprtmentdelete) {
+                        return;
+                      }
                       if (widget.isaddingrule) {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
                           return Adminaddinrules(
-                            email: widget.email,
+                              email: widget.email,
                               department: snapshot.data!.docs[index].reference);
                         }));
-                      }else if(widget.isemployee){
+                      } else if (widget.isemployee) {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
-                          return Viewingrules(department: snapshot.data!.docs[index].reference);
+                          return Viewingrules(
+                              isdelete: widget.isdelete,
+                              department: snapshot.data!.docs[index].reference);
                         }));
                       } else {
                         Navigator.push(context,
@@ -62,56 +75,153 @@ class _ChoosingdepttoaddsubState extends State<Choosingdepttoaddsub> {
                         }));
                       }
                     },
-                    child: Container(
-                        decoration: BoxDecoration(
-                          color: Material1.primaryColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        width: 100.w,
-                        height: (12 +
-                                (snapshot.data!.docs[index]['departments']
-                                        .length *
-                                    2))
-                            .h,
-                        margin:
-                            EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-                        child: Column(children: [
-                          Container(
-                              alignment: Alignment.center,
-                              margin: EdgeInsets.only(top: 1.h, bottom: 1.h),
-                              child: Text(
-                                snapshot.data!.docs[index]['name'],
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                          Container(
-                            margin: EdgeInsets.only(left: 5.w),
-                            child: Text(
-                              'بەشەکان',
-                              style: TextStyle(color: Colors.white),
+                    child: Stack(
+                      children: [
+                        Container(
+                            decoration: BoxDecoration(
+                              color: Material1.primaryColor,
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          ),
-                          SizedBox(
-                            height: (4 +
+                            width: 100.w,
+                            height: (12 +
                                     (snapshot.data!.docs[index]['departments']
                                             .length *
-                                        2))
+                                        5))
                                 .h,
-                            child: ListView.builder(
-                                itemCount: snapshot
-                                    .data!.docs[index]['departments'].length,
-                                itemBuilder: (context, index1) {
-                                  return Container(
-                                    margin: EdgeInsets.only(left: 5.w),
-                                    child: Text(
-                                      "${index1 + 1}. ${snapshot.data!.docs[index]['departments'][index1]}",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  );
-                                }),
+                            margin: EdgeInsets.only(
+                                left: 5.w, right: 5.w, top: 2.h),
+                            child: Column(children: [
+                              Container(
+                                  alignment: Alignment.center,
+                                  margin:
+                                      EdgeInsets.only(top: 1.h, bottom: 1.h),
+                                  child: Text(
+                                    snapshot.data!.docs[index]['name'],
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  )),
+                              Container(
+                                margin: EdgeInsets.only(left: 5.w),
+                                child: Text(
+                                  'بەشەکان',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              SizedBox(
+                                height: (4 +
+                                        (snapshot
+                                                .data!
+                                                .docs[index]['departments']
+                                                .length *
+                                            4))
+                                    .h,
+                                child: ListView.builder(
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: snapshot.data!
+                                        .docs[index]['departments'].length,
+                                    itemBuilder: (context, index1) {
+                                      return Container(
+                                        margin: EdgeInsets.only(left: 5.w),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              "${index1 + 1}. ${snapshot.data!.docs[index]['departments'][index1]}",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            if (widget.isdeprtmentdelete)
+                                              IconButton(
+                                                  onPressed: () {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (context) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                                'دڵنیایت لە سڕینەوەی ئەم بەشە؟'),
+                                                            actions: [
+                                                              TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                  },
+                                                                  child: const Text(
+                                                                      'نەخێر')),
+                                                              TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                    snapshot
+                                                                        .data!
+                                                                        .docs[
+                                                                            index]
+                                                                        .reference
+                                                                        .update({
+                                                                      'departments':
+                                                                          FieldValue
+                                                                              .arrayRemove([
+                                                                        snapshot
+                                                                            .data!
+                                                                            .docs[index]['departments'][index1]
+                                                                      ])
+                                                                    });
+                                                                  },
+                                                                  child: const Text(
+                                                                      'بەڵێ')),
+                                                            ],
+                                                          );
+                                                        });
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                  )),
+                                          ],
+                                        ),
+                                      );
+                                    }),
+                              )
+                            ])),
+                        if (widget.isdeprtmentdelete)
+                          Positioned(
+                            right: 5.w,
+                            top: 1.h,
+                            child: IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text(
+                                              'دڵنیایت لە سڕینەوەی ئەم بەشە؟'),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('نەخێر')),
+                                            TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                  snapshot.data!.docs[index]
+                                                      .reference
+                                                      .delete();
+                                                },
+                                                child: const Text('بەڵێ')),
+                                          ],
+                                        );
+                                      });
+                                },
+                                icon: Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                )),
                           )
-                        ])),
+                      ],
+                    ),
                   );
                 });
           }),

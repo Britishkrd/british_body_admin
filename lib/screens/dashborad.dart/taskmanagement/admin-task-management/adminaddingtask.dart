@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +26,25 @@ class AdminAddingTask extends StatefulWidget {
   State<AdminAddingTask> createState() => _AdminAddingTaskState();
 }
 
+const List<String> list = <String>[
+  'default1',
+  'annoying',
+  'annoying1',
+  'arabic',
+  'laughing',
+  'longfart',
+  'mild',
+  'oud',
+  'rooster',
+  'salawat',
+  'shortfart',
+  'soft2',
+  'softalert',
+  'srusht',
+  'witch',
+];
+String dropdownValue = 'default1';
+
 bool checkin = true;
 double latitude = 0.0;
 double longtitude = 0.0;
@@ -40,6 +61,12 @@ List<DateTime?> startsnotificationdates = [
   now.subtract(const Duration(minutes: 10))
 ];
 List<DateTime?> endsnotificationdates = [
+  now.subtract(const Duration(minutes: 10))
+];
+List<DateTime?> mainstartsnotificationdates = [
+  now.subtract(const Duration(minutes: 10))
+];
+List<DateTime?> mainendsnotificationdates = [
   now.subtract(const Duration(minutes: 10))
 ];
 bool isDaily = false;
@@ -121,9 +148,9 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
               }
               start = dateTimeList?[0] ?? DateTime.now();
               end = dateTimeList?[1] ?? DateTime.now();
-              startsnotificationdates[0] = ((start ?? DateTime.now())
+              mainstartsnotificationdates[0] = ((start ?? DateTime.now())
                   .subtract(const Duration(minutes: 10)));
-              endsnotificationdates[0] = ((end ?? DateTime.now())
+              mainendsnotificationdates[0] = ((end ?? DateTime.now())
                   .subtract(const Duration(minutes: 10)));
               setState(() {});
             },
@@ -153,74 +180,142 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                   ],
                 )),
           ),
-          GestureDetector(
-            onTap: () async {
-              List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
-                context: context,
-                startInitialDate: DateTime.now(),
-                startFirstDate:
-                    DateTime(1600).subtract(const Duration(days: 3652)),
-                startLastDate: DateTime.now().add(
-                  const Duration(days: 3652),
-                ),
-                endInitialDate: DateTime.now(),
-                endFirstDate:
-                    DateTime(1600).subtract(const Duration(days: 3652)),
-                endLastDate: DateTime.now().add(
-                  const Duration(days: 3652),
-                ),
-                is24HourMode: false,
-                isShowSeconds: false,
-                minutesInterval: 1,
-                secondsInterval: 1,
-                borderRadius: const BorderRadius.all(Radius.circular(16)),
-                constraints: const BoxConstraints(
-                  maxWidth: 350,
-                  maxHeight: 650,
-                ),
-                transitionBuilder: (context, anim1, anim2, child) {
-                  return FadeTransition(
-                    opacity: anim1.drive(
-                      Tween(
-                        begin: 0,
-                        end: 1,
+          ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: mainstartsnotificationdates.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () async {
+                    List<DateTime>? dateTimeList =
+                        await showOmniDateTimeRangePicker(
+                      context: context,
+                      startInitialDate: DateTime.now(),
+                      startFirstDate:
+                          DateTime(1600).subtract(const Duration(days: 3652)),
+                      startLastDate: DateTime.now().add(
+                        const Duration(days: 3652),
                       ),
+                      endInitialDate: DateTime.now(),
+                      endFirstDate:
+                          DateTime(1600).subtract(const Duration(days: 3652)),
+                      endLastDate: DateTime.now().add(
+                        const Duration(days: 3652),
+                      ),
+                      is24HourMode: false,
+                      isShowSeconds: false,
+                      minutesInterval: 1,
+                      secondsInterval: 1,
+                      borderRadius: const BorderRadius.all(Radius.circular(16)),
+                      constraints: const BoxConstraints(
+                        maxWidth: 350,
+                        maxHeight: 650,
+                      ),
+                      transitionBuilder: (context, anim1, anim2, child) {
+                        return FadeTransition(
+                          opacity: anim1.drive(
+                            Tween(
+                              begin: 0,
+                              end: 1,
+                            ),
+                          ),
+                          child: child,
+                        );
+                      },
+                      transitionDuration: const Duration(milliseconds: 200),
+                      barrierDismissible: true,
+                    );
+                    mainstartsnotificationdates[index] =
+                        dateTimeList?[0] ?? DateTime.now();
+                    mainendsnotificationdates[index] =
+                        dateTimeList?[1] ?? DateTime.now();
+                    setState(() {});
+                  },
+                  child: Container(
+                      margin: EdgeInsets.only(top: 3.h, left: 5.w, right: 5.w),
+                      height: 10.h,
+                      decoration: BoxDecoration(
+                          color: Material1.primaryColor,
+                          borderRadius: BorderRadius.circular(15)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('هەڵبژاردنی کاتی ئاگادارکردنەوە',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold)),
+                          Text(
+                              start == null
+                                  ? ''
+                                  : "${'لە'} ${formatDate(mainstartsnotificationdates.isEmpty ? null : mainstartsnotificationdates[index])} - ${'بۆ'} ${formatDate(mainendsnotificationdates.isEmpty ? null : mainendsnotificationdates[index])}",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      )),
+                );
+              }),
+          Container(
+            margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+            decoration: BoxDecoration(
+                color: Material1.primaryColor,
+                borderRadius: BorderRadius.circular(15)),
+            height: 6.h,
+            width: 90.w,
+            child: Material1.button(
+                label: 'زیادکردنی بەش ئاگادارکردنەوە',
+                buttoncolor: Material1.primaryColor,
+                textcolor: Colors.white,
+                function: () {
+                  setState(() {
+                    mainstartsnotificationdates
+                        .add(now.subtract(const Duration(minutes: 10)));
+                    mainendsnotificationdates
+                        .add(now.subtract(const Duration(minutes: 10)));
+                  });
+                }),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+            height: 8.h,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 6.h,
+                  width: 30.w,
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: dropdownValue,
+                    icon: const Icon(
+                      Icons.arrow_downward,
+                      color: Colors.black,
                     ),
-                    child: child,
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 200),
-                barrierDismissible: true,
-              );
-              startsnotificationdates[0] = dateTimeList?[0] ?? DateTime.now();
-              endsnotificationdates[0] = dateTimeList?[1] ?? DateTime.now();
-              setState(() {});
-            },
-            child: Container(
-                margin: EdgeInsets.only(top: 3.h, left: 5.w, right: 5.w),
-                height: 10.h,
-                decoration: BoxDecoration(
-                    color: Material1.primaryColor,
-                    borderRadius: BorderRadius.circular(15)),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('هەڵبژاردنی کاتی ئاگادارکردنەوە',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold)),
-                    Text(
-                        start == null
-                            ? ''
-                            : "${'لە'} ${formatDate(startsnotificationdates.isEmpty ? null : startsnotificationdates[0])} - ${'بۆ'} ${formatDate(endsnotificationdates.isEmpty ? null : endsnotificationdates[0])}",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold)),
-                  ],
-                )),
+                    elevation: 16,
+                    style: TextStyle(color: Material1.primaryColor),
+                    underline:
+                        Container(height: 2, color: Material1.primaryColor),
+                    onChanged: (String? value) {
+                      setState(() {
+                        dropdownValue = value!;
+                      });
+                    },
+                    items: list.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                          value: value, child: Text(value));
+                    }).toList(),
+                  ),
+                ),
+                SizedBox(
+                    height: 6.h,
+                    width: 30.w,
+                    child: Center(child: Text('هەڵبژاردنی دەنگ'))),
+              ],
+            ),
           ),
           Container(
             margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
@@ -359,10 +454,10 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                           );
                           startsstagedates[index] = dateTimeList?[0] ?? now;
                           endsstagedates[index] = dateTimeList?[1] ?? now;
-                          startsnotificationdates[index + 1] = dateTimeList?[0]
+                          startsnotificationdates[index] = dateTimeList?[0]
                                   .subtract(const Duration(minutes: 10)) ??
                               now;
-                          endsnotificationdates[index + 1] = dateTimeList?[1]
+                          endsnotificationdates[index] = dateTimeList?[1]
                                   .subtract(const Duration(minutes: 10)) ??
                               now;
                           setState(() {});
@@ -439,9 +534,9 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                 const Duration(milliseconds: 200),
                             barrierDismissible: true,
                           );
-                          startsnotificationdates[index + 1] =
+                          startsnotificationdates[index] =
                               dateTimeList?[0] ?? now;
-                          endsnotificationdates[index + 1] =
+                          endsnotificationdates[index] =
                               dateTimeList?[1] ?? now;
                           setState(() {});
                         },
@@ -464,7 +559,7 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                 Text(
                                     startsstagedates[index] == null
                                         ? ''
-                                        : "${'لە'} ${formatDate(startsnotificationdates[index + 1] == now ? null : startsnotificationdates[index + 1])} ${'بۆ'} ${formatDate(endsnotificationdates[index + 1] == now ? null : endsnotificationdates[index + 1])}",
+                                        : "${'لە'} ${formatDate(startsnotificationdates[index] == now ? null : startsnotificationdates[index])} ${'بۆ'} ${formatDate(endsnotificationdates[index] == now ? null : endsnotificationdates[index])}",
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15.sp,
@@ -476,11 +571,36 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                   ],
                 ),
                 SizedBox(
-                  width: 15.w,
-                  child: Text(
-                    'بەشی ${index + 1}',
-                    style:
-                        TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  height: 20.h,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
+                        width: 15.w,
+                        child: Text(
+                          'بەشی ${index + 1}',
+                          style: TextStyle(
+                              fontSize: 16.sp, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            startsstagedates.removeAt(index);
+                            endsstagedates.removeAt(index);
+                            startsnotificationdates.removeAt(index);
+                            endsnotificationdates.removeAt(index);
+                          });
+                        },
+                        child: SizedBox(
+                          width: 15.w,
+                          child: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -548,6 +668,8 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                     startstages.add(false);
                     endstages.add(false);
                   }
+                  startsnotificationdates.addAll(mainstartsnotificationdates);
+                  endsnotificationdates.addAll(mainendsnotificationdates);
                   showDialog(
                       context: context,
                       builder: (context) {
@@ -607,17 +729,21 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                             endsnotificationdates,
                                         'isnotificationset': false,
                                         'startstages': startstages,
-                                        'endstages': endstages
+                                        'endstages': endstages,
+                                        'lastsystemupdate': DateTime.now(),
+                                        'lastupdate': DateTime.now()
                                       }).then((value) {
                                         FirebaseFirestore.instance
                                             .collection('user')
                                             .doc(widget.selectedUsers[i])
                                             .get()
                                             .then((value) {
+                                          log(value.data()?['token']);
                                           sendingnotification(
                                               'کار ',
                                               'کارێکت بۆ زیاد کرا',
-                                              value.data()?['token']);
+                                              value.data()?['token'],
+                                              dropdownValue);
                                         });
                                       });
                                     }
@@ -667,17 +793,22 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                           endsnotificationdates,
                                       'isnotificationset': false,
                                       'startstages': startstages,
-                                      'endstages': endstages
+                                      'endstages': endstages,
+                                      'lastsystemupdate': DateTime.now(),
+                                      'lastupdate': DateTime.now()
                                     }).then((value) {
                                       FirebaseFirestore.instance
                                           .collection('user')
                                           .doc(widget.email)
                                           .get()
                                           .then((value) {
+                                        log(value.data()?['token']);
+
                                         sendingnotification(
                                             'کار ',
                                             'کارێکت بۆ زیاد کرا',
-                                            value.data()?['token']);
+                                            value.data()?['token'],
+                                            dropdownValue);
                                       });
                                     }).then(
                                       (value) {

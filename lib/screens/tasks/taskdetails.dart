@@ -551,7 +551,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                       }),
                 )
               : const SizedBox.shrink(),
-          !widget.task['isdaily'] && widget.task['status'] != 'done'
+          widget.task['status'] != 'done'
               ? Container(
                   margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
                   width: 90.w,
@@ -562,7 +562,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                       textColor: Material1.primaryColor),
                 )
               : const SizedBox.shrink(),
-          !widget.task['isdaily'] && widget.task['status'] != 'done'
+          widget.task['status'] != 'done'
               ? Container(
                   margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
                   width: 90.w,
@@ -573,7 +573,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                       textColor: Material1.primaryColor),
                 )
               : const SizedBox.shrink(),
-          (!widget.task['isdaily'] && widget.task['status'] != 'done')
+          widget.task['status'] != 'done'
               ? Container(
                   margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
                   width: 90.w,
@@ -687,8 +687,12 @@ class _TaskdetailsState extends State<Taskdetails> {
                                                   'type': 'reward'
                                                 });
                                               }
-                                              widget.task.reference
-                                                  .update({'status': 'done'});
+                                              widget.task.reference.update({
+                                                'status': 'done',
+                                                'lastupdate':
+                                                    Timestamp.fromDate(
+                                                        DateTime.now())
+                                              });
                                             }
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
@@ -708,9 +712,10 @@ class _TaskdetailsState extends State<Taskdetails> {
                                               content: Text('هەڵەیەک هەیە'),
                                             ),
                                           );
+                                        }).then((value) {
+                                          Navigator.popUntil(context,
+                                              (route) => route.isFirst);
                                         });
-                                        Navigator.popUntil(
-                                            context, (route) => route.isFirst);
                                       },
                                       textcolor: Colors.white,
                                       buttoncolor: Material1.primaryColor),

@@ -13,10 +13,28 @@ class Sendingalerts extends StatefulWidget {
   @override
   State<Sendingalerts> createState() => _SendingalertsState();
 }
-
+  const List<String> list = <String>[
+  'default1',
+  'annoying',
+  'annoying1',
+  'arabic',
+  'laughing',
+  'longfart',
+  'mild',
+  'oud',
+  'rooster',
+  'salawat',
+  'shortfart',
+  'soft2',
+  'softalert',
+  'srusht',
+  'witch',
+];
+String dropdownValue = 'default1';
 class _SendingalertsState extends State<Sendingalerts> {
   TextEditingController titlecontroller = TextEditingController();
   TextEditingController bodycontroller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,6 +65,45 @@ class _SendingalertsState extends State<Sendingalerts> {
                 controller: bodycontroller,
                 maxLines: 10),
           ),
+                    Container(
+            margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+            height: 8.h,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 6.h,
+                  width: 30.w,
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: dropdownValue,
+                    icon: const Icon(
+                      Icons.arrow_downward,
+                      color: Colors.black,
+                    ),
+                    elevation: 16,
+                    style: TextStyle(color: Material1.primaryColor),
+                    underline:
+                        Container(height: 2, color: Material1.primaryColor),
+                    onChanged: (String? value) {
+                      setState(() {
+                        dropdownValue = value!;
+                      });
+                    },
+                    items: list.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                          value: value, child: Text(value));
+                    }).toList(),
+                  ),
+                ),
+                SizedBox(
+                    height: 6.h,
+                    width: 30.w,
+                    child: Center(child: Text('هەڵبژاردنی دەنگ'))),
+              ],
+            ),
+          ),
           Container(
             width: 90.w,
             height: 8.h,
@@ -73,7 +130,7 @@ class _SendingalertsState extends State<Sendingalerts> {
                           .get()
                           .then((value) {
                         sendingnotification(titlecontroller.text,
-                            bodycontroller.text, value['token']);
+                            bodycontroller.text, value['token'],dropdownValue);
                       });
                     }
                   }).then((value) {

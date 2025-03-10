@@ -1,3 +1,4 @@
+
 import 'package:british_body_admin/screens/tasks/taskdetails.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,7 +32,6 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
         .doc(email)
         .collection('tasks')
         .where('status', isEqualTo: 'pending')
-        .where('isdaily', isEqualTo: false)
         .snapshots();
   } else if (tag == 2) {
     return FirebaseFirestore.instance
@@ -39,7 +39,6 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
         .doc(email)
         .collection('tasks')
         .where('status', isEqualTo: 'active')
-        .where('isdaily', isEqualTo: false)
         .snapshots();
   } else if (tag == 3) {
     return FirebaseFirestore.instance
@@ -125,25 +124,31 @@ class _TasksState extends State<Tasks> {
                         reward = '0';
                       }
                       if (snapshot.data!.docs[index]['end']
-                          .toDate()
-                          .isBefore(DateTime.now()) && snapshot.data!.docs[index]['status'] != 'done') {
-                        FirebaseFirestore.instance
-                            .collection('user')
-                            .doc(widget.email)
-                            .collection('rewardpunishment')
-                            .doc(
-                                'punishment-${snapshot.data!.docs[index]['name']}${DateTime.now()}')
-                            .set({
-                          'addedby': widget.email,
-                          'amount': deduction,
-                          'date': DateTime.now(),
-                          'reason':
-                              'for not doing task ${snapshot.data!.docs[index]['name']}',
-                          'type': 'punishment'
-                        }).then((value) {
+                              .toDate()
+                              .isBefore(DateTime.now()) &&
+                          snapshot.data!.docs[index]['status'] != 'done') {
+                        if (deduction == '0') {
                           snapshot.data!.docs[index].reference
                               .update({'status': 'incomplete'});
-                        });
+                        } else {
+                          FirebaseFirestore.instance
+                              .collection('user')
+                              .doc(widget.email)
+                              .collection('rewardpunishment')
+                              .doc(
+                                  'punishment-${snapshot.data!.docs[index]['name']}${DateTime.now()}')
+                              .set({
+                            'addedby': widget.email,
+                            'amount': deduction,
+                            'date': DateTime.now(),
+                            'reason':
+                                'for not doing task ${snapshot.data!.docs[index]['name']}',
+                            'type': 'punishment'
+                          }).then((value) {
+                            snapshot.data!.docs[index].reference
+                                .update({'status': 'incomplete'});
+                          });
+                        }
                       }
                       return GestureDetector(
                         onTap: () {
@@ -171,7 +176,7 @@ class _TasksState extends State<Tasks> {
                           int stages = 0;
                           try {
                             stages = snapshot
-                                    .data!.docs[index]['endstagedates'].length;
+                                .data!.docs[index]['endstagedates'].length;
                           } catch (e) {
                             stages = 0;
                           }

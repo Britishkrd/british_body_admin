@@ -53,6 +53,28 @@ class _AdminrulesState extends State<Adminrules> {
                         isaddingrule: false,
                         email: widget.email,
                         isemployee: false,
+                        isdelete: false,
+                        isdeprtmentdelete: false,
+                      );
+                    }));
+                  })),
+          Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
+              child: Material1.button(
+                  label: 'سڕینەوەی بەشەکان',
+                  buttoncolor: Colors.red,
+                  textcolor: Colors.white,
+                  function: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return Choosingdepttoaddsub(
+                        isaddingrule: false,
+                        email: widget.email,
+                        isemployee: false,
+                        isdelete: false,
+                        isdeprtmentdelete: true,
                       );
                     }));
                   })),
@@ -71,6 +93,28 @@ class _AdminrulesState extends State<Adminrules> {
                         isaddingrule: true,
                         email: widget.email,
                         isemployee: false,
+                        isdelete: false,
+                        isdeprtmentdelete: false,
+                      );
+                    }));
+                  })),
+          Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
+              child: Material1.button(
+                  label: 'سڕینەوەی یاساکان',
+                  buttoncolor: Colors.red,
+                  textcolor: Colors.white,
+                  function: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return Choosingdepttoaddsub(
+                        isaddingrule: false,
+                        email: widget.email,
+                        isemployee: true,
+                        isdelete: true,
+                        isdeprtmentdelete: false,
                       );
                     }));
                   })),

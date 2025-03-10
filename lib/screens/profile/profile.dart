@@ -56,68 +56,45 @@ class _ProfileState extends State<Profile> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 return ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
                     itemCount: snapshot.data?.docs.length ?? 0,
                     itemBuilder: (BuildContext context, int index) {
-                      return SizedBox(
-                        height: ((snapshot.data?.docs.length ?? 0) * 60).h,
-                        width: 90.w,
-                        child: ExpansionTile(
-                          leading: Icon(Icons.add_box_outlined,
-                              color: Colors.red, size: 20.sp),
-                          title: Text(snapshot.data?.docs[index]['name'] ?? ''),
-                          children: [
-                            SizedBox(
-                                                  height: (double.parse((snapshot
-                                                                      .data
-                                                                      ?.docs[
-                                                                          index]
-                                                                          [
-                                                                          'departments']
-                                                                      .length ??
-                                                                  0)
-                                                              .toString()) *
-                                                          5)
-                                                      .h,
-                                                  child: ListView.builder(
-                                                      physics:
-                                                          NeverScrollableScrollPhysics(),
-                                                      itemCount: snapshot
-                                                              .data
-                                                              ?.docs[index][
-                                                                  'departments']
-                                                              .length ??
-                                                          0,
-                                                      itemBuilder:
-                                                          (BuildContext context,
-                                                              int index2) {
-                                                        return Container(
-                                                          margin:
-                                                              EdgeInsets.only(
-                                                                  left: 10.w,
-                                                                  bottom: 1.h),
-                                                          child: Row(
-                                                            children: [
-                                                              Icon(
-                                                                  Icons
-                                                                      .add_box_outlined,
-                                                                  color: Colors
-                                                                      .red,
-                                                                  size: 16.sp),
-                                                              Text(snapshot.data
-                                                                              ?.docs[index]
-                                                                          [
-                                                                          'departments']
-                                                                      [
-                                                                      index2] ??
-                                                                  ''),
-                                                            ],
-                                                          ),
-                                                        );
-                                                      }),
-                                                ),
-                          ],
-                        ),
+                      return ExpansionTile(
+                        leading: Icon(Icons.add_box_outlined,
+                            color: Colors.red, size: 20.sp),
+                        title: Text(snapshot.data?.docs[index]['name'] ?? ''),
+                        children: [
+                          SizedBox(
+                            height: (double.parse((snapshot
+                                                .data
+                                                ?.docs[index]['departments']
+                                                .length ??
+                                            0)
+                                        .toString()) *
+                                    5)
+                                .h,
+                            child: ListView.builder(
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: snapshot.data
+                                        ?.docs[index]['departments'].length ??
+                                    0,
+                                itemBuilder:
+                                    (BuildContext context, int index2) {
+                                  return Container(
+                                    margin: EdgeInsets.only(
+                                        left: 10.w, bottom: 1.h),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.add_box_outlined,
+                                            color: Colors.red, size: 16.sp),
+                                        Text(snapshot.data?.docs[index]
+                                                ['departments'][index2] ??
+                                            ''),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                          ),
+                        ],
                       );
                     });
               }),

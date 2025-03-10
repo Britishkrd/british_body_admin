@@ -626,7 +626,7 @@ class _SendingemailState extends State<Sendingemail> {
                                 .get()
                                 .then((value) {
                               sendingnotification('ئیمەڵی نوێ', widget.subject,
-                                  value.data()?['token'] ?? 'a');
+                                  value.data()?['token'] ?? 'a','default1');
                             });
                           }
                           for (var i = 0; i < ccList.length; i++) {
@@ -636,7 +636,7 @@ class _SendingemailState extends State<Sendingemail> {
                                 .get()
                                 .then((value) {
                               sendingnotification('ئیمەڵی نوێ', widget.subject,
-                                  value.data()?['token'] ?? 'a');
+                                  value.data()?['token'] ?? 'a','default1');
                             });
                           }
                           counter++;

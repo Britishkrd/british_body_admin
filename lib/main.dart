@@ -5,13 +5,15 @@ import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/navigator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 // import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-// import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 // ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 import 'package:upgrader/upgrader.dart';
@@ -19,13 +21,30 @@ import 'firebase_options.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:app_badge_plus/app_badge_plus.dart';
 
 Future<void> _firebaseMessaginBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
 
 void _firebaseMessagingForgroundHandler(RemoteMessage message) {
-  if (message.notification != null) {}
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    'foreground_channel_id',
+    'Foreground Notifications',
+    channelDescription: 'Notifications shown when the app is in the foreground',
+    importance: Importance.high,
+    priority: Priority.high,
+  );
+
+  const NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
+
+  flutterLocalNotificationsPlugin.show(
+    message.data.hashCode,
+    message.notification?.title,
+    message.notification?.body,
+    notificationDetails,
+  );
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -74,7 +93,8 @@ Future<void> settinglocalnotifications(String notification) async {
             now.year,
             now.month,
             now.day,
-            (doc['start'].toDate().hour).subtract(const Duration(minutes: 10)));
+            doc['start'].toDate().hour,
+            (doc['start'].toDate().minute - 10));
 
         if (scheduledDate.isBefore(now)) {
           scheduledDate = scheduledDate.add(Duration(days: 1));
@@ -165,6 +185,49 @@ Future<void> settinglocalnotifications(String notification) async {
       }
     });
   });
+  FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('tasks')
+      .where('isdaily', isEqualTo: true)
+      .get()
+      .then((value) {
+    for (var snapshot in value.docs) {
+        
+        DateTime? lastupdate;
+        DateTime? lastsystemupdate;
+        try {
+          lastsystemupdate = snapshot.data()['lastsystemupdate'].toDate();
+        } catch (e) {
+          lastsystemupdate = null;
+        }
+        try {
+          lastupdate = snapshot.data()['lastupdate'].toDate();
+        } catch (e) {
+          lastupdate = null;
+        }
+        if (lastsystemupdate != null) {
+          if (lastsystemupdate.day != DateTime.now().day) {
+            if (lastupdate != null) {
+              if (lastupdate.day != DateTime.now().day &&
+                  snapshot.data()['status'] != 'pending') {
+                snapshot.reference.update(
+                    {'status': 'pending', 'lastsystemupdate': DateTime.now()});
+              }
+            }
+          }
+        } else {
+          if (lastupdate != null) {
+            if (lastupdate.day != DateTime.now().day &&
+                snapshot.data()['status'] != 'pending') {
+              snapshot.reference.update(
+                  {'status': 'pending', 'lastsystemupdate': DateTime.now()});
+            }
+          }
+        }
+      
+    }
+  });
 }
 
 Future<void> main() async {
@@ -209,13 +272,13 @@ Future<void> main() async {
         badge: true,
         sound: true,
       );
-  // try {
-  //   await AppBadgePlus.updateBadge(0);
-  // } catch (e) {
-  //   if (kDebugMode) {
-  //     print(e);
-  //   }
-  // }
+  try {
+    await AppBadgePlus.updateBadge(0);
+  } catch (e) {
+    if (kDebugMode) {
+      print(e);
+    }
+  }
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
@@ -308,23 +371,23 @@ class _MyAppState extends State<MyApp> {
     _handleMessageOprn(message);
   }
 
-  // static const MethodChannel _channel = MethodChannel('hama.com/channel_test');
-  // Map<String, String> channelMap = {
-  //   "id": "Notifications",
-  //   "name": "Notifications",
-  //   "description": "Notifications",
-  //   "icon": "notification_icon",
-  // };
+  static const MethodChannel _channel = MethodChannel('hama.com/channel_test');
+  Map<String, String> channelMap = {
+    "id": "Notifications",
+    "name": "Notifications",
+    "description": "Notifications",
+    "icon": "notification_icon",
+  };
 
-  // void _createNewChannel() async {
-  //   try {
-  //     await _channel.invokeMethod('createNotificationChannel', channelMap);
-  //   } on PlatformException catch (e) {
-  //     if (kDebugMode) {
-  //       print(e);
-  //     }
-  //   }
-  // }
+  void _createNewChannel() async {
+    try {
+      await _channel.invokeMethod('createNotificationChannel', channelMap);
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+  }
 
   Future<void> setupInteractedMessage() async {
     RemoteMessage? initialMessage =
@@ -357,9 +420,9 @@ class _MyAppState extends State<MyApp> {
     FlutterIsolate.spawn(settinglocalnotifications, "hello world");
     // locationsfunction();
 
-    // if (Platform.isAndroid) {
-    //   _createNewChannel();
-    // }
+    if (Platform.isAndroid) {
+      _createNewChannel();
+    }
     islogeding();
     setupInteractedMessage();
     _handlePermission();

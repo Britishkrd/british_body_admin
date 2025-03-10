@@ -2,7 +2,8 @@ import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-sendingnotification(String title, String body, String token) async {
+sendingnotification(
+    String title, String body, String token, String? sound) async {
   final credentials = ServiceAccountCredentials.fromJson({
     "private_key_id": "acd50d3a157701ada09fa7d74160c2321ea016f9",
     "private_key":
@@ -35,8 +36,8 @@ sendingnotification(String title, String body, String token) async {
               'notification': <String, dynamic>{
                 'title': title,
                 'body': body,
-                'sound': 'sound',
-                'channel_id': 'Notifications'
+                'sound': sound ?? 'default1',
+                'channel_id': 'channel_$sound'
               },
             },
             'apns': {

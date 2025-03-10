@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 
 class Viewingrules extends StatefulWidget {
   final DocumentReference<Map<String, dynamic>> department;
-  const Viewingrules({super.key, required this.department});
+  final bool isdelete;
+  const Viewingrules(
+      {super.key, required this.department, required this.isdelete});
 
   @override
   State<Viewingrules> createState() => _ViewingrulesState();
@@ -29,32 +31,74 @@ class _ViewingrulesState extends State<Viewingrules> {
             return ListView.builder(
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.all(8.0),
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withAlpha(127),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
+                  return Stack(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withAlpha(127),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: ExpansionTile(
-                      initiallyExpanded: true,
-                      title: Text(snapshot.data!.docs[index].data()['title']),
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                              snapshot.data!.docs[index].data()['content']),
+                        child: ExpansionTile(
+                          initiallyExpanded: true,
+                          title:
+                              Text(snapshot.data!.docs[index].data()['title']),
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  snapshot.data!.docs[index].data()['content']),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      if (widget.isdelete)
+                        Positioned(
+                          right: 10,
+                          top: 10,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                        title: const Text(
+                                            'دڵنیایت لە سڕینەوەی ئەم یاسایە؟'),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('نەخێر')),
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                widget.department
+                                                    .collection('rules')
+                                                    .doc(snapshot
+                                                        .data!.docs[index].id)
+                                                    .delete();
+                                              },
+                                              child: const Text('بەڵێ')),
+                                        ],
+                                      ));
+                              widget.department
+                                  .collection('rules')
+                                  .doc(snapshot.data!.docs[index].id)
+                                  .delete();
+                            },
+                          ),
+                        )
+                    ],
                   );
                 });
           }),

@@ -42,7 +42,7 @@ class _AddingOwnTaskState extends State<AddingOwnTask> {
         children: [
           GestureDetector(
             onTap: () async {
-                            List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
+              List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
                 context: context,
                 startInitialDate: DateTime.now(),
                 startFirstDate:
@@ -82,7 +82,7 @@ class _AddingOwnTaskState extends State<AddingOwnTask> {
               start = dateTimeList?[0] ?? DateTime.now();
               end = dateTimeList?[1] ?? DateTime.now();
               setState(() {});
-                        },
+            },
             child: Container(
                 margin: EdgeInsets.only(top: 3.h, left: 5.w, right: 5.w),
                 height: 10.h,
@@ -199,18 +199,16 @@ class _AddingOwnTaskState extends State<AddingOwnTask> {
                                     'name': namecontroller.text,
                                     'isdaily': false,
                                     'isowntask': true,
-                                      'addedby':widget.email,
-                                      'deductionamount':'0',
-                                      'rewardamount':'0',
-                                      'startstagedates': [],
-                                      'endstagedates': [],
-                                      'startnotificationdates':
-                                          [],
-                                      'endnotificationdates':
-                                          [],
-                                      'isnotificationset': false,
-                                      'startstages': [],
-                                      'endstages': []
+                                    'addedby': widget.email,
+                                    'deductionamount': '0',
+                                    'rewardamount': '0',
+                                    'startstagedates': [],
+                                    'endstagedates': [],
+                                    'startnotificationdates': [],
+                                    'endnotificationdates': [],
+                                    'isnotificationset': true,
+                                    'startstages': [],
+                                    'endstages': []
                                   }).then(
                                     (value) {
                                       ScaffoldMessenger.of(context)

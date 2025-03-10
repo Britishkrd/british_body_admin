@@ -18,6 +18,25 @@ String formatDate(DateTime? date) {
   return formatter.format(date ?? DateTime.now());
 }
 
+const List<String> list = <String>[
+  'default1',
+  'annoying',
+  'annoying1',
+  'arabic',
+  'laughing',
+  'longfart',
+  'mild',
+  'oud',
+  'rooster',
+  'salawat',
+  'shortfart',
+  'soft2',
+  'softalert',
+  'srusht',
+  'witch',
+];
+String dropdownValue = 'default1';
+
 class _AcceptingabsenceState extends State<Acceptingabsence> {
   @override
   Widget build(BuildContext context) {
@@ -49,13 +68,13 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     return SizedBox(
-                      height: ((snapshot.data?.docs.length ?? 0) * 28).h,
+                      height: ((snapshot.data?.docs.length ?? 0) * 38).h,
                       child: ListView.builder(
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: snapshot.data?.docs.length ?? 0,
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
-                                height: 28.h,
+                                height: 38.h,
                                 width: 90.w,
                                 child: Container(
                                     margin:
@@ -81,7 +100,6 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                               style: TextStyle(
                                                   fontSize: 16.sp,
                                                   fontWeight: FontWeight.bold)),
-                                         
                                           SizedBox(
                                             height: 3.h,
                                             child: Text(
@@ -108,6 +126,61 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                                     fontWeight:
                                                         FontWeight.bold)),
                                           ),
+                                          Container(
+                                            margin: EdgeInsets.only(
+                                                top: 5.h,
+                                                left: 5.w,
+                                                right: 5.w),
+                                            height: 8.h,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                SizedBox(
+                                                  height: 6.h,
+                                                  width: 30.w,
+                                                  child: DropdownButton<String>(
+                                                    isExpanded: true,
+                                                    value: dropdownValue,
+                                                    icon: const Icon(
+                                                      Icons.arrow_downward,
+                                                      color: Colors.black,
+                                                    ),
+                                                    elevation: 16,
+                                                    style: TextStyle(
+                                                        color: Material1
+                                                            .primaryColor),
+                                                    underline: Container(
+                                                        height: 2,
+                                                        color: Material1
+                                                            .primaryColor),
+                                                    onChanged: (String? value) {
+                                                      setState(() {
+                                                        dropdownValue = value!;
+                                                      });
+                                                    },
+                                                    items: list.map<
+                                                            DropdownMenuItem<
+                                                                String>>(
+                                                        (String value) {
+                                                      return DropdownMenuItem<
+                                                              String>(
+                                                          value: value,
+                                                          child: Text(value));
+                                                    }).toList(),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                    height: 6.h,
+                                                    width: 30.w,
+                                                    child: Center(
+                                                        child: Text(
+                                                            'هەڵبژاردنی دەنگ'))),
+                                              ],
+                                            ),
+                                          ),
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceAround,
@@ -133,7 +206,8 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                                             'مۆڵەت',
                                                             'مۆڵەتەکەت قبوڵکرا',
                                                             value.data()?[
-                                                                'token']);
+                                                                'token'],
+                                                            dropdownValue);
                                                       });
                                                     });
                                                   },
@@ -163,7 +237,8 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                                             'مۆڵەت',
                                                             'مۆڵەتەکەت ڕەتکرایەوە',
                                                             value.data()?[
-                                                                'token']);
+                                                                'token'],
+                                                            dropdownValue);
                                                       });
                                                     });
                                                   },
