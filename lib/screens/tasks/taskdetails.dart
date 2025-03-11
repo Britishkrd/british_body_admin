@@ -53,7 +53,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                   .where((element) => element == false)
                   .length)
               .toDouble() *
-          20);
+          30);
     } catch (e) {
       listviewheight = 0;
     }
@@ -186,6 +186,22 @@ class _TaskdetailsState extends State<Taskdetails> {
                         }
                         return Column(
                           children: [
+                            SizedBox(
+                              height: 6.h,
+                              child: Text(
+                                    "${widget.task['stagetitles']?[index] ?? 'No title'} : ناو",
+                                  style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                            SizedBox(
+                              height: 6.h,
+                              child: Text(
+                                  "${widget.task['stagecontents'][index]} : وردەکاری",
+                                  style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold)),
+                            ),
                             SizedBox(
                               height:
                                   ((notecontrollerslist[index].length * 8) + 5)

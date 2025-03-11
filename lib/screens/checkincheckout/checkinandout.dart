@@ -32,17 +32,8 @@ double worklongtitude = 0.0;
 TextEditingController notecontroller = TextEditingController();
 
 String email = '';
-bool checkinpage = false;
 List permissions = [];
-
-getuserinfo() async {
-  final SharedPreferences preference = await SharedPreferences.getInstance();
-  email = preference.getString('email') ?? '';
-  checkin = preference.getBool('checkin') ?? false;
-  permissions = preference.getStringList('permissions') ?? [];
-  worklatitude = preference.getDouble('worklat') ?? 0.0;
-  worklongtitude = preference.getDouble('worklong') ?? 0.0;
-}
+bool checkinpage = false;
 
 class _CheckinandoutState extends State<Checkinandout> {
   @override
@@ -51,29 +42,20 @@ class _CheckinandoutState extends State<Checkinandout> {
     super.initState();
   }
 
+  getuserinfo() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    email = preference.getString('email') ?? '';
+    checkin = preference.getBool('checkin') ?? false;
+    permissions = preference.getStringList('permissions') ?? [];
+    worklatitude = preference.getDouble('worklat') ?? 0.0;
+    worklongtitude = preference.getDouble('worklong') ?? 0.0;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (checkin)
-          Container(
-            height: 8.h,
-            width: 90.w,
-            decoration: BoxDecoration(
-              color: Material1.primaryColor,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            margin: EdgeInsets.only(top: 3.h),
-            child: Center(
-              child: Text(
-                "${email} : بەکارهێنەر",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
         Container(
           height: 8.h,
           width: 90.w,

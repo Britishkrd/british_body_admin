@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
+import 'dart:developer';
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/navigator.dart';
@@ -27,17 +28,21 @@ Future<void> _firebaseMessaginBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
 
+//TODO add weekly and monthly tasks
 void _firebaseMessagingForgroundHandler(RemoteMessage message) {
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    'foreground_channel_id',
+  log(message.notification?.android?.channelId.toString() ?? 'no message');
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    message.notification?.android?.channelId ?? 'daily_channel_id',
     'Foreground Notifications',
     channelDescription: 'Notifications shown when the app is in the foreground',
     importance: Importance.high,
     priority: Priority.high,
   );
 
-  const NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
+  NotificationDetails notificationDetails =
+      NotificationDetails(android: androidDetails);
 
   flutterLocalNotificationsPlugin.show(
     message.data.hashCode,
@@ -193,30 +198,20 @@ Future<void> settinglocalnotifications(String notification) async {
       .get()
       .then((value) {
     for (var snapshot in value.docs) {
-        
-        DateTime? lastupdate;
-        DateTime? lastsystemupdate;
-        try {
-          lastsystemupdate = snapshot.data()['lastsystemupdate'].toDate();
-        } catch (e) {
-          lastsystemupdate = null;
-        }
-        try {
-          lastupdate = snapshot.data()['lastupdate'].toDate();
-        } catch (e) {
-          lastupdate = null;
-        }
-        if (lastsystemupdate != null) {
-          if (lastsystemupdate.day != DateTime.now().day) {
-            if (lastupdate != null) {
-              if (lastupdate.day != DateTime.now().day &&
-                  snapshot.data()['status'] != 'pending') {
-                snapshot.reference.update(
-                    {'status': 'pending', 'lastsystemupdate': DateTime.now()});
-              }
-            }
-          }
-        } else {
+      DateTime? lastupdate;
+      DateTime? lastsystemupdate;
+      try {
+        lastsystemupdate = snapshot.data()['lastsystemupdate'].toDate();
+      } catch (e) {
+        lastsystemupdate = null;
+      }
+      try {
+        lastupdate = snapshot.data()['lastupdate'].toDate();
+      } catch (e) {
+        lastupdate = null;
+      }
+      if (lastsystemupdate != null) {
+        if (lastsystemupdate.day != DateTime.now().day) {
           if (lastupdate != null) {
             if (lastupdate.day != DateTime.now().day &&
                 snapshot.data()['status'] != 'pending') {
@@ -225,7 +220,15 @@ Future<void> settinglocalnotifications(String notification) async {
             }
           }
         }
-      
+      } else {
+        if (lastupdate != null) {
+          if (lastupdate.day != DateTime.now().day &&
+              snapshot.data()['status'] != 'pending') {
+            snapshot.reference.update(
+                {'status': 'pending', 'lastsystemupdate': DateTime.now()});
+          }
+        }
+      }
     }
   });
 }

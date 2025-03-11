@@ -6,6 +6,7 @@ import 'package:british_body_admin/screens/email/email.dart';
 import 'package:british_body_admin/screens/profile/profile.dart';
 import 'package:british_body_admin/screens/tasks/tasks.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Navigation extends StatefulWidget {
   final String email;
@@ -14,7 +15,16 @@ class Navigation extends StatefulWidget {
   @override
   State<Navigation> createState() => _NavigationState();
 }
+bool checkin = true;
+double latitude = 0.0;
+double longtitude = 0.0;
+double worklatitude = 0.0;
+double worklongtitude = 0.0;
 
+TextEditingController notecontroller = TextEditingController();
+
+String email = '';
+List permissions = [];
 class _NavigationState extends State<Navigation> {
   int _bottomNavIndex = 2;
   @override
@@ -26,6 +36,15 @@ class _NavigationState extends State<Navigation> {
       Icons.person,
       Icons.dashboard,
     ];
+    getuserinfo() async {
+      final SharedPreferences preference =
+          await SharedPreferences.getInstance();
+      email = preference.getString('email') ?? '';
+      checkin = preference.getBool('checkin') ?? false;
+      permissions = preference.getStringList('permissions') ?? [];
+      worklatitude = preference.getDouble('worklat') ?? 0.0;
+      worklongtitude = preference.getDouble('worklong') ?? 0.0;
+    }
 
     return Scaffold(
         appBar: AppBar(
