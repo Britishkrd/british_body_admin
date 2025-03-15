@@ -181,7 +181,7 @@ class _ViewingrewardpunishmentState extends State<Viewingrewardpunishment> {
                                           CrossAxisAlignment.end,
                                       children: [
                                         Text(
-                                          "${snapshot.data!.docs[index]['addedby']} : زیاد کراوە لەلایەن",
+                                          "${snapshot.data?.docs[index]['addedby']} : زیاد کراوە لەلایەن",
                                           style: const TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,

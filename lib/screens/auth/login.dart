@@ -106,7 +106,6 @@ class _LoginState extends State<Login> {
               child: Material1.textfield(
                   hint: '******',
                   controller: passwordcontroller,
-                  inputType: TextInputType.number,
                   textColor: Material1.primaryColor),
             ),
             Container(
@@ -230,10 +229,15 @@ class _LoginState extends State<Login> {
                             longtitude,
                             value.data()?['worklat'] ?? 0.0,
                             value.data()?['worklong'] ?? 0.0,
+                            value.data()?['starthour'] ?? 0,
+                            value.data()?['endhour'] ?? 0,
+                            value.data()?['startmin'] ?? 0,
+                            value.data()?['endmin'] ?? 0,
                             true,
                             fcm,
                             value.data()?['checkin'] ?? false,
-                            value.data()?['permissions'] ?? []);
+                            value.data()?['permissions'] ?? [],
+                            value.data()?['weekdays'] ?? []);
                         Navigator.pushReplacement(context, MaterialPageRoute(
                           builder: (context) {
                             return Navigation(

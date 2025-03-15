@@ -1,5 +1,8 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
+import 'package:day_night_time_picker/lib/state/time.dart';
+import 'package:day_picker/day_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
@@ -40,6 +43,20 @@ class _AdduserState extends State<Adduser> {
     'adding rules'
   ];
   List<String> selectedpermissions = [];
+  final List<DayInWeek> _days = [
+    DayInWeek("Mon", dayKey: "1"),
+    DayInWeek("Tue", dayKey: "2"),
+    DayInWeek("Wen", dayKey: "3"),
+    DayInWeek("Thu", dayKey: "4"),
+    DayInWeek("Fri", dayKey: "5"),
+    DayInWeek("Sat", dayKey: "6"),
+    DayInWeek("Sun", dayKey: "7"),
+  ];
+  List<int> workdays = [];
+
+  Time starthour =
+      Time(hour: DateTime.now().hour, minute: DateTime.now().minute);
+  Time endhour = Time(hour: DateTime.now().hour, minute: DateTime.now().minute);
 
   @override
   Widget build(BuildContext context) {
@@ -148,10 +165,102 @@ class _AdduserState extends State<Adduser> {
                 inputType: TextInputType.number,
                 controller: worklongcontroller),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                showPicker(
+                  context: context,
+                  value: starthour,
+                  sunrise: TimeOfDay(hour: 6, minute: 0),
+                  sunset: TimeOfDay(hour: 18, minute: 0),
+                  duskSpanInMinutes: 120,
+                  onChange: (value) {
+                    setState(() {
+                      starthour = value;
+                    });
+                  },
+                ),
+              );
+            },
+            child: Text(
+              "هەڵبژاردنی کاتی دەستپێکردن",
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
           SizedBox(
-            height: 70.h,
+            width: 100.w,
+            height: 8.h,
+            child: Center(
+              child: Text(
+                'کاتی دەستپێکردن: ${starthour.hour}:${starthour.minute}',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                showPicker(
+                  context: context,
+                  value: endhour,
+                  sunrise: TimeOfDay(hour: 6, minute: 0),
+                  sunset: TimeOfDay(hour: 18, minute: 0),
+                  duskSpanInMinutes: 120,
+                  onChange: (value) {
+                    setState(() {
+                      endhour = value;
+                    });
+                  },
+                ),
+              );
+            },
+            child: Text(
+              "هەڵبژاردنی کاتی کۆتایی",
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          SizedBox(
+            width: 100.w,
+            height: 8.h,
+            child: Center(
+              child: Text(
+                'کاتی کۆتایی: ${endhour.hour}:${endhour.minute}',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 2.h, right: 5.w, left: 5.w),
+            child: SelectWeekDays(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              days: _days,
+              border: false,
+              width: 90.w,
+              boxDecoration: BoxDecoration(
+                color: Material1.primaryColor,
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+              onSelect: (values) {
+                List daysoff = values;
+                workdays = [];
+                for (int i = 0; i < values.length; i++) {
+                  workdays.add(int.parse(daysoff[i]));
+                }
+              },
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.fromLTRB(0.w, 1.h, 0.w, 1.h),
+            height: 75.h,
             child: ListView.builder(
-                physics: const BouncingScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: permissions.length,
                 itemBuilder: (context, index) {
                   return CheckboxListTile(
@@ -224,6 +333,11 @@ class _AdduserState extends State<Adduser> {
                         'loanstatus': 'no',
                         'worktarget': workhourtargetcontroller.text,
                         'password': passwordcontroller.text,
+                        'weekdays': workdays,
+                        'starthour': starthour.hour,
+                        'endhour': endhour.hour,
+                        'startmin': starthour.minute,
+                        'endmin': endhour.minute,
                       }).then((value) {
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

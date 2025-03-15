@@ -143,9 +143,9 @@ class _ChangeworktimerequestState extends State<Changeworktimerequest> {
                 showPicker(
                   context: context,
                   value: endhour,
-                  sunrise: TimeOfDay(hour: 6, minute: 0), // optional
-                  sunset: TimeOfDay(hour: 18, minute: 0), // optional
-                  duskSpanInMinutes: 120, // optional
+                  sunrise: TimeOfDay(hour: 6, minute: 0),
+                  sunset: TimeOfDay(hour: 18, minute: 0),
+                  duskSpanInMinutes: 120,
                   onChange: (value) {
                     setState(() {
                       endhour = value;

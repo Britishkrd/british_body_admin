@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,6 +36,11 @@ TextEditingController notecontroller = TextEditingController();
 String email = '';
 List permissions = [];
 bool checkinpage = false;
+int starthour = 0;
+int endhour = 0;
+int startmin = 0;
+int endmin = 0;
+List<int> workdays = [];
 
 class _CheckinandoutState extends State<Checkinandout> {
   @override
@@ -49,6 +56,18 @@ class _CheckinandoutState extends State<Checkinandout> {
     permissions = preference.getStringList('permissions') ?? [];
     worklatitude = preference.getDouble('worklat') ?? 0.0;
     worklongtitude = preference.getDouble('worklong') ?? 0.0;
+    workdays = preference
+            .getStringList('weekdays')
+            ?.map((e) => int.parse(e))
+            .toList() ??
+        [];
+    starthour = preference.getInt('starthour') ?? 0;
+    endhour = preference.getInt('endhour') ?? 0;
+    startmin = preference.getInt('startmin') ?? 0;
+    endmin = preference.getInt('endmin') ?? 0;
+    log(starthour.toString());
+    log(endhour.toString());
+    log(workdays.toString());
     setState(() {});
   }
 
@@ -272,6 +291,70 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                 .doc(email)
                                                 .update({'checkin': true}).then(
                                                     (value) {
+                                              if (workdays
+                                                  .contains(now.weekday)) {
+                                                if (now.hour >= starthour &&
+                                                    ((now.hour == starthour)
+                                                        ? now.minute > startmin
+                                                        : true)) {
+                                                  Duration late =
+                                                      now.difference(DateTime(
+                                                          now.year,
+                                                          now.month,
+                                                          now.day,
+                                                          starthour,
+                                                          startmin));
+                                                  FirebaseFirestore.instance
+                                                      .collection('user')
+                                                      .doc(email)
+                                                      .collection(
+                                                          'rewardpunishment')
+                                                      .doc(
+                                                          'punishment-late-login${DateTime.now()}')
+                                                      .set({
+                                                    'addedby': 'system',
+                                                    'amount':
+                                                        (late.inMinutes * 100)
+                                                            .toString(),
+                                                    'date': DateTime.now(),
+                                                    'reason':
+                                                        'for late login ${late.inMinutes} minutes',
+                                                    'type': 'punishment'
+                                                  }).then(
+                                                    (value) {
+                                                      showDialog(
+                                                          context: context,
+                                                          builder: (
+                                                            context,
+                                                          ) {
+                                                            return AlertDialog(
+                                                              title: Text(
+                                                                  'ئاگاداری'),
+                                                              content: Text(
+                                                                  'لەکاتی خۆی درەنگتر چوونەژوورەوەت کردوە و سزا دراویت دەتوانیت لە بەشی پاداشت و سزا بیبیت '),
+                                                              actions: [
+                                                                Material1
+                                                                    .button(
+                                                                        label:
+                                                                            'باشە',
+                                                                        buttoncolor:
+                                                                            Material1
+                                                                                .primaryColor,
+                                                                        textcolor:
+                                                                            Colors
+                                                                                .white,
+                                                                        function:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        })
+                                                              ],
+                                                            );
+                                                          });
+                                                    },
+                                                  );
+                                                }
+                                              }
                                               Sharedpreference.checkin(
                                                   now.toString(),
                                                   latitude,
@@ -395,6 +478,65 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                   'checkout': false,
                                                   'checkin': true,
                                                 }).then((value) {
+                                                  if (workdays
+                                                      .contains(now.weekday)) {
+                                                    if (now.hour >= starthour &&
+                                                        ((now.hour == starthour)
+                                                            ? now.minute >
+                                                                startmin
+                                                            : true)) {
+                                                      Duration late = now
+                                                          .difference(DateTime(
+                                                              now.year,
+                                                              now.month,
+                                                              now.day,
+                                                              starthour,
+                                                              startmin));
+                                                      FirebaseFirestore.instance
+                                                          .collection('user')
+                                                          .doc(email)
+                                                          .collection(
+                                                              'rewardpunishment')
+                                                          .doc(
+                                                              'punishment-late-login${DateTime.now()}')
+                                                          .set({
+                                                        'addedby': 'system',
+                                                        'amount':
+                                                            (late.inMinutes *
+                                                                    100)
+                                                                .toString(),
+                                                        'date': DateTime.now(),
+                                                        'reason':
+                                                            'for late login ${late.inMinutes} minutes',
+                                                        'type': 'punishment'
+                                                      }).then(
+                                                        (value) {
+                                                          showDialog(
+                                                              context: context,
+                                                              builder: (
+                                                                context,
+                                                              ) {
+                                                                return AlertDialog(
+                                                                  title: Text(
+                                                                      'ئاگاداری'),
+                                                                  content: Text(
+                                                                      'لەکاتی خۆی درەنگتر چوونەژوورەوەت کردوە و سزا دراویت دەتوانیت لە بەشی پاداشت و سزا بیبیت '),
+                                                                  actions: [
+                                                                    Material1.button(
+                                                                        label: 'باشە',
+                                                                        buttoncolor: Material1.primaryColor,
+                                                                        textcolor: Colors.white,
+                                                                        function: () {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        })
+                                                                  ],
+                                                                );
+                                                              });
+                                                        },
+                                                      );
+                                                    }
+                                                  }
                                                   FirebaseFirestore.instance
                                                       .collection('user')
                                                       .doc(email)

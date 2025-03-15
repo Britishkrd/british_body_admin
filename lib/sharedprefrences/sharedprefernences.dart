@@ -2,20 +2,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Sharedpreference {
   static Future<void> setuser(
-      String name,
-      String phonenumber,
-      String location,
-      String email,
-      String salary,
-      String age,
-      double lat,
-      double long,
-      double worklat,
-      double worklong,
-      bool logedin,
-      String token,
-      bool checkin,
-      List permissions) async {
+    String name,
+    String phonenumber,
+    String location,
+    String email,
+    String salary,
+    String age,
+    double lat,
+    double long,
+    double worklat,
+    double worklong,
+    int starthour,
+    int endhour,
+    int startmin,
+    int endmin,
+    bool logedin,
+    String token,
+    bool checkin,
+    List permissions,
+    List workdays,
+  ) async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     List<String> permissionsString =
         permissions.map((e) => e.toString()).toList();
@@ -29,9 +35,14 @@ class Sharedpreference {
     preference.setDouble('long', long);
     preference.setDouble('worklat', worklat);
     preference.setDouble('worklong', worklong);
+    preference.setInt('starthour', starthour);
+    preference.setInt('endhour', endhour);
+    preference.setInt('startmin', startmin);
+    preference.setInt('endmin', endmin);
     preference.setBool('logedin', logedin);
     preference.setBool('checkin', checkin);
     preference.setString('token', token);
+    preference.setStringList('weekdays', List<String>.from(workdays));
     preference.setStringList('permissions', permissionsString);
   }
 

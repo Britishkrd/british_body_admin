@@ -246,7 +246,7 @@ class _DashboardState extends State<Dashboard> {
                         return;
                       }
                       Sharedpreference.setuser('', '', '', 'aa', 'aa', 'aa', 0,
-                          0, 0, 0, false, '', false, []);
+                          0, 0, 0, 0,0,0, 0, false, '', false, [], []);
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {
                         return Login();
@@ -431,7 +431,7 @@ class _DashboardState extends State<Dashboard> {
         margin: EdgeInsets.only(left: 2.w, right: 2.w, top: 3.w, bottom: 0.w),
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(20)),
-          color: Material1.primaryColor,
+          color: name == 'دەرچوون' ? Colors.red : Material1.primaryColor,
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withAlpha(150),
