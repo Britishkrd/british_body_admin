@@ -60,7 +60,7 @@ class _CheckinandoutState extends State<Checkinandout> {
           height: 8.h,
           width: 90.w,
           decoration: BoxDecoration(
-            color: Material1.primaryColor,
+            color: checkin ? Colors.green : Colors.red,
             borderRadius: BorderRadius.circular(15),
           ),
           margin: EdgeInsets.only(top: 3.h),

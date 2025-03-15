@@ -71,6 +71,9 @@ Future<void> settinglocalnotifications(String notification) async {
   if (email.isEmpty) {
     return;
   }
+  bool isweekly = false;
+  bool ismonthly = false;
+
   FirebaseFirestore.instance
       .collection('user')
       .doc(email)
@@ -79,10 +82,107 @@ Future<void> settinglocalnotifications(String notification) async {
       .get()
       .then((value) async {
     for (var doc in value.docs) {
+      try {
+        isweekly = doc['isweekly'];
+      } catch (e) {
+        isweekly = false;
+      }
+      try {
+        ismonthly = doc['ismonthly'];
+      } catch (e) {
+        ismonthly = false;
+      }
+
+      if (ismonthly) {
+        const AndroidNotificationDetails androidDetails =
+            AndroidNotificationDetails(
+          'channel_default1',
+          'Monthly Notifications',
+          channelDescription: 'Sends notifications at a fixed time every month',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
+
+        const NotificationDetails notificationDetails =
+            NotificationDetails(android: androidDetails);
+
+        final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+        tz.TZDateTime scheduledDate = tz.TZDateTime(
+            tz.local,
+            now.year,
+            now.month,
+            doc['start'].toDate().day,
+            doc['start'].toDate().hour,
+            (doc['start'].toDate().minute - 10));
+
+        if (scheduledDate.isBefore(now)) {
+          scheduledDate = tz.TZDateTime(
+              tz.local,
+              now.year,
+              now.month + 1,
+              int.parse(doc['dayofthemonth']),
+              doc['start'].toDate().hour,
+              (doc['start'].toDate().minute - 10));
+        }
+
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          (doc['time'].seconds + now.day).toInt(),
+          doc['name'],
+          "١٠ خولەک یان کەمتری ماوە دەست پێبکات ${doc['name']} ئەرکی",
+          scheduledDate,
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
+        );
+      }
+      if (isweekly) {
+        List<int> days = List<int>.from(doc['weekdays']);
+        for (var day in days) {
+          const AndroidNotificationDetails androidDetails =
+              AndroidNotificationDetails(
+            'channel_default1',
+            'Weekly Notifications',
+            channelDescription:
+                'Sends notifications at a fixed time every week',
+            importance: Importance.high,
+            priority: Priority.high,
+          );
+
+          const NotificationDetails notificationDetails =
+              NotificationDetails(android: androidDetails);
+
+          final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+          tz.TZDateTime scheduledDate = tz.TZDateTime(
+              tz.local,
+              now.year,
+              now.month,
+              day,
+              doc['start'].toDate().hour,
+              (doc['start'].toDate().minute - 10));
+
+          if (scheduledDate.isBefore(now)) {
+            scheduledDate = scheduledDate.add(Duration(days: 7));
+          }
+
+          await flutterLocalNotificationsPlugin.zonedSchedule(
+            (doc['time'].seconds + day).toInt(),
+            doc['name'],
+            "١٠ خولەک یان کەمتری ماوە دەست پێبکات ${doc['name']} ئەرکی",
+            scheduledDate,
+            notificationDetails,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+          );
+        }
+      }
       if (doc['isdaily']) {
         const AndroidNotificationDetails androidDetails =
             AndroidNotificationDetails(
-          'daily_channel_id',
+          'channel_default1',
           'Daily Notifications',
           channelDescription: 'Sends notifications at a fixed time every day',
           importance: Importance.high,
@@ -116,7 +216,9 @@ Future<void> settinglocalnotifications(String notification) async {
               UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
-      } else {
+      }
+
+      if (!(ismonthly || isweekly || doc['isdaily'])) {
         for (var i = 0; i < doc['startnotificationdates'].length; i++) {
           if (doc['startnotificationdates'][i]
               .toDate()
@@ -136,7 +238,7 @@ Future<void> settinglocalnotifications(String notification) async {
                 doc['startnotificationdates'][i].toDate().minute),
             const NotificationDetails(
                 android: AndroidNotificationDetails(
-                    'your channel id', 'your channel name',
+                    'channel_default1', 'your channel name',
                     channelDescription: 'your channel description')),
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
             uiLocalNotificationDateInterpretation:

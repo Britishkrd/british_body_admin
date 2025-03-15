@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
+import 'package:day_picker/day_picker.dart';
 
 import '../../../../sendingnotification.dart';
 
@@ -45,6 +47,17 @@ const List<String> list = <String>[
 ];
 String dropdownValue = 'default1';
 
+final List<DayInWeek> _days = [
+  DayInWeek("Mon", dayKey: "1"),
+  DayInWeek("Tue", dayKey: "2"),
+  DayInWeek("Wen", dayKey: "3"),
+  DayInWeek("Thu", dayKey: "4"),
+  DayInWeek("Fri", dayKey: "5"),
+  DayInWeek("Sat", dayKey: "6"),
+  DayInWeek("Sun", dayKey: "7"),
+];
+List<int> offdays = [];
+
 bool checkin = true;
 double latitude = 0.0;
 double longtitude = 0.0;
@@ -52,6 +65,7 @@ TextEditingController descriptioncontroller = TextEditingController();
 TextEditingController namecontroller = TextEditingController();
 TextEditingController deductionamountcontroller = TextEditingController();
 TextEditingController rewardamountcontroller = TextEditingController();
+TextEditingController dayofthemontcontroller = TextEditingController();
 
 DateTime? start;
 DateTime? end;
@@ -72,6 +86,8 @@ List<DateTime?> mainendsnotificationdates = [
   now.subtract(const Duration(minutes: 10))
 ];
 bool isDaily = false;
+bool isWeekly = false;
+bool isMonthly = false;
 DateTime now = DateTime.now();
 String formatDate(DateTime? date) {
   final DateFormat formatter = DateFormat('dd/MM/yyyy HH:mm');
@@ -393,11 +409,96 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                 onChanged: (bool? value) {
                   setState(() {
                     isDaily = value!;
+                    isWeekly = false;
+                    isMonthly = false;
                   });
                 },
               ),
             ],
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'کارەکە هەفتانە بکرێت',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+              ),
+              Checkbox(
+                checkColor: Colors.white,
+                fillColor: WidgetStateProperty.resolveWith(
+                  (states) => Material1.primaryColor,
+                ),
+                value: isWeekly,
+                onChanged: (bool? value) {
+                  setState(() {
+                    isWeekly = value!;
+                    isDaily = false;
+                    isMonthly = false;
+                  });
+                },
+              ),
+            ],
+          ),
+          if (isWeekly)
+            Container(
+              margin: EdgeInsets.only(top: 2.h, right: 5.w, left: 5.w),
+              child: SelectWeekDays(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                days: _days,
+                border: false,
+                width: 90.w,
+                boxDecoration: BoxDecoration(
+                  color: Material1.primaryColor,
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                onSelect: (values) {
+                  List daysoff = values;
+                  offdays = [];
+                  for (int i = 0; i < values.length; i++) {
+                    offdays.add(int.parse(daysoff[i]));
+                  }
+                },
+              ),
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'کارەکە مانگانە بکرێت',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+              ),
+              Checkbox(
+                checkColor: Colors.white,
+                fillColor: WidgetStateProperty.resolveWith(
+                  (states) => Material1.primaryColor,
+                ),
+                value: isMonthly,
+                onChanged: (bool? value) {
+                  setState(() {
+                    isMonthly = value!;
+                    isDaily = false;
+                    isWeekly = false;
+                  });
+                },
+              ),
+            ],
+          ),
+          if (isMonthly)
+            Container(
+              margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+              width: 70.w,
+              height: 8.h,
+              child: Material1.textfield(
+                  hint: 'ڕۆژی ئەرکەکە لە مانگەکەدا',
+                  controller: dayofthemontcontroller,
+                  inputType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^(3[01]|[12][0-9]|[1-9])$')),
+                  ],
+                  textColor: Material1.primaryColor),
+            ),
           Container(
             margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
             decoration: BoxDecoration(
@@ -648,12 +749,30 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+            margin:
+                EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w, bottom: 5.h),
             width: 90.w,
             height: 8.h,
             child: Material1.button(
                 label: 'زیادکردن',
                 function: () async {
+                  if (isWeekly && offdays.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('تکایە ڕۆژێک لە هەفتەکەدا هەڵبژێرە'),
+                      ),
+                    );
+                    return;
+                  }
+                  if (isMonthly && dayofthemontcontroller.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('تکایە ڕۆژی ئەرکەکە لە مانگەکەدا هەڵبژێرە'),
+                      ),
+                    );
+                    return;
+                  }
                   if (start == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -781,6 +900,11 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                         'lastupdate': DateTime.now(),
                                         'stagetitles': stagetitles,
                                         'stagecontents': stagecontents,
+                                        'isweekly': isWeekly,
+                                        'ismonthly': isMonthly,
+                                        'weekdays': offdays,
+                                        'dayofthemonth':
+                                            dayofthemontcontroller.text
                                       }).then((value) {
                                         FirebaseFirestore.instance
                                             .collection('user')
@@ -847,6 +971,11 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                       'lastupdate': DateTime.now(),
                                       'stagetitles': stagetitles,
                                       'stagecontents': stagecontents,
+                                      'isweekly': isWeekly,
+                                      'ismonthly': isMonthly,
+                                      'weekdays': offdays,
+                                      'dayofthemonth':
+                                          dayofthemontcontroller.text
                                     }).then((value) {
                                       FirebaseFirestore.instance
                                           .collection('user')
