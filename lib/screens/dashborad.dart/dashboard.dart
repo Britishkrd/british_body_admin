@@ -32,6 +32,7 @@ import 'package:sizer/sizer.dart';
 import '../../../material/materials.dart';
 import 'adduser/choosinguserforusermanagement.dart';
 import 'alert/choosinguserforalerts.dart';
+import 'emplyeetracking/emplyeetacking.dart';
 import 'loan/loan.dart';
 
 class Dashboard extends StatefulWidget {
@@ -85,6 +86,18 @@ class _DashboardState extends State<Dashboard> {
                   mainAxisSpacing: 0,
                 ),
                 children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Emplyeetacking(
+                          email: email,
+                        );
+                      }));
+                    },
+                    child:
+                        controlpanelcard(Icons.keyboard_voice, 'ناردنی ڤۆیس'),
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(context,
@@ -246,7 +259,7 @@ class _DashboardState extends State<Dashboard> {
                         return;
                       }
                       Sharedpreference.setuser('', '', '', 'aa', 'aa', 'aa', 0,
-                          0, 0, 0, 0,0,0, 0, false, '', false, [], []);
+                          0, 0, 0, 0, 0, 0, 0, false, '', false, [], []);
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {
                         return Login();

@@ -1493,6 +1493,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.0+3"
+  telegram:
+    dependency: "direct main"
+    description:
+      name: telegram
+      sha256: "8af9420f4c95b90e7dd15fed450d185b17dac72adff6592a5e759025ab7629d9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.9"
   term_glyph:
     dependency: transitive
     description:
