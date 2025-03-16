@@ -289,10 +289,36 @@ class _CheckinandoutState extends State<Checkinandout> {
                                             FirebaseFirestore.instance
                                                 .collection('user')
                                                 .doc(email)
-                                                .update({'checkin': true}).then(
-                                                    (value) {
-                                              if (workdays
-                                                  .contains(now.weekday)) {
+                                                .get()
+                                                .then((value) {
+                                              value.reference.update({
+                                                'checkin': true
+                                              }).then((value1) {
+                                                DateTime? changedworktimeend;
+
+                                                try {
+                                                  changedworktimeend = (value
+                                                                  .data()![
+                                                              'changedworkend']
+                                                          as Timestamp)
+                                                      .toDate();
+                                                } catch (e) {
+                                                  changedworktimeend = null;
+                                                }
+
+                                                if (changedworktimeend
+                                                        ?.isAfter(now) ??
+                                                    false) {
+                                                  log('changedworktimeend');
+                                                  starthour = int.parse(value
+                                                          .data()![
+                                                      'changedworkstarthour']);
+                                                  startmin = int.parse(value
+                                                          .data()![
+                                                      'changedworkstartmin']);
+                                                }
+                                                // if (workdays
+                                                //     .contains(now.weekday-1)) {
                                                 if (now.hour >= starthour &&
                                                     ((now.hour == starthour)
                                                         ? now.minute > startmin
@@ -353,17 +379,18 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                           });
                                                     },
                                                   );
+                                                  // }
                                                 }
-                                              }
-                                              Sharedpreference.checkin(
-                                                  now.toString(),
-                                                  latitude,
-                                                  longtitude,
-                                                  true);
-                                              Navigator.pop(context);
-                                              Navigator.pop(context);
-                                              setState(() {
-                                                checkin = true;
+                                                Sharedpreference.checkin(
+                                                    now.toString(),
+                                                    latitude,
+                                                    longtitude,
+                                                    true);
+                                                Navigator.pop(context);
+                                                Navigator.pop(context);
+                                                setState(() {
+                                                  checkin = true;
+                                                });
                                               });
                                             });
                                           });

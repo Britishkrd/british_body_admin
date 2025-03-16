@@ -152,6 +152,54 @@ class _AdminacceptingchangeworktimeState
                                                                 TextButton(
                                                                     onPressed:
                                                                         () {
+                                                                      List<String> startlist = snapshot
+                                                                          .data!
+                                                                          .docs[
+                                                                              index]
+                                                                              [
+                                                                              'start']
+                                                                          .toString()
+                                                                          .split(
+                                                                              '-');
+                                                                      List<String> endlist = snapshot
+                                                                          .data!
+                                                                          .docs[
+                                                                              index]
+                                                                              [
+                                                                              'end']
+                                                                          .toString()
+                                                                          .split(
+                                                                              '-');
+                                                                      DateTime start = DateTime(
+                                                                          int.parse(startlist[
+                                                                              0]),
+                                                                          int.parse(startlist[
+                                                                              1]),
+                                                                          int.parse(
+                                                                              startlist[2]));
+                                                                      DateTime end = DateTime(
+                                                                          int.parse(endlist[
+                                                                              0]),
+                                                                          int.parse(endlist[
+                                                                              1]),
+                                                                          int.parse(
+                                                                              endlist[2]));
+                                                                      List<String> starttimelist = snapshot
+                                                                          .data!
+                                                                          .docs[
+                                                                              index]
+                                                                              [
+                                                                              'starthour']
+                                                                          .toString()
+                                                                          .split(
+                                                                              ':');
+                                                                      List<String> endtimelist = snapshot
+                                                                          .data!
+                                                                          .docs[index]
+                                                                              ['endhour']
+                                                                          .toString()
+                                                                          .split(':');
+                                                                      
                                                                       FirebaseFirestore
                                                                           .instance
                                                                           .collection(
@@ -165,15 +213,27 @@ class _AdminacceptingchangeworktimeState
                                                                         'status':
                                                                             'accepted'
                                                                       }).then((value) {
-                                                                        ScaffoldMessenger.of(context)
-                                                                            .showSnackBar(const SnackBar(
-                                                                          content:
-                                                                              Text('داواکاری پەسەندکرا'),
-                                                                        ));
-                                                                        Navigator.popUntil(
-                                                                            context,
-                                                                            (route) =>
-                                                                                route.isFirst);
+                                                                        FirebaseFirestore
+                                                                            .instance
+                                                                            .collection('user')
+                                                                            .doc(snapshot.data!.docs[index]['email'])
+                                                                            .set({
+                                                                          'changedworkstart': start,
+                                                                          'changedworkend': end,
+                                                                          'changedworkstarthour': starttimelist[0],
+                                                                          'changedworkstartmin': starttimelist[1],
+                                                                          'changedworkendhour': endtimelist[0],
+                                                                          'changedworkendmin': endtimelist[1],
+                                                                        }, SetOptions(merge: true)).then((value) {
+                                                                          ScaffoldMessenger.of(context)
+                                                                              .showSnackBar(const SnackBar(
+                                                                            content:
+                                                                                Text('داواکاری پەسەندکرا'),
+                                                                          ));
+                                                                          Navigator.popUntil(
+                                                                              context,
+                                                                              (route) => route.isFirst);
+                                                                        });
                                                                       });
                                                                     },
                                                                     child: Text(
