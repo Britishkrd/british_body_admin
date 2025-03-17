@@ -1,8 +1,8 @@
-import 'dart:developer';
 
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 import 'hoursworked.dart';
@@ -116,7 +116,7 @@ class _ViewingselfloginlogoutState extends State<Viewingselfloginlogout> {
                   label: 'بینینی بڕی ئیشکردن',
                   buttoncolor: Material1.primaryColor,
                   textcolor: Colors.white,
-                  function: () {
+                  function: () async {
                     int totalWorkDays = 0;
                     DateTime firstDayOfMonth =
                         DateTime(widget.date.year, widget.date.month, 1);
@@ -131,9 +131,23 @@ class _ViewingselfloginlogoutState extends State<Viewingselfloginlogout> {
                         totalWorkDays++;
                       }
                     }
-                    Duration targetWorkTime =
-                        Duration(hours: totalWorkDays * 8);
-                    log(targetWorkTime.toString());
+                    final SharedPreferences preference =
+                        await SharedPreferences.getInstance();
+
+                    int starthour = 0;
+                    int endhour = 0;
+                    int startmin = 0;
+                    int endmin = 0;
+                    starthour = preference.getInt('starthour') ?? 0;
+                    endhour = preference.getInt('endhour') ?? 0;
+                    startmin = preference.getInt('startmin') ?? 0;
+                    endmin = preference.getInt('endmin') ?? 0;
+                    Duration targetWorkTime = Duration();
+
+                    targetWorkTime = Duration(
+                        hours: endhour - starthour, minutes: endmin - startmin);
+
+                    targetWorkTime *= totalWorkDays;
 
                     FirebaseFirestore.instance
                         .collection('user')
@@ -157,9 +171,19 @@ class _ViewingselfloginlogoutState extends State<Viewingselfloginlogout> {
                         if (i + 1 == value.docs.length) {
                           break;
                         }
-                        totalworkedtime += value.docs[i + 1]['time']
-                            .toDate()
-                            .difference(value.docs[i]['time'].toDate());
+                        if (value.docs[i]['checkin'] == false) {
+                          if (i + 2 == value.docs.length) {
+                            break;
+                          }
+
+                          totalworkedtime += value.docs[i + 2]['time']
+                              .toDate()
+                              .difference(value.docs[i + 1]['time'].toDate());
+                        } else {
+                          totalworkedtime += value.docs[i + 1]['time']
+                              .toDate()
+                              .difference(value.docs[i]['time'].toDate());
+                        }
                       }
                       showDialog(
                           context: context,

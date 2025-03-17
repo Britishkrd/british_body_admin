@@ -13,7 +13,8 @@ class Sendingalerts extends StatefulWidget {
   @override
   State<Sendingalerts> createState() => _SendingalertsState();
 }
-  const List<String> list = <String>[
+
+const List<String> list = <String>[
   'default1',
   'annoying',
   'annoying1',
@@ -31,6 +32,7 @@ class Sendingalerts extends StatefulWidget {
   'witch',
 ];
 String dropdownValue = 'default1';
+
 class _SendingalertsState extends State<Sendingalerts> {
   TextEditingController titlecontroller = TextEditingController();
   TextEditingController bodycontroller = TextEditingController();
@@ -65,7 +67,7 @@ class _SendingalertsState extends State<Sendingalerts> {
                 controller: bodycontroller,
                 maxLines: 10),
           ),
-                    Container(
+          Container(
             margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
             height: 8.h,
             child: Row(
@@ -112,7 +114,44 @@ class _SendingalertsState extends State<Sendingalerts> {
                 label: 'ناردن',
                 buttoncolor: Material1.primaryColor,
                 textcolor: Colors.white,
-                function: () {
+                function: () async {
+                  String password = '';
+                  if ('default1' != dropdownValue) {
+                    await showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('Enter Password'),
+                          content: TextField(
+                            onChanged: (value) {
+                              password = value;
+                            },
+                            obscureText: true,
+                            decoration: InputDecoration(hintText: "Password"),
+                          ),
+                          actions: [
+                            Material1.button(
+                              label: 'OK',
+                              function: () {
+                                Navigator.pop(context);
+                              },
+                              textcolor: Colors.white,
+                              buttoncolor: Material1.primaryColor,
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+
+                  if (password != '1010' && 'default1' != dropdownValue) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Password is incorrect'),
+                      ),
+                    );
+                    return;
+                  }
                   FirebaseFirestore.instance
                       .collection('alert')
                       .doc(DateTime.now().toIso8601String())
@@ -130,7 +169,7 @@ class _SendingalertsState extends State<Sendingalerts> {
                           .get()
                           .then((value) {
                         sendingnotification(titlecontroller.text,
-                            bodycontroller.text, value['token'],dropdownValue);
+                            bodycontroller.text, value['token'], dropdownValue);
                       });
                     }
                   }).then((value) {

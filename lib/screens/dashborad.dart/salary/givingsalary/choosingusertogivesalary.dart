@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/givingsalary.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class ChoosingUserForGivingSalary extends StatefulWidget {
@@ -52,7 +55,7 @@ class _ChoosingUserForGivingSalaryState
                                       firstDate:
                                           DateTime(DateTime.now().year - 1, 1),
                                       rangeList: false,
-                                    ).then((List<DateTime>? dates) {
+                                    ).then((List<DateTime>? dates) async {
                                       if (dates?.isNotEmpty ?? false) {
                                         showDialog(
                                             context: context,
@@ -67,13 +70,55 @@ class _ChoosingUserForGivingSalaryState
                                                 ],
                                               ));
                                             });
+                                        int totalWorkDays = 0;
+                                        DateTime firstDayOfMonth = DateTime(
+                                            dates![0].year, dates[0].month, 1);
+                                        DateTime lastDayOfMonth = DateTime(
+                                            dates[0].year,
+                                            dates[0].month + 1,
+                                            0);
+                                        final SharedPreferences preference =
+                                            await SharedPreferences
+                                                .getInstance();
+
+                                        int starthour = 0;
+                                        int endhour = 0;
+                                        int startmin = 0;
+                                        int endmin = 0;
+                                        starthour =
+                                            preference.getInt('starthour') ?? 0;
+                                        endhour =
+                                            preference.getInt('endhour') ?? 0;
+                                        startmin =
+                                            preference.getInt('startmin') ?? 0;
+                                        endmin =
+                                            preference.getInt('endmin') ?? 0;
+                                        Duration targetWorkTime = Duration();
+                                        log(starthour.toString());
+                                        log(endhour.toString());
+                                        targetWorkTime = Duration(
+                                            hours: endhour - starthour,
+                                            minutes: endmin - startmin);
+
+                                        for (DateTime day = firstDayOfMonth;
+                                            day.isBefore(lastDayOfMonth) ||
+                                                day.isAtSameMomentAs(
+                                                    lastDayOfMonth);
+                                            day = day
+                                                .add(const Duration(days: 1))) {
+                                          if (day.weekday != DateTime.friday) {
+                                            totalWorkDays++;
+                                          }
+                                        }
+                                        targetWorkTime *= totalWorkDays - 1;
+                                        log(targetWorkTime.toString());
                                         FirebaseFirestore.instance
                                             .collection('user')
                                             .doc(widget.email)
                                             .collection('checkincheckouts')
                                             .where('time',
                                                 isGreaterThanOrEqualTo:
-                                                    DateTime(dates!.first.year,
+                                                    DateTime(dates.first.year,
                                                         dates.first.month, 1))
                                             .where('time',
                                                 isLessThanOrEqualTo: DateTime(
@@ -90,12 +135,29 @@ class _ChoosingUserForGivingSalaryState
                                           for (var i = 0;
                                               i < value.docs.length;
                                               i = i + 2) {
-                                            totalworkedtime += value.docs[i + 1]
-                                                    ['time']
-                                                .toDate()
-                                                .difference(value.docs[i]
-                                                        ['time']
-                                                    .toDate());
+                                            if (i + 1 == value.docs.length) {
+                                              break;
+                                            }
+                                            if (value.docs[i]['checkin'] ==
+                                                false) {
+                                              if (i + 2 == value.docs.length) {
+                                                break;
+                                              }
+
+                                              totalworkedtime += value
+                                                  .docs[i + 2]['time']
+                                                  .toDate()
+                                                  .difference(value.docs[i + 1]
+                                                          ['time']
+                                                      .toDate());
+                                            } else {
+                                              totalworkedtime += value
+                                                  .docs[i + 1]['time']
+                                                  .toDate()
+                                                  .difference(value.docs[i]
+                                                          ['time']
+                                                      .toDate());
+                                            }
                                           }
                                         }).then((value) {
                                           num reward = 0;
@@ -160,10 +222,9 @@ class _ChoosingUserForGivingSalaryState
                                                           date: dates.first,
                                                           totalworkedtime:
                                                               totalworkedtime,
-                                                          worktarget: snapshot
-                                                                  .data!
-                                                                  .docs[index]
-                                                              ['worktarget'],
+                                                          worktarget:
+                                                              targetWorkTime
+                                                                  .inHours,
                                                           salary: int.parse(
                                                               snapshot.data!
                                                                           .docs[

@@ -853,6 +853,45 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                             Material1.button(
                                 label: 'بەڵێ',
                                 function: () async {
+                                  String password = '';
+                                  if ('default1' != dropdownValue) {
+                                    
+                                  await showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: Text('Enter Password'),
+                                        content: TextField(
+                                          onChanged: (value) {
+                                            password = value;
+                                          },
+                                          obscureText: true,
+                                          decoration: InputDecoration(hintText: "Password"),
+                                        ),
+                                        actions: [
+                                          Material1.button(
+                                            label: 'OK',
+                                            function: () {
+                                              Navigator.pop(context);
+                                            },
+                                            textcolor: Colors.white,
+                                            buttoncolor: Material1.primaryColor,
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                    
+                                  }
+
+                                  if (password != '1010' && 'default1' != dropdownValue) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Password is incorrect'),
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   if (widget.isbatch) {
                                     showDialog(
                                         context: context,
