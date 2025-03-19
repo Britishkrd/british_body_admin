@@ -19,6 +19,8 @@ import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/cho
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/choosingusertogivesalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/receivingsalary/choosingmonthtoreceiversalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
+import 'package:british_body_admin/screens/dashborad.dart/selftaskview/selftaskview.dart';
+import 'package:british_body_admin/screens/dashborad.dart/sound-preview/soundpreview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/admintarget/choosinguserfortarget.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/selftargetview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
@@ -72,7 +74,7 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  List<Color> colors = List.generate(28, (index) => Color(0xff04839f));
+  List<Color> colors = List.generate(50, (index) => Color(0xff04839f));
 
   @override
   void didChangeDependencies() {
@@ -82,7 +84,7 @@ class _DashboardState extends State<Dashboard> {
 
   getcolors() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
-    for (var i = 0; i < 28; i++) {
+    for (var i = 0; i < 50; i++) {
       colors[i] = Color(preference.getInt('color$i') ?? 0xff04839f);
     }
     setState(() {
@@ -90,6 +92,7 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+// TODO: use 30 for the index of new widget
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -214,12 +217,25 @@ class _DashboardState extends State<Dashboard> {
                     onTap: () {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
+                        return Selftaskview(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(Icons.add_task_outlined,
+                        'بینینی وەردەکاری کارەکان', 29),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
                         return Choosingdepttoaddsub(
                           isaddingrule: false,
                           email: email,
                           isemployee: true,
                           isdelete: false,
                           isdeprtmentdelete: false,
+                          isaddingsubdeptrule: false,
+                          isviewingrules: true,
+                          issubdeptdelete: false,
                         );
                       }));
                     },
@@ -452,6 +468,16 @@ class _DashboardState extends State<Dashboard> {
                       },
                       child:
                           controlpanelcard(Icons.category_sharp, 'یاساکان', 27),
+                    ),
+                  if (permissions.contains('testing sounds'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return Soundpreview();
+                        }));
+                      },
+                      child: controlpanelcard(Icons.music_note, 'دەنگەکان', 28),
                     ),
                 ],
               ),

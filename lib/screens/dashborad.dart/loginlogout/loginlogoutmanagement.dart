@@ -3,6 +3,7 @@ import 'package:british_body_admin/screens/dashborad.dart/loginlogout/editinglog
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginLogoutManagement extends StatefulWidget {
   final String email;
@@ -135,6 +136,55 @@ class _LoginLogoutManagementState extends State<LoginLogoutManagement> {
                                       "${snapshot.data!.docs[index]['time'].toDate()} : کات ",
                                       style: const TextStyle(
                                         fontSize: 15,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: const Text('شوێن'),
+                                                content: Text(
+                                                    "دڵنییایت لە بینینی شوێن"),
+                                                actions: [
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child:
+                                                          const Text('نەخێر')),
+                                                  TextButton(
+                                                      onPressed: () async {
+                                                        if (!await launchUrl(
+                                                            Uri.parse(
+                                                                'https://www.google.com/maps/search/?api=1&query=${snapshot.data!.docs[index]['latitude']},${snapshot.data!.docs[index]['longtitude']}'))) {
+                                                          throw Exception(
+                                                              'Could not launch ');
+                                                        }
+                                                      },
+                                                      child:
+                                                          const Text('بەڵێ')),
+                                                ],
+                                              );
+                                            });
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "${snapshot.data!.docs[index]['latitude']}-${snapshot.data!.docs[index]['longtitude']}",
+                                            style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.blue),
+                                          ),
+                                          Text(
+                                            " : شوێن",
+                                            style:
+                                                const TextStyle(fontSize: 14),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     Text(

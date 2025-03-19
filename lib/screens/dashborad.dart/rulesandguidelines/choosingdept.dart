@@ -1,5 +1,6 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/adminaddingrules.dart';
+import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/adminaddinrulestosubdept.dart';
 import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/viewingrules.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +14,19 @@ class Choosingdepttoaddsub extends StatefulWidget {
   final bool isemployee;
   final bool isdelete;
   final bool isdeprtmentdelete;
+  final bool isaddingsubdeptrule;
+  final bool isviewingrules;
+  final bool issubdeptdelete;
   const Choosingdepttoaddsub(
       {super.key,
       required this.isaddingrule,
       required this.email,
       required this.isemployee,
       required this.isdelete,
-      required this.isdeprtmentdelete});
+      required this.isdeprtmentdelete,
+      required this.isaddingsubdeptrule,
+      required this.isviewingrules,
+      required this.issubdeptdelete});
 
   @override
   State<Choosingdepttoaddsub> createState() => _ChoosingdepttoaddsubState();
@@ -50,7 +57,10 @@ class _ChoosingdepttoaddsubState extends State<Choosingdepttoaddsub> {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
-                      if (widget.isdeprtmentdelete) {
+                      if (widget.isdeprtmentdelete ||
+                          widget.isaddingsubdeptrule ||
+                          widget.isviewingrules ||
+                          widget.isemployee) {
                         return;
                       }
                       if (widget.isaddingrule) {
@@ -58,13 +68,6 @@ class _ChoosingdepttoaddsubState extends State<Choosingdepttoaddsub> {
                             MaterialPageRoute(builder: (context) {
                           return Adminaddinrules(
                               email: widget.email,
-                              department: snapshot.data!.docs[index].reference);
-                        }));
-                      } else if (widget.isemployee) {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return Viewingrules(
-                              isdelete: widget.isdelete,
                               department: snapshot.data!.docs[index].reference);
                         }));
                       } else {
@@ -83,13 +86,13 @@ class _ChoosingdepttoaddsubState extends State<Choosingdepttoaddsub> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             width: 100.w,
-                            height: (12 +
+                            height: (20 +
                                     (snapshot.data!.docs[index]['departments']
                                             .length *
-                                        5))
+                                        6))
                                 .h,
                             margin: EdgeInsets.only(
-                                left: 5.w, right: 5.w, top: 2.h),
+                                left: 5.w, right: 5.w, top: 2.h, bottom: 2.h),
                             child: Column(children: [
                               Container(
                                   alignment: Alignment.center,
@@ -114,7 +117,7 @@ class _ChoosingdepttoaddsubState extends State<Choosingdepttoaddsub> {
                                                 .data!
                                                 .docs[index]['departments']
                                                 .length *
-                                            4))
+                                            6))
                                     .h,
                                 child: ListView.builder(
                                     physics:
@@ -123,14 +126,93 @@ class _ChoosingdepttoaddsubState extends State<Choosingdepttoaddsub> {
                                         .docs[index]['departments'].length,
                                     itemBuilder: (context, index1) {
                                       return Container(
+                                        height: 6.h,
                                         margin: EdgeInsets.only(left: 5.w),
                                         child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               "${index1 + 1}. ${snapshot.data!.docs[index]['departments'][index1]}",
                                               style: TextStyle(
                                                   color: Colors.white),
                                             ),
+                                            if (widget.isviewingrules)
+                                              IconButton(
+                                                  onPressed: () {
+                                                    Navigator.push(context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) {
+                                                      return Viewingrules(
+                                                        issubdeptdelte: false,
+                                                        isdelete:
+                                                            widget.isdelete,
+                                                        department: snapshot
+                                                            .data!
+                                                            .docs[index]
+                                                            .reference,
+                                                        issubdept: widget
+                                                            .isviewingrules,
+                                                        subdept: snapshot.data!
+                                                                    .docs[index]
+                                                                ['departments']
+                                                            [index1],
+                                                      );
+                                                    }));
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.remove_red_eye,
+                                                    color: Colors.white,
+                                                  )),
+                                            if (widget.issubdeptdelete)
+                                              IconButton(
+                                                  onPressed: () {
+                                                    Navigator.push(context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) {
+                                                      return Viewingrules(
+                                                          issubdeptdelte: true,
+                                                          issubdept: true,
+                                                          subdept: snapshot.data!
+                                                                          .docs[
+                                                                      index][
+                                                                  'departments']
+                                                              [index1],
+                                                          isdelete: false,
+                                                          department: snapshot
+                                                              .data!
+                                                              .docs[index]
+                                                              .reference);
+                                                    }));
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                  )),
+                                            if (widget.isaddingsubdeptrule)
+                                              IconButton(
+                                                  onPressed: () {
+                                                    Navigator.push(context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) {
+                                                      return Adminaddinrulestosubdept(
+                                                          email: widget.email,
+                                                          department: snapshot
+                                                              .data!
+                                                              .docs[index]
+                                                              .reference,
+                                                          subdepartment: snapshot
+                                                                      .data!
+                                                                      .docs[index]
+                                                                  [
+                                                                  'departments']
+                                                              [index1]);
+                                                    }));
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.add,
+                                                    color: Colors.white,
+                                                  )),
                                             if (widget.isdeprtmentdelete)
                                               IconButton(
                                                   onPressed: () {
@@ -183,7 +265,27 @@ class _ChoosingdepttoaddsubState extends State<Choosingdepttoaddsub> {
                                         ),
                                       );
                                     }),
-                              )
+                              ),
+                              if (widget.isemployee)
+                                Container(
+                                    margin: EdgeInsets.only(top: 1.h),
+                                    child: Material1.button(
+                                        label: 'بینینی یاساکانی بەشەکە',
+                                        buttoncolor: Colors.white,
+                                        textcolor: Material1.primaryColor,
+                                        function: () {
+                                          Navigator.push(context,
+                                              MaterialPageRoute(
+                                                  builder: (context) {
+                                            return Viewingrules(
+                                                issubdeptdelte: false,
+                                                issubdept: false,
+                                                subdept: '',
+                                                isdelete: widget.isdelete,
+                                                department: snapshot.data!
+                                                    .docs[index].reference);
+                                          }));
+                                        }))
                             ])),
                         if (widget.isdeprtmentdelete)
                           Positioned(

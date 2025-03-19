@@ -5,15 +5,15 @@ import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../material/materials.dart';
-import 'viewingtaskdetailsupdates.dart';
+import '../taskmanagement/viewingtaskdetails/viewingtaskdetailsupdates.dart';
 
-class Choosingtasktoviewtaskdetails extends StatefulWidget {
+class Selftaskview extends StatefulWidget {
   final String email;
-  const Choosingtasktoviewtaskdetails({super.key, required this.email});
+  const Selftaskview({super.key, required this.email});
 
   @override
-  State<Choosingtasktoviewtaskdetails> createState() =>
-      _ChoosingtasktoviewtaskdetailsState();
+  State<Selftaskview> createState() =>
+      _SelftaskviewState();
 }
 
 int tag = 0;
@@ -82,8 +82,8 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
   }
 }
 
-class _ChoosingtasktoviewtaskdetailsState
-    extends State<Choosingtasktoviewtaskdetails> {
+class _SelftaskviewState
+    extends State<Selftaskview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

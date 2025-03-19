@@ -28,6 +28,17 @@ class _AdminrulesState extends State<Adminrules> {
               width: 100.w,
               height: 6.h,
               margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
+              child: Center(
+                child: Text('بەشە سەرەکییەکان',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold)),
+              )),
+          Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
               child: Material1.button(
                   label: 'زیادکردنی بەش',
                   buttoncolor: Material1.primaryColor,
@@ -43,18 +54,21 @@ class _AdminrulesState extends State<Adminrules> {
               height: 6.h,
               margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
               child: Material1.button(
-                  label: 'زیادکردنی بەشی لاوەکی',
+                  label: 'زیادکردنی یاساکان',
                   buttoncolor: Material1.primaryColor,
                   textcolor: Colors.white,
                   function: () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
                       return Choosingdepttoaddsub(
-                        isaddingrule: false,
+                        isaddingrule: true,
                         email: widget.email,
                         isemployee: false,
                         isdelete: false,
                         isdeprtmentdelete: false,
+                        isaddingsubdeptrule: false,
+                        isviewingrules: false,
+                        issubdeptdelete: false,
                       );
                     }));
                   })),
@@ -75,26 +89,9 @@ class _AdminrulesState extends State<Adminrules> {
                         isemployee: false,
                         isdelete: false,
                         isdeprtmentdelete: true,
-                      );
-                    }));
-                  })),
-          Container(
-              width: 100.w,
-              height: 6.h,
-              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-              child: Material1.button(
-                  label: 'زیادکردنی یاساکان',
-                  buttoncolor: Material1.primaryColor,
-                  textcolor: Colors.white,
-                  function: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return Choosingdepttoaddsub(
-                        isaddingrule: true,
-                        email: widget.email,
-                        isemployee: false,
-                        isdelete: false,
-                        isdeprtmentdelete: false,
+                        isaddingsubdeptrule: false,
+                        isviewingrules: false,
+                        issubdeptdelete: false,
                       );
                     }));
                   })),
@@ -115,6 +112,89 @@ class _AdminrulesState extends State<Adminrules> {
                         isemployee: true,
                         isdelete: true,
                         isdeprtmentdelete: false,
+                        isaddingsubdeptrule: false,
+                        isviewingrules: false,
+                        issubdeptdelete: false,
+                      );
+                    }));
+                  })),
+          Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
+              child: Center(
+                child: Text('بەشە لاوەکییەکان',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold)),
+              )),
+          Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
+              child: Material1.button(
+                  label: 'زیادکردنی بەشی لاوەکی',
+                  buttoncolor: Material1.primaryColor,
+                  textcolor: Colors.white,
+                  function: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return Choosingdepttoaddsub(
+                        isaddingrule: false,
+                        email: widget.email,
+                        isemployee: false,
+                        isdelete: false,
+                        isdeprtmentdelete: false,
+                        isaddingsubdeptrule: false,
+                        isviewingrules: false,
+                        issubdeptdelete: false,
+                      );
+                    }));
+                  })),
+          Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
+              child: Material1.button(
+                  label: 'زیادکردنی یاساکان بۆ بەشی لاوەکی',
+                  buttoncolor: Material1.primaryColor,
+                  textcolor: Colors.white,
+                  function: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return Choosingdepttoaddsub(
+                        isaddingrule: false,
+                        email: widget.email,
+                        isemployee: false,
+                        isdelete: false,
+                        isdeprtmentdelete: false,
+                        isaddingsubdeptrule: true,
+                        isviewingrules: false,
+                        issubdeptdelete: false,
+                      );
+                    }));
+                  })),
+          Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
+              child: Material1.button(
+                  label: 'سڕینەوەی یاساکان بۆ بەشی لاوەکی',
+                  buttoncolor: Colors.red,
+                  textcolor: Colors.white,
+                  function: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return Choosingdepttoaddsub(
+                        isaddingrule: false,
+                        email: widget.email,
+                        isemployee: true,
+                        isdelete: true,
+                        isdeprtmentdelete: false,
+                        isaddingsubdeptrule: false,
+                        isviewingrules: false,
+                        issubdeptdelete: true,
                       );
                     }));
                   })),
