@@ -49,6 +49,7 @@ class _EdituserrState extends State<Edituserr> {
   TextEditingController passwordcontroller = TextEditingController();
 
   List<String> permissions = [
+    'workoutside',
     'accepting absence',
     'adding task',
     'sending alert',

@@ -27,6 +27,7 @@ class _AdduserState extends State<Adduser> {
   TextEditingController passwordcontroller = TextEditingController();
 
   List<String> permissions = [
+    'workoutside',
     'accepting absence',
     'adding task',
     'sending alert',
