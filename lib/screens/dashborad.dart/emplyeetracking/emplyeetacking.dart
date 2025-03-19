@@ -28,10 +28,13 @@ class _EmplyeetackingState extends State<Emplyeetacking> {
   bool _mPlayerIsInited = false;
   bool _mRecorderIsInited = false;
   bool _mplaybackReady = false;
+  TextEditingController notecontroller = TextEditingController();
+  TextEditingController manpowercontroller = TextEditingController();
+  DateTime? start;
+  DateTime? end;
 
   @override
   void initState() {
-    _mPath = '${widget.email}-${DateTime.now()}.mp4';
     _mPlayer!.openPlayer().then((value) {
       setState(() {
         _mPlayerIsInited = true;
@@ -123,6 +126,8 @@ class _EmplyeetackingState extends State<Emplyeetacking> {
     });
   }
 
+// ----------------------------- UI --------------------------------------------
+
   _Fn? getRecorderFn() {
     if (!_mRecorderIsInited || !_mPlayer!.isStopped) {
       return null;
@@ -148,96 +153,101 @@ class _EmplyeetackingState extends State<Emplyeetacking> {
       ),
       body: Column(
         children: [
-          Container(
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            padding:
-                EdgeInsets.only(top: 1.h, bottom: 1.h, left: 5.w, right: 5.w),
-            decoration: BoxDecoration(
-                color: Material1.primaryColor,
-                borderRadius: BorderRadius.circular(15)),
-            child: Row(children: [
-              ElevatedButton(
-                onPressed: getRecorderFn(),
-                //color: Colors.white,
-                //disabledColor: Colors.grey,
-                child: Text(_mRecorder!.isRecording ? 'Stop' : 'Record'),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              Text(
-                _mRecorder!.isRecording
-                    ? 'Recording in progress'
-                    : 'Recorder is stopped',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ]),
-          ),
-          Container(
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            padding:
-                EdgeInsets.only(top: 1.h, bottom: 1.h, left: 5.w, right: 5.w),
-            decoration: BoxDecoration(
-                color: Material1.primaryColor,
-                borderRadius: BorderRadius.circular(15)),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
+          Column(
+            children: [
+              Container(
+                margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+                padding: EdgeInsets.only(
+                    top: 1.h, bottom: 1.h, left: 5.w, right: 5.w),
+                decoration: BoxDecoration(
+                    color: Material1.primaryColor,
+                    borderRadius: BorderRadius.circular(15)),
+                child: Row(children: [
                   ElevatedButton(
-                    onPressed: getPlaybackFn(),
+                    onPressed: getRecorderFn(),
                     //color: Colors.white,
                     //disabledColor: Colors.grey,
-                    child: Text(_mPlayer!.isPlaying ? 'Stop' : 'Play'),
+                    child: Text(_mRecorder!.isRecording ? 'Stop' : 'Record'),
+                  ),
+                  const SizedBox(
+                    width: 20,
                   ),
                   Text(
-                    _mPlayer!.isPlaying
-                        ? 'Playback in progress'
-                        : 'Player is stopped',
+                    _mRecorder!.isRecording
+                        ? 'Recording in progress'
+                        : 'Recorder is stopped',
                     style: const TextStyle(color: Colors.white),
                   ),
-                  IconButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Delete'),
-                              content: Text(
-                                  'Are you sure you want to delete this audio?'),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text('Cancel',
-                                      style: TextStyle(color: Colors.black)),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _mplaybackReady = false;
-                                    });
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text(
-                                    'Delete',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                        setState(() {
-                          _mplaybackReady = false;
-                          _mRecorder!.deleteRecord(fileName: _mPath);
-                        });
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                      ))
                 ]),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+                padding: EdgeInsets.only(
+                    top: 1.h, bottom: 1.h, left: 5.w, right: 5.w),
+                decoration: BoxDecoration(
+                    color: Material1.primaryColor,
+                    borderRadius: BorderRadius.circular(15)),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: getPlaybackFn(),
+                        //color: Colors.white,
+                        //disabledColor: Colors.grey,
+                        child: Text(_mPlayer!.isPlaying ? 'Stop' : 'Play'),
+                      ),
+                      Text(
+                        _mPlayer!.isPlaying
+                            ? 'Playback in progress'
+                            : 'Player is stopped',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Delete'),
+                                  content: Text(
+                                      'Are you sure you want to delete this audio?'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text('Cancel',
+                                          style:
+                                              TextStyle(color: Colors.black)),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _mplaybackReady = false;
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text(
+                                        'Delete',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                            setState(() {
+                              _mplaybackReady = false;
+                              _mRecorder!.deleteRecord(fileName: _mPath);
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ))
+                    ]),
+              ),
+            ],
           ),
           Container(
               child: Material1.button(
@@ -245,14 +255,23 @@ class _EmplyeetackingState extends State<Emplyeetacking> {
                   buttoncolor: Material1.primaryColor,
                   textcolor: Colors.white,
                   function: () async {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            content: Text('Sending file...'),
+                          );
+                        });
                     final url = Uri.parse(
                         'https://api.telegram.org/bot7729692126:AAGSO08oifYVsSOlNg9skkz-LSlpPErILec/sendDocument');
-                    log(_mPath);
                     String path =
                         await _mRecorder!.getRecordURL(path: _mPath) ?? '';
                     log(path);
                     var request = http.MultipartRequest('POST', url)
-                      ..fields['chat_id'] = '1132064820'
+                      ..fields['chat_id'] = '-4638656701'
                       ..files.add(await http.MultipartFile.fromPath(
                         'document',
                         path,
@@ -262,7 +281,11 @@ class _EmplyeetackingState extends State<Emplyeetacking> {
                     try {
                       var response = await request.send();
                       if (response.statusCode == 200) {
-                        print('File sent successfully');
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('File sent successfully!'),
+                        ));
                       } else {
                         print('Failed to send file: ${response.reasonPhrase}');
                       }
