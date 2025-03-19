@@ -53,7 +53,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                   .where((element) => element == false)
                   .length)
               .toDouble() *
-          30);
+          55);
     } catch (e) {
       listviewheight = 0;
     }
@@ -72,6 +72,8 @@ class _TaskdetailsState extends State<Taskdetails> {
     }
     linkcontrollerslist = [];
     notecontrollerslist = [];
+    notecontroller.clear();
+    linkcontroller.clear();
     super.dispose();
   }
 
@@ -187,15 +189,15 @@ class _TaskdetailsState extends State<Taskdetails> {
                         return Column(
                           children: [
                             SizedBox(
-                              height: 6.h,
+                              height: 5.h,
                               child: Text(
-                                    "${widget.task['stagetitles']?[index] ?? 'No title'} : ناو",
+                                  "${widget.task['stagetitles']?[index] ?? 'No title'} : ناو",
                                   style: TextStyle(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.bold)),
                             ),
                             SizedBox(
-                              height: 6.h,
+                              height: 5.h,
                               child: Text(
                                   "${widget.task['stagecontents'][index]} : وردەکاری",
                                   style: TextStyle(
@@ -591,7 +593,8 @@ class _TaskdetailsState extends State<Taskdetails> {
               : const SizedBox.shrink(),
           widget.task['status'] != 'done'
               ? Container(
-                  margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
+                  margin: EdgeInsets.only(
+                      top: 5.h, left: 5.w, right: 5.w, bottom: 5.h),
                   width: 90.w,
                   height: 8.h,
                   child: Material1.button(

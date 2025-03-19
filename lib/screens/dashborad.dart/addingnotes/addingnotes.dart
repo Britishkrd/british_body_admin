@@ -35,6 +35,17 @@ class _AddingnotesState extends State<Addingnotes> {
   void initState() {
     super.initState();
   }
+  
+  @override
+  dispose() {
+    for (int i = 0; i < notecontrollerslist.length; i++) {
+      notecontrollerslist[i].clear();
+    }
+    for (int i = 0; i < linkcontrollerslist.length; i++) {
+      linkcontrollerslist[i].clear();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
