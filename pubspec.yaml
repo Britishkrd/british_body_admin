@@ -69,6 +69,7 @@ dependencies:
   app_badge_plus: ^1.2.0
   day_picker: ^2.3.0
   telegram: ^0.0.9
+  flutter_colorpicker: ^1.1.0
 
 dev_dependencies:
   flutter_test:

@@ -28,7 +28,6 @@ Future<void> _firebaseMessaginBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
 
-//TODO add weekly and monthly tasks
 void _firebaseMessagingForgroundHandler(RemoteMessage message) {
   log(message.notification?.android?.channelId.toString() ?? 'no message');
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =

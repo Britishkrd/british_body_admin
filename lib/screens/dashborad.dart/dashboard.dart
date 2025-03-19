@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/acceptingabsence.dart';
@@ -26,6 +28,7 @@ import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptin
 import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -69,6 +72,24 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+  List<Color> colors = List.generate(28, (index) => Color(0xff04839f));
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    getcolors();
+  }
+
+  getcolors() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    for (var i = 0; i < 28; i++) {
+      colors[i] = Color(preference.getInt('color$i') ?? 0xff04839f);
+    }
+    setState(() {
+      colors = colors;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,8 +116,8 @@ class _DashboardState extends State<Dashboard> {
                         );
                       }));
                     },
-                    child:
-                        controlpanelcard(Icons.keyboard_voice, 'ناردنی ڤۆیس'),
+                    child: controlpanelcard(
+                        Icons.keyboard_voice, 'ناردنی ڤۆیس', 0),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -105,7 +126,7 @@ class _DashboardState extends State<Dashboard> {
                         return AbsentManagement(email: email);
                       }));
                     },
-                    child: controlpanelcard(Icons.more_time, 'مۆڵەت'),
+                    child: controlpanelcard(Icons.more_time, 'مۆڵەت', 1),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -115,7 +136,7 @@ class _DashboardState extends State<Dashboard> {
                       }));
                     },
                     child: controlpanelcard(
-                        Icons.task_outlined, 'زیادکردنی ئەرک بۆ خۆم'),
+                        Icons.task_outlined, 'زیادکردنی ئەرک بۆ خۆم', 2),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -125,7 +146,7 @@ class _DashboardState extends State<Dashboard> {
                       }));
                     },
                     child: controlpanelcard(
-                        Icons.note_add, 'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم'),
+                        Icons.note_add, 'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم', 3),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -134,7 +155,7 @@ class _DashboardState extends State<Dashboard> {
                         return Viewingalerts(email: email);
                       }));
                     },
-                    child: controlpanelcard(Icons.alarm_add, 'ئاگاداریەکان'),
+                    child: controlpanelcard(Icons.alarm_add, 'ئاگاداریەکان', 4),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -144,7 +165,7 @@ class _DashboardState extends State<Dashboard> {
                       }));
                     },
                     child: controlpanelcard(
-                        Icons.work_history, 'گۆڕینی کارتی کار'),
+                        Icons.work_history, 'گۆڕینی کارتی کار', 5),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -153,8 +174,8 @@ class _DashboardState extends State<Dashboard> {
                         return Viewingrewardpunishment(email: email);
                       }));
                     },
-                    child: controlpanelcard(
-                        Icons.card_giftcard_sharp, 'بینینی پاداشت و سزاکانت'),
+                    child: controlpanelcard(Icons.card_giftcard_sharp,
+                        'بینینی پاداشت و سزاکانت', 6),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -163,7 +184,7 @@ class _DashboardState extends State<Dashboard> {
                         return LoanManagement(email: email);
                       }));
                     },
-                    child: controlpanelcard(Icons.money, 'سولفە'),
+                    child: controlpanelcard(Icons.money, 'سولفە', 7),
                   ),
                   GestureDetector(
                     onTap: () async {
@@ -173,8 +194,8 @@ class _DashboardState extends State<Dashboard> {
                               builder: (context) =>
                                   ChoosingMonthToReceiveSalary(email: email)));
                     },
-                    child:
-                        controlpanelcard(Icons.attach_money, 'وەرگرتنی موچە'),
+                    child: controlpanelcard(
+                        Icons.attach_money, 'وەرگرتنی موچە', 8),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -187,7 +208,7 @@ class _DashboardState extends State<Dashboard> {
                       }));
                     },
                     child: controlpanelcard(
-                        Icons.track_changes_outlined, 'تارگێتەکان'),
+                        Icons.track_changes_outlined, 'تارگێتەکان', 9),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -202,7 +223,7 @@ class _DashboardState extends State<Dashboard> {
                         );
                       }));
                     },
-                    child: controlpanelcard(Icons.rule, 'یاسا و ڕێساکان'),
+                    child: controlpanelcard(Icons.rule, 'یاسا و ڕێساکان', 10),
                   ),
                   GestureDetector(
                     onTap: () async {
@@ -224,7 +245,7 @@ class _DashboardState extends State<Dashboard> {
                       });
                     },
                     child: controlpanelcard(
-                        Icons.login, 'بینینی چوونەژوورەوە / دەرچوونەوە'),
+                        Icons.login, 'بینینی چوونەژوورەوە / دەرچوونەوە', 11),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -233,7 +254,8 @@ class _DashboardState extends State<Dashboard> {
                         return Employeefeedback(email: email);
                       }));
                     },
-                    child: controlpanelcard(Icons.feedback, 'ڕەخنە و پێشنیار'),
+                    child:
+                        controlpanelcard(Icons.feedback, 'ڕەخنە و پێشنیار', 12),
                   ),
                   GestureDetector(
                     onTap: () async {
@@ -265,7 +287,7 @@ class _DashboardState extends State<Dashboard> {
                         return Login();
                       }));
                     },
-                    child: controlpanelcard(Icons.logout, 'دەرچوون'),
+                    child: controlpanelcard(Icons.logout, 'دەرچوون', 13),
                   ),
                   if (permissions.contains('accepting absence'))
                     GestureDetector(
@@ -275,8 +297,8 @@ class _DashboardState extends State<Dashboard> {
                           return Acceptingabsence();
                         }));
                       },
-                      child:
-                          controlpanelcard(Icons.more_time, 'قبوڵکردنی مۆڵەت'),
+                      child: controlpanelcard(
+                          Icons.more_time, 'قبوڵکردنی مۆڵەت', 14),
                     ),
                   if (permissions.contains('viewing task detail'))
                     GestureDetector(
@@ -287,7 +309,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.task_alt, 'بینینی وردەکاری کارەکان'),
+                          Icons.task_alt, 'بینینی وردەکاری کارەکان', 15),
                     ),
                   if (permissions.contains('adding task'))
                     GestureDetector(
@@ -298,7 +320,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.task_alt, 'زیادکردنی ئەرک وەک ئەدمین'),
+                          Icons.task_alt, 'زیادکردنی ئەرک وەک ئەدمین', 16),
                     ),
                   if (permissions.contains('sending alert'))
                     GestureDetector(
@@ -309,7 +331,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.alarm_add, 'ناردنی ئاگادارکردنەوە'),
+                          Icons.alarm_add, 'ناردنی ئاگادارکردنەوە', 17),
                     ),
                   if (permissions.contains('accepting change time'))
                     GestureDetector(
@@ -320,7 +342,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.work_history, 'گۆڕینی کارتی کار بۆ ئەدمین'),
+                          Icons.work_history, 'گۆڕینی کارتی کار بۆ ئەدمین', 18),
                     ),
                   if (permissions.contains('reward and punishment'))
                     GestureDetector(
@@ -331,7 +353,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(Icons.card_giftcard_outlined,
-                          'زیادکردنی پاداشت و سزا'),
+                          'زیادکردنی پاداشت و سزا', 19),
                     ),
                   if (permissions.contains('accepting loan'))
                     GestureDetector(
@@ -341,8 +363,8 @@ class _DashboardState extends State<Dashboard> {
                           return AcceptingLoan();
                         }));
                       },
-                      child: controlpanelcard(
-                          Icons.monetization_on_outlined, 'قبۆڵکردنی سولفە'),
+                      child: controlpanelcard(Icons.monetization_on_outlined,
+                          'قبۆڵکردنی سولفە', 20),
                     ),
                   if (permissions.contains('giving salary'))
                     GestureDetector(
@@ -354,7 +376,7 @@ class _DashboardState extends State<Dashboard> {
                                     ChoosingUserForGivingSalary(email: email)));
                       },
                       child: controlpanelcard(
-                          Icons.monetization_on, 'پێدانی موچە'),
+                          Icons.monetization_on, 'پێدانی موچە', 21),
                     ),
                   if (permissions.contains('login and logout'))
                     GestureDetector(
@@ -366,7 +388,7 @@ class _DashboardState extends State<Dashboard> {
                                     ChoosingUseroForLoginLogout(email: email)));
                       },
                       child: controlpanelcard(
-                          Icons.login_sharp, 'چوونەژوورەوە / دەرچوونەوە'),
+                          Icons.login_sharp, 'چوونەژوورەوە / دەرچوونەوە', 22),
                     ),
                   if (permissions.contains('setting feedback'))
                     GestureDetector(
@@ -379,7 +401,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.feedback, 'ڕەخنە و پێشنیار بۆ ئەدمین'),
+                          Icons.feedback, 'ڕەخنە و پێشنیار بۆ ئەدمین', 23),
                     ),
                   if (permissions.contains('setting target'))
                     GestureDetector(
@@ -392,7 +414,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.track_changes_outlined, 'تارگێت بۆ ئەدمین'),
+                          Icons.track_changes_outlined, 'تارگێت بۆ ئەدمین', 24),
                     ),
                   if (permissions.contains('add user'))
                     GestureDetector(
@@ -405,7 +427,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.group_add, 'زیاد کردنی بەکار هێنەر'),
+                          Icons.group_add, 'زیاد کردنی بەکار هێنەر', 25),
                     ),
                   if (permissions.contains('changing worker phone'))
                     GestureDetector(
@@ -416,7 +438,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.phone_iphone, 'گۆڕینی مۆبایلی کارمەند'),
+                          Icons.phone_iphone, 'گۆڕینی مۆبایلی کارمەند', 26),
                     ),
                   if (permissions.contains('adding rules'))
                     GestureDetector(
@@ -428,7 +450,8 @@ class _DashboardState extends State<Dashboard> {
                           );
                         }));
                       },
-                      child: controlpanelcard(Icons.category_sharp, 'یاساکان'),
+                      child:
+                          controlpanelcard(Icons.category_sharp, 'یاساکان', 27),
                     ),
                 ],
               ),
@@ -439,41 +462,97 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget controlpanelcard(IconData icon, String name) {
-    return Container(
-        margin: EdgeInsets.only(left: 2.w, right: 2.w, top: 3.w, bottom: 0.w),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(20)),
-          color: name == 'دەرچوون' ? Colors.red : Material1.primaryColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withAlpha(150),
-              spreadRadius: 1,
-              blurRadius: 3,
+  Widget controlpanelcard(IconData icon, String name, int index) {
+    return Stack(
+      children: [
+        Container(
+            margin:
+                EdgeInsets.only(left: 2.w, right: 2.w, top: 3.w, bottom: 0.w),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
+              color: colors[index],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withAlpha(150),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 10.h,
-              child: Icon(icon,
-                  color: const Color.fromARGB(205, 26, 26, 26), size: 30.sp),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 0.5.h),
-              width: 100.w,
-              height: 6.h,
-              child: Text(
-                textAlign: TextAlign.center,
-                name,
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 10.h,
+                  child: Icon(icon,
+                      color: const Color.fromARGB(205, 26, 26, 26),
+                      size: 30.sp),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 0.5.h),
+                  width: 100.w,
+                  height: 6.h,
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    name,
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            )),
+        Positioned(
+          top: 2.h,
+          right: 2.h,
+          child: GestureDetector(
+            onTap: () {
+              Color pickerColor = Color(0xff04839f);
+              Color changeColor = Color(0xff04839f);
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Pick a color!'),
+                      content: SingleChildScrollView(
+                          child: ColorPicker(
+                        pickerColor: pickerColor,
+                        onColorChanged: (color) {
+                          changeColor = color;
+                          log(changeColor.toString());
+                        },
+                      )),
+                      actions: [
+                        Material1.button(
+                            label: 'باشە',
+                            buttoncolor: Material1.primaryColor,
+                            textcolor: Colors.white,
+                            function: () async {
+                              final SharedPreferences preference =
+                                  await SharedPreferences.getInstance();
+                              setState(() {
+                                colors[index] = changeColor;
+                                preference.setInt(
+                                    'color$index', changeColor.value);
+                              });
+                              Navigator.of(context).pop();
+                            }),
+                      ],
+                    );
+                  });
+            },
+            child: Container(
+              width: 10.w,
+              height: 10.w,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                color: Colors.white,
               ),
+              child: Icon(Icons.color_lens),
             ),
-          ],
-        ));
+          ),
+        )
+      ],
+    );
   }
 }
