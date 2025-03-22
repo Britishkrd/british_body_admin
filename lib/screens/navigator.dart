@@ -3,6 +3,7 @@ import 'package:british_body_admin/screens/checkincheckout/checkinandout.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/dashboard.dart';
 import 'package:british_body_admin/screens/email/email.dart';
+import 'package:british_body_admin/screens/notifications/notifications.dart';
 import 'package:british_body_admin/screens/profile/profile.dart';
 import 'package:british_body_admin/screens/tasks/tasks.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,19 @@ class _NavigationState extends State<Navigation> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Material1.primaryColor,
+          title: const Text('British Body Admin'),
+          foregroundColor: Colors.white,
+          centerTitle: true,
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  await getuserinfo();
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const Notifications();
+                  }));
+                },
+                icon: const Icon(Icons.notifications, color: Colors.white))
+          ],
         ),
         bottomNavigationBar: AnimatedBottomNavigationBar(
           activeColor: Material1.primaryColor,

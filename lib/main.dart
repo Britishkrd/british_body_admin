@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
-import 'dart:developer';
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/navigator.dart';
@@ -26,10 +25,54 @@ import 'package:app_badge_plus/app_badge_plus.dart';
 
 Future<void> _firebaseMessaginBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String> notificationTitles =
+      prefs.getStringList('notificationTitles') ?? [];
+  List<String> notificationBodies =
+      prefs.getStringList('notificationBodies') ?? [];
+
+  notificationTitles.add(message.notification?.title ?? 'British Body Admin');
+  notificationBodies.add(message.notification?.body ?? 'Notification');
+
+  await prefs.setStringList('notificationTitles', notificationTitles);
+  await prefs.setStringList('notificationBodies', notificationBodies);
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    message.notification?.android?.channelId ?? 'daily_channel_id',
+    'Foreground Notifications',
+    channelDescription: 'Notifications shown when the app is in the foreground',
+    importance: Importance.high,
+    priority: Priority.high,
+  );
+
+  NotificationDetails notificationDetails =
+      NotificationDetails(android: androidDetails);
+
+  flutterLocalNotificationsPlugin.show(
+    message.data.hashCode,
+    message.notification?.title,
+    message.notification?.body,
+    notificationDetails,
+  );
 }
 
-void _firebaseMessagingForgroundHandler(RemoteMessage message) {
-  log(message.notification?.android?.channelId.toString() ?? 'no message');
+Future<void> _firebaseMessagingForgroundHandler(RemoteMessage message) async {
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String> notificationTitles =
+      prefs.getStringList('notificationTitles') ?? [];
+  List<String> notificationBodies =
+      prefs.getStringList('notificationBodies') ?? [];
+
+  notificationTitles.add(message.notification?.title ?? 'British Body Admin');
+  notificationBodies.add(message.notification?.body ?? 'Notification');
+
+  await prefs.setStringList('notificationTitles', notificationTitles);
+  await prefs.setStringList('notificationBodies', notificationBodies);
+
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
@@ -394,7 +437,7 @@ Future<void> main() async {
     initializationSettings,
     onDidReceiveNotificationResponse:
         (NotificationResponse notificationResponse) async {
-      // ...
+
     },
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
   );
@@ -456,7 +499,7 @@ final DarwinInitializationSettings initializationSettingsDarwin =
 
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse notificationResponse) {
-  // handle action
+
 }
 
 class MyApp extends StatefulWidget {
@@ -617,7 +660,6 @@ class _MyAppState extends State<MyApp> {
             navigatorKey: navigatorKey,
             supportedLocales: const [
               Locale('en', 'US'),
-              Locale('ar', 'IQ'),
             ],
             // localizationsDelegates: localization.localizationsDelegates,
             debugShowCheckedModeBanner: false,
