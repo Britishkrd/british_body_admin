@@ -26,7 +26,7 @@ class _ViewingTaskDeatsilsupdatesState
   }
 
   int sizedboxheight(int lengthlinks, int lengthnotes, int height) {
-    return (lengthlinks * 4) + (lengthnotes * 4) + height;
+    return (lengthlinks * 6) + (lengthnotes * 6) + height;
   }
 
   @override
@@ -104,7 +104,6 @@ class _ViewingTaskDeatsilsupdatesState
                                     )),
                                 Container(
                                   width: 100.w,
-                                  height: 10.h,
                                   margin:
                                       EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
                                   padding: EdgeInsets.all(1.h),
@@ -269,90 +268,117 @@ class _ViewingTaskDeatsilsupdatesState
                                   },
                                   child: SizedBox(
                                     width: 100.w,
-                                    height: heightfunction(
-                                            ((snapshot.data?.docs[index]['link']
-                                                .length)),
-                                            4)
+                                    height: (heightfunction(
+                                                ((snapshot
+                                                    .data
+                                                    ?.docs[index]['link']
+                                                    .length)),
+                                                6) +
+                                            heightfunction(
+                                                ((snapshot
+                                                    .data
+                                                    ?.docs[index]['note']
+                                                    .length)),
+                                                6))
                                         .h,
                                     child: ListView.builder(
                                         physics:
                                             const NeverScrollableScrollPhysics(),
-                                        itemCount: snapshot.data
-                                                ?.docs[index]['link'].length ??
-                                            0,
+                                        itemCount: ((snapshot
+                                                        .data
+                                                        ?.docs[index]['link']
+                                                        .length ??
+                                                    0) >
+                                                (snapshot
+                                                        .data
+                                                        ?.docs[index]['note']
+                                                        .length ??
+                                                    0)
+                                            ? (snapshot
+                                                    .data
+                                                    ?.docs[index]['link']
+                                                    .length ??
+                                                0)
+                                            : (snapshot
+                                                    .data
+                                                    ?.docs[index]['note']
+                                                    .length ??
+                                                0)),
                                         itemBuilder: (context, index1) {
-                                          return Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
+                                          return Column(
                                             children: [
-                                              Text(
-                                                (snapshot.data?.docs[index]
-                                                                        ['link']
-                                                                    [index1] ??
-                                                                '')
-                                                            .toString()
-                                                            .length >
-                                                        39
-                                                    ? (snapshot.data?.docs[index]
-                                                                    ['link']
-                                                                [index1] ??
-                                                            '')
-                                                        .toString()
-                                                        .substring(0, 40)
-                                                    : (snapshot.data?.docs[
-                                                                        index]
-                                                                    ['link']
-                                                                [index1] ??
-                                                            '')
-                                                        .toString(),
-                                                style: const TextStyle(
-                                                  color: Colors.blue,
-                                                  fontSize: 12,
+                                              if (index1 <
+                                                  (snapshot
+                                                          .data
+                                                          ?.docs[index]['link']
+                                                          .length ??
+                                                      0))
+                                                SizedBox(
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: [
+                                                      Text(
+                                                        (snapshot.data?.docs[index]['link'][index1] ??
+                                                                        '')
+                                                                    .toString()
+                                                                    .length >
+                                                                39
+                                                            ? (snapshot.data?.docs[index]
+                                                                            ['link']
+                                                                        [
+                                                                        index1] ??
+                                                                    '')
+                                                                .toString()
+                                                                .substring(
+                                                                    0, 40)
+                                                            : (snapshot.data?.docs[index]
+                                                                            ['link']
+                                                                        [index1] ??
+                                                                    '')
+                                                                .toString(),
+                                                        style: TextStyle(
+                                                          color: Colors.blue,
+                                                          fontSize: 16.sp,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        ": لینک ${index1 + 1}",
+                                                        style: TextStyle(
+                                                          fontSize: 16.sp,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              Text(
-                                                ": لینک ${index1 + 1}",
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
+                                              if (index1 <
+                                                  (snapshot
+                                                          .data
+                                                          ?.docs[index]['note']
+                                                          .length ??
+                                                      0))
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      "${(snapshot.data?.docs[index]['note'][index1] ?? '')}",
+                                                      style: TextStyle(
+                                                        fontSize: 16.sp,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      ": تێبینی ${index1 + 1}",
+                                                      style: TextStyle(
+                                                        fontSize: 16.sp,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
                                             ],
                                           );
                                         }),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: heightfunction(
-                                          ((snapshot.data?.docs[index]['note']
-                                              .length)),
-                                          4)
-                                      .h,
-                                  child: ListView.builder(
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: snapshot.data
-                                              ?.docs[index]['note'].length ??
-                                          0,
-                                      itemBuilder: (context, index1) {
-                                        return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              "${(snapshot.data?.docs[index]['note'][index1] ?? '')}",
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                            Text(
-                                              ": تێبینی ${index1 + 1}",
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      }),
                                 ),
                               ],
                             ),

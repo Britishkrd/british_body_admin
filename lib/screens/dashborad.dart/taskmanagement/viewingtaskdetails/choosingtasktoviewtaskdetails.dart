@@ -107,9 +107,7 @@ class _ChoosingtasktoviewtaskdetailsState
               ),
             ),
           ),
-          SizedBox(
-            height: 70.h,
-            width: 100.w,
+          Expanded(
             child: StreamBuilder(
                 stream: streams(widget.email),
                 builder: (BuildContext context,
@@ -166,7 +164,6 @@ class _ChoosingtasktoviewtaskdetailsState
                             }));
                           },
                           child: SizedBox(
-                              height: 20.h,
                               width: 90.w,
                               child: Container(
                                 margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
@@ -196,6 +193,11 @@ class _ChoosingtasktoviewtaskdetailsState
                                                 ? TextDecoration.lineThrough
                                                 : null,
                                             fontSize: 16.sp,
+                                            fontWeight: FontWeight.bold)),
+                                    Text(
+                                        "${snapshot.data!.docs[index]['description']}",
+                                        style: TextStyle(
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.bold)),
                                     Text("بڕی غەرامە : $deduction",
                                         style: TextStyle(

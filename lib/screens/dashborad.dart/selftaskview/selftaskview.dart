@@ -12,8 +12,7 @@ class Selftaskview extends StatefulWidget {
   const Selftaskview({super.key, required this.email});
 
   @override
-  State<Selftaskview> createState() =>
-      _SelftaskviewState();
+  State<Selftaskview> createState() => _SelftaskviewState();
 }
 
 int tag = 0;
@@ -82,8 +81,7 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
   }
 }
 
-class _SelftaskviewState
-    extends State<Selftaskview> {
+class _SelftaskviewState extends State<Selftaskview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,9 +105,7 @@ class _SelftaskviewState
               ),
             ),
           ),
-          SizedBox(
-            height: 70.h,
-            width: 100.w,
+          Expanded(
             child: StreamBuilder(
                 stream: streams(widget.email),
                 builder: (BuildContext context,
@@ -166,7 +162,7 @@ class _SelftaskviewState
                             }));
                           },
                           child: SizedBox(
-                              height: 20.h,
+                              height: 25.h,
                               width: 90.w,
                               child: Container(
                                 margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
@@ -196,6 +192,11 @@ class _SelftaskviewState
                                                 ? TextDecoration.lineThrough
                                                 : null,
                                             fontSize: 16.sp,
+                                            fontWeight: FontWeight.bold)),
+                                    Text(
+                                        "${snapshot.data!.docs[index]['description']} : وردەکاری",
+                                        style: TextStyle(
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.bold)),
                                     Text("بڕی غەرامە : $deduction",
                                         style: TextStyle(

@@ -64,7 +64,8 @@ class _EdituserrState extends State<Edituserr> {
     'add user',
     'changing worker phone',
     'adding rules',
-    'testing sounds'
+    'testing sounds',
+    'user status'
   ];
   List<String> selectedpermissions = [];
   final List<DayInWeek> _days = [
@@ -298,7 +299,7 @@ class _EdituserrState extends State<Edituserr> {
           ),
           Container(
             margin: EdgeInsets.fromLTRB(0.w, 1.h, 0.w, 1.h),
-            height: 115.h,
+            height: 120.h,
             child: ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: permissions.length,

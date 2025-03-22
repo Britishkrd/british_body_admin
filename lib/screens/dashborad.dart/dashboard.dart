@@ -19,6 +19,7 @@ import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/cho
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/choosingusertogivesalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/receivingsalary/choosingmonthtoreceiversalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
+import 'package:british_body_admin/screens/dashborad.dart/selfnotification/selfnotification.dart';
 import 'package:british_body_admin/screens/dashborad.dart/selftaskview/selftaskview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/sound-preview/soundpreview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/admintarget/choosinguserfortarget.dart';
@@ -26,6 +27,7 @@ import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/self
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
+import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
@@ -92,7 +94,7 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-// TODO: use 30 for the index of new widget
+// TODO: use 32 for the index of new widget
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -221,7 +223,17 @@ class _DashboardState extends State<Dashboard> {
                       }));
                     },
                     child: controlpanelcard(Icons.add_task_outlined,
-                        'بینینی وەردەکاری کارەکان', 29),
+                        'بینینی وەردەکاری کارەکانی خۆم', 29),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return Selfnotification();
+                      }));
+                    },
+                    child: controlpanelcard(Icons.notification_add,
+                        'دانانی ئاگادارکردنەوە بۆ خۆم', 31),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -478,6 +490,19 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(Icons.music_note, 'دەنگەکان', 28),
+                    ),
+                  if (permissions.contains('user status'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return UsersStatus(
+                            email: email,
+                          );
+                        }));
+                      },
+                      child: controlpanelcard(
+                          Icons.person_off_sharp, 'بارو دۆخی کارمەند', 30),
                     ),
                 ],
               ),

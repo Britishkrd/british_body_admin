@@ -51,7 +51,8 @@ class _ChoosingUserToViewTaskDetailsState
                                           email: snapshot.data!.docs[index]
                                               ['email']);
                                     }));
-                                  }, child: const Text('بەڵێ')),
+                                  },
+                                  child: const Text('بەڵێ')),
                               TextButton(
                                   onPressed: () {
                                     Navigator.pop(context);
