@@ -1,4 +1,3 @@
-
 import 'package:british_body_admin/screens/tasks/taskdetails.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -83,8 +82,31 @@ class _TasksState extends State<Tasks> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Container(
+            margin: EdgeInsets.fromLTRB(5.w, 0, 5.w, 0),
+            height: 6.h,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  'ئەرکە دووبارە بووەکان',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(
+                  width: 2.w,
+                ),
+                SizedBox(
+                  child: Icon(Icons.circle,
+                      size: 18.sp,
+                      color: const Color.fromARGB(255, 149, 207, 239)),
+                ),
+              ],
+            )),
         SizedBox(
-          height: 8.h,
+          height: 7.h,
           child: ChipsChoice<int>.single(
             value: tag,
             onChanged: (val) => setState(() => tag = val),
@@ -108,6 +130,12 @@ class _TasksState extends State<Tasks> {
                 return ListView.builder(
                     itemCount: snapshot.data?.docs.length ?? 0,
                     itemBuilder: (BuildContext context, int index) {
+                      bool isweekly = false;
+                      try {
+                        isweekly = snapshot.data!.docs[index]['isweekly'];
+                      } catch (e) {
+                        isweekly = false;
+                      }
                       String deduction = '';
                       String reward = '';
                       try {
@@ -180,6 +208,7 @@ class _TasksState extends State<Tasks> {
                           } catch (e) {
                             stages = 0;
                           }
+
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
                             return Taskdetails(
@@ -195,7 +224,9 @@ class _TasksState extends State<Tasks> {
                               margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
                               padding: EdgeInsets.all(1.h),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: isweekly
+                                    ? const Color.fromARGB(255, 149, 207, 239)
+                                    : const Color.fromRGBO(255, 255, 255, 1),
                                 borderRadius: BorderRadius.circular(5),
                                 boxShadow: const [
                                   BoxShadow(

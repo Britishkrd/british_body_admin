@@ -248,6 +248,22 @@ class _CheckinandoutState extends State<Checkinandout> {
                                 });
                             return;
                           }
+                          bool isNewDay = false;
+                          await FirebaseFirestore.instance
+                              .collection('user')
+                              .doc(email)
+                              .collection('checkincheckouts')
+                              .orderBy('time', descending: true)
+                              .limit(1)
+                              .get()
+                              .then((value2) {
+                            if ((value2.docs.first.data()['time'] as Timestamp)
+                                    .toDate()
+                                    .day !=
+                                DateTime.now().day) {
+                              isNewDay = true;
+                            }
+                          });
                           showDialog(
                               context: context,
                               builder: (context) {
@@ -294,6 +310,9 @@ class _CheckinandoutState extends State<Checkinandout> {
                                               value.reference.update({
                                                 'checkin': true
                                               }).then((value1) {
+                                                if (isNewDay) {
+                                                 
+                                        
                                                 DateTime? changedworktimeend;
 
                                                 try {
@@ -377,8 +396,8 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                               ],
                                                             );
                                                           });
-                                                    },
-                                                  );
+                                                      },
+                                                  );      }
                                                   // }
                                                 }
                                                 Sharedpreference.checkin(
@@ -438,6 +457,22 @@ class _CheckinandoutState extends State<Checkinandout> {
                                       });
                                   return;
                                 }
+                                bool isNewDay = false;
+                          await FirebaseFirestore.instance
+                              .collection('user')
+                              .doc(email)
+                              .collection('checkincheckouts')
+                              .orderBy('time', descending: true)
+                              .limit(1)
+                              .get()
+                              .then((value2) {
+                            if ((value2.docs.first.data()['time'] as Timestamp)
+                                    .toDate()
+                                    .day !=
+                                DateTime.now().day) {
+                              isNewDay = true;
+                            }
+                          });
                                 showDialog(
                                     context: context,
                                     builder: (context) {
@@ -505,6 +540,8 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                   'checkout': false,
                                                   'checkin': true,
                                                 }).then((value) {
+                                                  if(isNewDay){
+                                               
                                                   if (workdays
                                                       .contains(now.weekday)) {
                                                     if (now.hour >= starthour &&
@@ -563,6 +600,7 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                         },
                                                       );
                                                     }
+                                                  }     
                                                   }
                                                   FirebaseFirestore.instance
                                                       .collection('user')

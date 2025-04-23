@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:open_file_plus/open_file_plus.dart';
+// import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -69,7 +69,7 @@ class PDF {
     await file.writeAsBytes(await pdf.save());
 
     // Open the PDF (optional, requires additional packages on Android/iOS)
-    OpenFile.open(file.path);
+    // OpenFile.open(file.path);
   }
 
   // Build the title for the report in Arabic

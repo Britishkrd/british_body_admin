@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
+import 'dart:developer';
 import 'package:british_body_admin/screens/auth/login.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/navigator.dart';
@@ -60,7 +61,6 @@ Future<void> _firebaseMessaginBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> _firebaseMessagingForgroundHandler(RemoteMessage message) async {
-
   SharedPreferences prefs = await SharedPreferences.getInstance();
   List<String> notificationTitles =
       prefs.getStringList('notificationTitles') ?? [];
@@ -339,11 +339,103 @@ Future<void> settinglocalnotifications(String notification) async {
       .doc(email)
       .collection('tasks')
       .where('isdaily', isEqualTo: true)
+      .where('end', isGreaterThanOrEqualTo: DateTime.now())
       .get()
       .then((value) {
     for (var snapshot in value.docs) {
       DateTime? lastupdate;
       DateTime? lastsystemupdate;
+      try {
+        lastsystemupdate = snapshot.data()['lastsystemupdate'].toDate();
+      } catch (e) {
+        lastsystemupdate = null;
+      }
+      try {
+        lastupdate = snapshot.data()['lastupdate'].toDate();
+      } catch (e) {
+        lastupdate = null;
+      }
+      if (lastsystemupdate != null) {
+        if (lastsystemupdate.day != DateTime.now().day) {
+          if (lastupdate != null) {
+            if (lastupdate.day != DateTime.now().day &&
+                snapshot.data()['status'] != 'pending') {
+              snapshot.reference.update(
+                  {'status': 'pending', 'lastsystemupdate': DateTime.now()});
+            }
+          }
+        }
+      } else {
+        if (lastupdate != null) {
+          if (lastupdate.day != DateTime.now().day &&
+              snapshot.data()['status'] != 'pending') {
+            snapshot.reference.update(
+                {'status': 'pending', 'lastsystemupdate': DateTime.now()});
+          }
+        }
+      }
+    }
+  });
+  FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('tasks')
+      .where('isweekly', isEqualTo: true)
+      .where('end', isGreaterThanOrEqualTo: DateTime.now())
+      .get()
+      .then((value) {
+    for (var snapshot in value.docs) {
+      if (snapshot.data()['weekdays'].contains(DateTime.now().weekday)) {
+        DateTime? lastupdate;
+        DateTime? lastsystemupdate;
+        try {
+          lastsystemupdate = snapshot.data()['lastsystemupdate'].toDate();
+        } catch (e) {
+          lastsystemupdate = null;
+        }
+        try {
+          lastupdate = snapshot.data()['lastupdate'].toDate();
+        } catch (e) {
+          lastupdate = null;
+        }
+        log(lastupdate.toString());
+        log(lastsystemupdate.toString());
+        if (lastsystemupdate != null) {
+          if (lastsystemupdate.day != DateTime.now().day) {
+            if (lastupdate != null) {
+              if (lastupdate.day != DateTime.now().day &&
+                  snapshot.data()['status'] != 'pending') {
+                snapshot.reference.update(
+                    {'status': 'pending', 'lastsystemupdate': DateTime.now()});
+              }
+            }
+          }
+        } else {
+          if (lastupdate != null) {
+            if (lastupdate.day != DateTime.now().day &&
+                snapshot.data()['status'] != 'pending') {
+              snapshot.reference.update(
+                  {'status': 'pending', 'lastsystemupdate': DateTime.now()});
+            }
+          }
+        }
+      }
+    }
+  });
+  FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('tasks')
+      .where('ismonthly', isEqualTo: true)
+      .where('end', isGreaterThanOrEqualTo: DateTime.now())
+      .get()
+      .then((value) {
+    for (var snapshot in value.docs) {
+      DateTime? lastupdate;
+      DateTime? lastsystemupdate;
+      if (int.parse(snapshot.data()['dayofthemonth']) != DateTime.now().day) {
+        return;
+      }
       try {
         lastsystemupdate = snapshot.data()['lastsystemupdate'].toDate();
       } catch (e) {
@@ -436,9 +528,7 @@ Future<void> main() async {
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onDidReceiveNotificationResponse:
-        (NotificationResponse notificationResponse) async {
-
-    },
+        (NotificationResponse notificationResponse) async {},
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
   );
 
@@ -498,9 +588,7 @@ final DarwinInitializationSettings initializationSettingsDarwin =
 );
 
 @pragma('vm:entry-point')
-void notificationTapBackground(NotificationResponse notificationResponse) {
-
-}
+void notificationTapBackground(NotificationResponse notificationResponse) {}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});

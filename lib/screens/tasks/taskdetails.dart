@@ -41,6 +41,16 @@ TextEditingController linkcontroller = TextEditingController();
 List<List<TextEditingController>> linkcontrollerslist = [];
 List<List<TextEditingController>> notecontrollerslist = [];
 
+List<String> weekdays = [
+  'دووشەممە',
+  'سێشەممە',
+  'چوارشەممە',
+  'پێنج شەممە',
+  'هەینی شەممە',
+  'شەممە',
+  'یەکشەممە',
+];
+
 class _TaskdetailsState extends State<Taskdetails> {
   @override
   void initState() {
@@ -154,6 +164,33 @@ class _TaskdetailsState extends State<Taskdetails> {
               ],
             ),
           ),
+          if (widget.task['isweekly'])
+            Container(
+                alignment: Alignment.topRight,
+                margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
+                child: Text('ڕۆژانی دووبارە بوونەوە',
+                    style: TextStyle(
+                        fontSize: 16.sp, fontWeight: FontWeight.bold))),
+          if (widget.task['isweekly'])
+            Container(
+                height: 8.h,
+                margin: EdgeInsets.only(top: 0.h, right: 1.w, left: 1.w),
+                child: ListView.builder(
+                  itemCount: 7,
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) => Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (widget.task['weekdays'].contains(index + 1))
+                        Container(
+                            margin: EdgeInsets.only(left: 1.w),
+                            child: Text("${weekdays[index]},",
+                                style: TextStyle(fontSize: 16.sp))),
+                    ],
+                  ),
+                )),
           widget.stages != 0
               ? Container(
                   margin: EdgeInsets.fromLTRB(5.w, 3.h, 5.w, 1.h),

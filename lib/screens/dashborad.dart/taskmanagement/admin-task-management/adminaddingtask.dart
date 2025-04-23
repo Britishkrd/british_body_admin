@@ -454,6 +454,7 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                 ),
                 onSelect: (values) {
                   List daysoff = values;
+                  log(daysoff.toString());
                   offdays = [];
                   for (int i = 0; i < values.length; i++) {
                     offdays.add(int.parse(daysoff[i]));
@@ -855,36 +856,37 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                 function: () async {
                                   String password = '';
                                   if ('default1' != dropdownValue) {
-                                    
-                                  await showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: Text('Enter Password'),
-                                        content: TextField(
-                                          onChanged: (value) {
-                                            password = value;
-                                          },
-                                          obscureText: true,
-                                          decoration: InputDecoration(hintText: "Password"),
-                                        ),
-                                        actions: [
-                                          Material1.button(
-                                            label: 'OK',
-                                            function: () {
-                                              Navigator.pop(context);
+                                    await showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text('Enter Password'),
+                                          content: TextField(
+                                            onChanged: (value) {
+                                              password = value;
                                             },
-                                            textcolor: Colors.white,
-                                            buttoncolor: Material1.primaryColor,
+                                            obscureText: true,
+                                            decoration: InputDecoration(
+                                                hintText: "Password"),
                                           ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                    
+                                          actions: [
+                                            Material1.button(
+                                              label: 'OK',
+                                              function: () {
+                                                Navigator.pop(context);
+                                              },
+                                              textcolor: Colors.white,
+                                              buttoncolor:
+                                                  Material1.primaryColor,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   }
 
-                                  if (password != '1010' && 'default1' != dropdownValue) {
+                                  if (password != '1010' &&
+                                      'default1' != dropdownValue) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text('Password is incorrect'),
