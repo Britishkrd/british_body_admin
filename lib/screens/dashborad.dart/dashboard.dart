@@ -31,6 +31,7 @@ import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -493,13 +494,49 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   if (permissions.contains('user status'))
                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return UsersStatus(
-                            email: email,
-                          );
-                        }));
+                      onTap: () async {
+                        Map<String, bool> haslogedintoday = {};
+
+                        FirebaseFirestore.instance
+                            .collection('user')
+                            .get()
+                            .then(
+                          (value) async {
+                            for (var element in value.docs) {
+                              await FirebaseFirestore.instance
+                                  .collection('user')
+                                  .doc(element['email'])
+                                  .collection('checkincheckouts')
+                                  .orderBy('time', descending: true)
+                                  .limit(1)
+                                  .get()
+                                  .then((value2) {
+                                if (value2.docs.isNotEmpty) {
+                                  if ((value2.docs.first.data()['time']
+                                              as Timestamp)
+                                          .toDate()
+                                          .day ==
+                                      DateTime.now().day) {
+                                    haslogedintoday[element['email']] = true;
+                                  } else {
+                                    haslogedintoday[element['email']] = false;
+                                  }
+                                } else {
+                                  haslogedintoday[element['email']] = false;
+                                }
+                              });
+                            }
+                          },
+                        ).then((value) {
+                          log(haslogedintoday.toString());
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return UsersStatus(
+                              email: email,
+                              haslogeding: haslogedintoday,
+                            );
+                          }));
+                        });
                       },
                       child: controlpanelcard(
                           Icons.person_off_sharp, 'بارو دۆخی کارمەند', 30),

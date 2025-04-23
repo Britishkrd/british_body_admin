@@ -36,40 +36,23 @@ class _ChoosingUseroForLoginLogoutState
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                              title: const Text(
-                                  'دڵنیایت لە هەڵبژاردنی ئەم کارمەندە'),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      showMonthRangePicker(
-                                        context: context,
-                                        firstDate: DateTime(
-                                            DateTime.now().year - 1, 1),
-                                        rangeList: false,
-                                      ).then((List<DateTime>? dates) {
-                                        Navigator.push(context,
-                                            MaterialPageRoute(
-                                                builder: (context) {
-                                          return LoginLogoutManagement(
-                                            email: snapshot.data!.docs[index]
-                                                ['email'],
-                                            date: dates![0],
-                                          );
-                                        }));
-                                      });
-                                    },
-                                    child: const Text('بەڵێ')),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('نەخێر')),
-                              ]);
-                        });
+                    showMonthRangePicker(
+                      context: context,
+                      firstDate: DateTime(DateTime.now().year - 1, 1),
+                      rangeList: false,
+                    ).then((List<DateTime>? dates) {
+                      if (dates == null) {
+                        return;
+                      }
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return LoginLogoutManagement(
+                          email: snapshot.data!.docs[index]['email'],
+                          name: snapshot.data!.docs[index]['name'],
+                          date: dates[0],
+                        );
+                      }));
+                    });
                   },
                   child: SizedBox(
                       height: 15.h,

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,9 +39,101 @@ class _ProfileState extends State<Profile> {
     setState(() {});
   }
 
+  Future<List<String>> todaysworktime() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    String email = preference.getString('email') ?? '';
+    Duration worktime = Duration.zero;
+    Duration rest = Duration.zero;
+    DateTime lastaction = DateTime.now();
+    bool islastactionlogin = false;
+
+    await FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .collection('checkincheckouts')
+        .where('time',
+            isGreaterThanOrEqualTo: DateTime(
+                DateTime.now().year, DateTime.now().month, DateTime.now().day))
+        .where('time',
+            isLessThan: DateTime(DateTime.now().year, DateTime.now().month,
+                DateTime.now().day + 1))
+        .get()
+        .then((value) async {
+      if (value.docs.isNotEmpty) {
+        log(value.docs.length.toString());
+        log(value.docs[0].data().toString());
+        for (var i = 0; i < value.docs.length; i = i + 2) {
+          if (i + 1 == value.docs.length) {
+            break;
+          }
+          if (value.docs[i]['checkin'] == false) {
+            if (i + 2 == value.docs.length) {
+              break;
+            }
+
+            worktime += value.docs[i + 2]['time']
+                .toDate()
+                .difference(value.docs[i + 1]['time'].toDate());
+          } else {
+            worktime += value.docs[i + 1]['time']
+                .toDate()
+                .difference(value.docs[i]['time'].toDate());
+          }
+        }
+        islastactionlogin = value.docs.last.data()['checkin'];
+        lastaction = value.docs.last.data()['time'].toDate();
+      }
+      if (islastactionlogin) {
+        worktime += DateTime.now().difference(lastaction);
+      }
+    });
+    await FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .collection('checkincheckouts')
+        .where('time',
+            isGreaterThanOrEqualTo: DateTime(
+                DateTime.now().year, DateTime.now().month, DateTime.now().day))
+        .where('time',
+            isLessThan: DateTime(DateTime.now().year, DateTime.now().month,
+                DateTime.now().day + 1))
+        .get()
+        .then((value) {
+      if (value.docs.isNotEmpty) {
+        log(value.docs.length.toString());
+        log(value.docs[0].data().toString());
+        for (var i = 0; i < value.docs.length; i = i + 2) {
+          if (i + 1 == value.docs.length) {
+            break;
+          }
+          if (value.docs[i]['checkout'] == false) {
+            if (i + 2 == value.docs.length) {
+              break;
+            }
+
+            rest += value.docs[i + 2]['time']
+                .toDate()
+                .difference(value.docs[i + 1]['time'].toDate());
+          } else {
+            rest += value.docs[i + 1]['time']
+                .toDate()
+                .difference(value.docs[i]['time'].toDate());
+          }
+        }
+        islastactionlogin = value.docs.last.data()['checkin'];
+        lastaction = value.docs.last.data()['time'].toDate();
+      }
+      log(value.docs.first.data().toString());
+      log((value.docs.first.data()['time'] as Timestamp).toString());
+      log((value.docs.first.data()['time'] as Timestamp).toString());
+      log("rest ${rest.toString()}");
+    });
+    return [worktime.toString(), rest.toString()];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return Column(
       children: [
         // SizedBox(
         //   width: 100.w,
@@ -68,98 +162,112 @@ class _ProfileState extends State<Profile> {
         //     textAlign: TextAlign.center,
         //   ),
         // ),
-        if (checkin)
-          Container(
-            width: 100.w,
-            margin: EdgeInsets.only(
-              top: 3.h,
-            ),
-            padding: EdgeInsets.all(2.w),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                SizedBox(
-                  height: 4.h,
-                  child: Text(
-                    "$name : بەکارهێنەر",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(
-                  height: 4.h,
-                  child: Text(
-                    "$email : ئیمەیل",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('شوێن'),
-                            content: Text("دڵنییایت لە بینینی شوێن"),
-                            actions: [
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('نەخێر')),
-                              TextButton(
-                                  onPressed: () async {
-                                    if (!await launchUrl(Uri.parse(
-                                        'https://www.google.com/maps/search/?api=1&query=$worklatitude,$worklongtitude'))) {
-                                      throw Exception('Could not launch ');
-                                    }
-                                  },
-                                  child: const Text('بەڵێ')),
-                            ],
-                          );
-                        });
-                  },
-                  child: SizedBox(
-                    height: 4.h,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "$worklatitude-$worklongtitude",
-                          style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
-                              decorationColor: Colors.blue),
-                        ),
-                        Text(
-                          " : شوێن",
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Text(
-                  checkin
-                      ? 'تۆ لە ئێستادا لەکاردایت'
-                      : 'تۆ لە ئێستادا لەکاردا نیت تکایە چوونەژوورەوە بکە',
+        // if (checkin)
+        Container(
+          width: 100.w,
+          // margin: EdgeInsets.only(
+          //   top: 1.h,
+          // ),
+          padding: EdgeInsets.all(2.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                height: 4.h,
+                child: Text(
+                  "$name : بەکارهێنەر",
                   style: TextStyle(
                       color: Colors.black,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
+              ),
+              SizedBox(
+                height: 4.h,
+                child: Text(
+                  "$email : ئیمەیل",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('شوێن'),
+                          content: Text("دڵنییایت لە بینینی شوێن"),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('نەخێر')),
+                            TextButton(
+                                onPressed: () async {
+                                  if (!await launchUrl(Uri.parse(
+                                      'https://www.google.com/maps/search/?api=1&query=$worklatitude,$worklongtitude'))) {
+                                    throw Exception('Could not launch ');
+                                  }
+                                },
+                                child: const Text('بەڵێ')),
+                          ],
+                        );
+                      });
+                },
+                child: SizedBox(
+                  height: 4.h,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        "$worklatitude-$worklongtitude",
+                        style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.blue),
+                      ),
+                      Text(
+                        " : شوێن",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Text(
+                checkin
+                    ? 'تۆ لە ئێستادا لەکاردایت'
+                    : 'تۆ لە ئێستادا لەکاردا نیت تکایە چوونەژوورەوە بکە',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
+        ),
+        FutureBuilder(
+            future: todaysworktime(),
+            builder: (context, snapshot) {
+              return SizedBox(
+                  height: 6.h,
+                  child: Text(
+                      snapshot.connectionState == ConnectionState.waiting
+                          ? 'تکایە چاوەڕوانبکە'
+                          : " کاتی ئیشکرند : ${snapshot.data![0].substring(0, 8).toString()}   -  کاتی ڕێست :  ${snapshot.data![1].substring(0, 8).toString()}",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold)));
+            }),
         SizedBox(
-          height: 80.h,
+          height: 60.h,
           width: 100.w,
           child: FutureBuilder(
               future: FirebaseFirestore.instance

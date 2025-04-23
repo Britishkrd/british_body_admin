@@ -36,31 +36,14 @@ class _ChoosingUserToViewTaskDetailsState
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text(
-                                'دڵنییایت لە هەڵبژاردنی ئەم کارمەندە؟'),
-                            actions: [
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.push(context,
+                    Navigator.push(context,
                                         MaterialPageRoute(builder: (context) {
                                       return Choosingtasktoviewtaskdetails(
                                           email: snapshot.data!.docs[index]
-                                              ['email']);
+                                              ['email'],
+                                              name: snapshot.data!.docs[index]
+                                              ['name'],);
                                     }));
-                                  },
-                                  child: const Text('بەڵێ')),
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('نەخێر')),
-                            ],
-                          );
-                        });
                   },
                   child: SizedBox(
                       height: 15.h,

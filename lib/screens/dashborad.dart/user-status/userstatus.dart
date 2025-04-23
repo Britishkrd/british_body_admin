@@ -5,7 +5,9 @@ import 'package:sizer/sizer.dart';
 
 class UsersStatus extends StatefulWidget {
   final String email;
-  const UsersStatus({super.key, required this.email});
+  final Map<String, bool> haslogeding;
+  const UsersStatus(
+      {super.key, required this.email, required this.haslogeding});
 
   @override
   State<UsersStatus> createState() => _UsersStatusState();
@@ -42,7 +44,11 @@ class _UsersStatusState extends State<UsersStatus> {
                           decoration: BoxDecoration(
                             color: snapshot.data!.docs[index]['checkin']
                                 ? Colors.green
-                                : Colors.red,
+                                : (widget.haslogeding[
+                                            "${snapshot.data!.docs[index]['email']}"] ??
+                                        false)
+                                    ? Colors.amber
+                                    : Colors.red,
                             borderRadius: BorderRadius.circular(5),
                             boxShadow: const [
                               BoxShadow(

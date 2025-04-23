@@ -1,0 +1,2 @@
+C:/Users/TUF - Z/Desktop/british_body_admin/android/app/.cxx/RelWithDebInfo/2u2g3d4x/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/TUF - Z/Desktop/british_body_admin/android/app/.cxx/RelWithDebInfo/2u2g3d4x/armeabi-v7a/CMakeFiles/rebuild_cache.dir

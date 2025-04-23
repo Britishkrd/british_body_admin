@@ -9,7 +9,9 @@ import 'viewingtaskdetailsupdates.dart';
 
 class Choosingtasktoviewtaskdetails extends StatefulWidget {
   final String email;
-  const Choosingtasktoviewtaskdetails({super.key, required this.email});
+  final String name;
+  const Choosingtasktoviewtaskdetails(
+      {super.key, required this.email, required this.name});
 
   @override
   State<Choosingtasktoviewtaskdetails> createState() =>
@@ -88,7 +90,7 @@ class _ChoosingtasktoviewtaskdetailsState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('بینینی وردەکاری کارەکان'),
+        title: Text('بینینی وردەکاری کارەکان بۆ ${widget.name}'),
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
