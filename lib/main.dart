@@ -474,9 +474,23 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessaginBackgroundHandler);
   FirebaseMessaging.onMessage.listen(_firebaseMessagingForgroundHandler);
-  await Firebase.initializeApp(
+
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+        options: FirebaseOptions(
+            apiKey: "AIzaSyB_ic561lFl7k5i27nBAe6kammJrm6HHHA",
+            authDomain: "british-body-admin.firebaseapp.com",
+            projectId: "british-body-admin",
+            storageBucket: "british-body-admin.firebasestorage.app",
+            messagingSenderId: "528586385117",
+            appId: "1:528586385117:web:673bc1552ac4605be99d34",
+            measurementId: "G-6XTCNC81HG"));
+  }else{
+    await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  }
+  
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
     announcement: false,
@@ -511,6 +525,7 @@ Future<void> main() async {
         badge: true,
         sound: true,
       );
+  if (!kIsWeb) {
   try {
     await AppBadgePlus.updateBadge(0);
   } catch (e) {
@@ -518,6 +533,7 @@ Future<void> main() async {
       print(e);
     }
   }
+}
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
@@ -652,12 +668,15 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    FlutterIsolate.spawn(settinglocalnotifications, "hello world");
+    // FlutterIsolate.spawn(settinglocalnotifications, "hello world");
+    if (!kIsWeb) {
+  FlutterIsolate.spawn(settinglocalnotifications, "hello world");
+}
     // locationsfunction();
 
-    if (Platform.isAndroid) {
-      _createNewChannel();
-    }
+   if (!kIsWeb && Platform.isAndroid) {
+  _createNewChannel();
+}
     islogeding();
     setupInteractedMessage();
     _handlePermission();

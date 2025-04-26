@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 import 'package:sizer/sizer.dart';
@@ -266,14 +267,29 @@ class _LoginState extends State<Login> {
     ));
   }
 
+  // Future<String> getDeviceId() async {
+  //   var deviceInfo = DeviceInfoPlugin();
+  //   if (Platform.isAndroid) {
+  //     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  //     return androidInfo.id;
+  //   } else {
+  //     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+  //     return iosInfo.identifierForVendor ?? iosInfo.localizedModel;
+  //   }
+  // }
   Future<String> getDeviceId() async {
     var deviceInfo = DeviceInfoPlugin();
-    if (Platform.isAndroid) {
+
+    if (kIsWeb) {
+      return 'web-device';
+    } else if (Platform.isAndroid) {
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
       return androidInfo.id;
-    } else {
+    } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       return iosInfo.identifierForVendor ?? iosInfo.localizedModel;
+    } else {
+      return 'unknown-device';
     }
   }
 }
