@@ -39,95 +39,209 @@ class _ProfileState extends State<Profile> {
     setState(() {});
   }
 
+  // Future<List<String>> todaysworktime() async {
+  //   final SharedPreferences preference = await SharedPreferences.getInstance();
+  //   String email = preference.getString('email') ?? '';
+  //   Duration worktime = Duration.zero;
+  //   Duration rest = Duration.zero;
+  //   DateTime lastaction = DateTime.now();
+  //   bool islastactionlogin = false;
+
+  //   await FirebaseFirestore.instance
+  //       .collection('user')
+  //       .doc(email)
+  //       .collection('checkincheckouts')
+  //       .where('time',
+  //           isGreaterThanOrEqualTo: DateTime(
+  //               DateTime.now().year, DateTime.now().month, DateTime.now().day))
+  //       .where('time',
+  //           isLessThan: DateTime(DateTime.now().year, DateTime.now().month,
+  //               DateTime.now().day + 1))
+  //       .get()
+  //       .then((value) async {
+  //     if (value.docs.isNotEmpty) {
+  //       log(value.docs.length.toString());
+  //       log(value.docs[0].data().toString());
+  //       for (var i = 0; i < value.docs.length; i = i + 2) {
+  //         if (i + 1 == value.docs.length) {
+  //           break;
+  //         }
+  //         if (value.docs[i]['checkin'] == false) {
+  //           if (i + 2 == value.docs.length) {
+  //             break;
+  //           }
+
+  //           worktime += value.docs[i + 2]['time']
+  //               .toDate()
+  //               .difference(value.docs[i + 1]['time'].toDate());
+  //         } else {
+  //           worktime += value.docs[i + 1]['time']
+  //               .toDate()
+  //               .difference(value.docs[i]['time'].toDate());
+  //         }
+  //       }
+  //       islastactionlogin = value.docs.last.data()['checkin'];
+  //       lastaction = value.docs.last.data()['time'].toDate();
+  //     }
+  //     if (islastactionlogin) {
+  //       worktime += DateTime.now().difference(lastaction);
+  //     }
+  //   });
+  //   await FirebaseFirestore.instance
+  //       .collection('user')
+  //       .doc(email)
+  //       .collection('checkincheckouts')
+  //       .where('time',
+  //           isGreaterThanOrEqualTo: DateTime(
+  //               DateTime.now().year, DateTime.now().month, DateTime.now().day))
+  //       .where('time',
+  //           isLessThan: DateTime(DateTime.now().year, DateTime.now().month,
+  //               DateTime.now().day + 1))
+  //       .get()
+  //       .then((value) {
+  //     if (value.docs.isNotEmpty) {
+  //       log(value.docs.length.toString());
+  //       log(value.docs[0].data().toString());
+  //       for (var i = 0; i < value.docs.length; i = i + 2) {
+  //         if (i + 1 == value.docs.length) {
+  //           break;
+  //         }
+  //         if (value.docs[i]['checkout'] == false) {
+  //           if (i + 2 == value.docs.length) {
+  //             break;
+  //           }
+
+  //           rest += value.docs[i + 2]['time']
+  //               .toDate()
+  //               .difference(value.docs[i + 1]['time'].toDate());
+  //         } else {
+  //           rest += value.docs[i + 1]['time']
+  //               .toDate()
+  //               .difference(value.docs[i]['time'].toDate());
+  //         }
+  //       }
+  //       islastactionlogin = value.docs.last.data()['checkin'];
+  //       lastaction = value.docs.last.data()['time'].toDate();
+  //     }
+  //     log(value.docs.first.data().toString());
+  //     log((value.docs.first.data()['time'] as Timestamp).toString());
+  //     log((value.docs.first.data()['time'] as Timestamp).toString());
+  //     log("rest ${rest.toString()}");
+  //   });
+  //   return [worktime.toString(), rest.toString()];
+  // }
+
   Future<List<String>> todaysworktime() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     String email = preference.getString('email') ?? '';
     Duration worktime = Duration.zero;
     Duration rest = Duration.zero;
-    DateTime lastaction = DateTime.now();
-    bool islastactionlogin = false;
+    DateTime? lastaction; // Make lastaction nullable
+    bool? islastactionlogin; // Make islastactionlogin nullable
 
-    await FirebaseFirestore.instance
-        .collection('user')
-        .doc(email)
-        .collection('checkincheckouts')
-        .where('time',
-            isGreaterThanOrEqualTo: DateTime(
-                DateTime.now().year, DateTime.now().month, DateTime.now().day))
-        .where('time',
-            isLessThan: DateTime(DateTime.now().year, DateTime.now().month,
-                DateTime.now().day + 1))
-        .get()
-        .then((value) async {
-      if (value.docs.isNotEmpty) {
-        log(value.docs.length.toString());
-        log(value.docs[0].data().toString());
-        for (var i = 0; i < value.docs.length; i = i + 2) {
-          if (i + 1 == value.docs.length) {
-            break;
-          }
-          if (value.docs[i]['checkin'] == false) {
-            if (i + 2 == value.docs.length) {
-              break;
+    QuerySnapshot<Map<String, dynamic>> workTimeSnapshot =
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(email)
+            .collection('checkincheckouts')
+            .where('time',
+                isGreaterThanOrEqualTo: DateTime(DateTime.now().year,
+                    DateTime.now().month, DateTime.now().day))
+            .where('time',
+                isLessThan: DateTime(DateTime.now().year, DateTime.now().month,
+                    DateTime.now().day + 1))
+            .get();
+
+    if (workTimeSnapshot.docs.isNotEmpty) {
+      log('Work Time Docs Length: ${workTimeSnapshot.docs.length}');
+      for (var i = 0; i < workTimeSnapshot.docs.length; i = i + 2) {
+        if (i + 1 >= workTimeSnapshot.docs.length) {
+          break;
+        }
+        final doc1 = workTimeSnapshot.docs[i].data();
+        final doc2 = workTimeSnapshot.docs[i + 1].data();
+
+        if (doc1['time'] != null &&
+            doc2['time'] != null &&
+            doc1['checkin'] != null) {
+          if (doc1['checkin'] == false) {
+            if (i + 2 < workTimeSnapshot.docs.length) {
+              final doc3 = workTimeSnapshot.docs[i + 2].data();
+              if (doc3['time'] != null) {
+                worktime += (doc3['time'] as Timestamp)
+                    .toDate()
+                    .difference((doc2['time'] as Timestamp).toDate());
+              }
             }
-
-            worktime += value.docs[i + 2]['time']
-                .toDate()
-                .difference(value.docs[i + 1]['time'].toDate());
           } else {
-            worktime += value.docs[i + 1]['time']
+            worktime += (doc2['time'] as Timestamp)
                 .toDate()
-                .difference(value.docs[i]['time'].toDate());
+                .difference((doc1['time'] as Timestamp).toDate());
           }
         }
-        islastactionlogin = value.docs.last.data()['checkin'];
-        lastaction = value.docs.last.data()['time'].toDate();
       }
-      if (islastactionlogin) {
+      if (workTimeSnapshot.docs.isNotEmpty) {
+        final lastDoc = workTimeSnapshot.docs.last.data();
+        islastactionlogin = lastDoc['checkin'];
+        lastaction = (lastDoc['time'] as Timestamp?)?.toDate();
+      }
+      if (islastactionlogin == true && lastaction != null) {
         worktime += DateTime.now().difference(lastaction);
       }
-    });
-    await FirebaseFirestore.instance
-        .collection('user')
-        .doc(email)
-        .collection('checkincheckouts')
-        .where('time',
-            isGreaterThanOrEqualTo: DateTime(
-                DateTime.now().year, DateTime.now().month, DateTime.now().day))
-        .where('time',
-            isLessThan: DateTime(DateTime.now().year, DateTime.now().month,
-                DateTime.now().day + 1))
-        .get()
-        .then((value) {
-      if (value.docs.isNotEmpty) {
-        log(value.docs.length.toString());
-        log(value.docs[0].data().toString());
-        for (var i = 0; i < value.docs.length; i = i + 2) {
-          if (i + 1 == value.docs.length) {
-            break;
-          }
-          if (value.docs[i]['checkout'] == false) {
-            if (i + 2 == value.docs.length) {
-              break;
-            }
+    }
 
-            rest += value.docs[i + 2]['time']
-                .toDate()
-                .difference(value.docs[i + 1]['time'].toDate());
+    QuerySnapshot<Map<String, dynamic>> restTimeSnapshot =
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(email)
+            .collection('checkincheckouts')
+            .where('time',
+                isGreaterThanOrEqualTo: DateTime(DateTime.now().year,
+                    DateTime.now().month, DateTime.now().day))
+            .where('time',
+                isLessThan: DateTime(DateTime.now().year, DateTime.now().month,
+                    DateTime.now().day + 1))
+            .get();
+
+    if (restTimeSnapshot.docs.isNotEmpty) {
+      log('Rest Time Docs Length: ${restTimeSnapshot.docs.length}');
+      for (var i = 0; i < restTimeSnapshot.docs.length; i = i + 2) {
+        if (i + 1 >= restTimeSnapshot.docs.length) {
+          break;
+        }
+        final doc1 = restTimeSnapshot.docs[i].data();
+        final doc2 = restTimeSnapshot.docs[i + 1].data();
+
+        if (doc1['time'] != null &&
+            doc2['time'] != null &&
+            doc1['checkout'] != null) {
+          if (doc1['checkout'] == false) {
+            if (i + 2 < restTimeSnapshot.docs.length) {
+              final doc3 = restTimeSnapshot.docs[i + 2].data();
+              if (doc3['time'] != null) {
+                rest += (doc3['time'] as Timestamp)
+                    .toDate()
+                    .difference((doc2['time'] as Timestamp).toDate());
+              }
+            }
           } else {
-            rest += value.docs[i + 1]['time']
+            rest += (doc2['time'] as Timestamp)
                 .toDate()
-                .difference(value.docs[i]['time'].toDate());
+                .difference((doc1['time'] as Timestamp).toDate());
           }
         }
-        islastactionlogin = value.docs.last.data()['checkin'];
-        lastaction = value.docs.last.data()['time'].toDate();
       }
-      log(value.docs.first.data().toString());
-      log((value.docs.first.data()['time'] as Timestamp).toString());
-      log((value.docs.first.data()['time'] as Timestamp).toString());
+      if (restTimeSnapshot.docs.isNotEmpty &&
+          restTimeSnapshot.docs.first.data()['time'] != null) {
+        log(restTimeSnapshot.docs.first.data().toString());
+        log((restTimeSnapshot.docs.first.data()['time'] as Timestamp)
+            .toString());
+        log((restTimeSnapshot.docs.first.data()['time'] as Timestamp)
+            .toString());
+      }
       log("rest ${rest.toString()}");
-    });
+    }
+
     return [worktime.toString(), rest.toString()];
   }
 
