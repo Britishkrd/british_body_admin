@@ -1,6 +1,6 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import 'package:british_body_admin/screens/checkincheckout/checkinandout.dart';
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/screens/checkincheckout/checkinandout.dart';
 import 'package:british_body_admin/screens/dashborad.dart/dashboard.dart';
 import 'package:british_body_admin/screens/email/email.dart';
 import 'package:british_body_admin/screens/notifications/notifications.dart';
@@ -16,6 +16,7 @@ class Navigation extends StatefulWidget {
   @override
   State<Navigation> createState() => _NavigationState();
 }
+
 bool checkin = true;
 double latitude = 0.0;
 double longtitude = 0.0;
@@ -26,6 +27,7 @@ TextEditingController notecontroller = TextEditingController();
 
 String email = '';
 List permissions = [];
+
 class _NavigationState extends State<Navigation> {
   int _bottomNavIndex = 2;
   @override
@@ -83,7 +85,7 @@ class _NavigationState extends State<Navigation> {
             : _bottomNavIndex == 3
                 ? const Profile()
                 : _bottomNavIndex == 2
-                    ? Checkinandout()
+                    ? CheckInOutScreen()
                     : _bottomNavIndex == 1
                         ? Tasks(
                             email: widget.email,
