@@ -1,6 +1,7 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:ntp/ntp.dart';
@@ -43,17 +44,16 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
 
   Future<void> _loadUserInfo() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     setState(() {
       CheckInState.userEmail = prefs.getString('email') ?? '';
       CheckInState.isCheckedIn = prefs.getBool('checkin') ?? false;
       CheckInState.userPermissions = prefs.getStringList('permissions') ?? [];
       CheckInState.workplaceLatitude = prefs.getDouble('worklat') ?? 0.0;
       CheckInState.workplaceLongitude = prefs.getDouble('worklong') ?? 0.0;
-      CheckInState.workingDays = prefs.getStringList('weekdays')
-              ?.map((e) => int.parse(e))
-              .toList() ??
-          [];
+      CheckInState.workingDays =
+          prefs.getStringList('weekdays')?.map((e) => int.parse(e)).toList() ??
+              [];
       CheckInState.workStartHour = prefs.getInt('starthour') ?? 0;
       CheckInState.workEndHour = prefs.getInt('endhour') ?? 0;
       CheckInState.workStartMinute = prefs.getInt('startmin') ?? 0;
@@ -91,10 +91,10 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
               ? 'تۆ لە ئێستادا لەکاردایت'
               : 'تۆ لە ئێستادا لەکاردا نیت تکایە چوونەژوورەوە بکە',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5),
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5),
         ),
       ),
     );
@@ -119,7 +119,8 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
         height: 8.h,
         width: 40.w,
         decoration: BoxDecoration(
-          color: CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
+          color:
+              CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
@@ -136,9 +137,9 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
             Text(
               'چوونەژوورەوە',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600),
             ),
             const Icon(Icons.login_rounded, color: Colors.white),
           ],
@@ -156,7 +157,8 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
         height: 8.h,
         width: 40.w,
         decoration: BoxDecoration(
-          color: !CheckInState.isCheckedIn ? Colors.grey : const Color(0xFFE53935),
+          color:
+              !CheckInState.isCheckedIn ? Colors.grey : const Color(0xFFE53935),
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
@@ -173,9 +175,9 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
             Text(
               'چوونەدەرەوە',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600),
             ),
             const Icon(Icons.logout_rounded, color: Colors.white),
           ],
@@ -228,7 +230,8 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
       width: 40.w,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
+          backgroundColor:
+              CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -237,16 +240,14 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
           shadowColor: Colors.black.withOpacity(0.2),
           padding: EdgeInsets.symmetric(horizontal: 20),
         ),
-        onPressed: CheckInState.isCheckedIn
-            ? null
-            : () => _handleCheckIn(false),
+        onPressed:
+            CheckInState.isCheckedIn ? null : () => _handleCheckIn(false),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.login_rounded, color: Colors.white),
             SizedBox(width: 8),
-            Text('چوونەژوورەوە',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            Text('چوونەژوورەوە', style: TextStyle(fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -254,12 +255,13 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
   }
 
   Widget _buildWorkOutsideCheckInButton() {
-    return Container(
+    return SizedBox(
       height: 8.h,
       width: 80.w,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
+          backgroundColor:
+              CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -268,9 +270,7 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
           shadowColor: Colors.black.withOpacity(0.2),
           padding: EdgeInsets.symmetric(horizontal: 20),
         ),
-        onPressed: CheckInState.isCheckedIn
-            ? null
-            : () => _handleCheckIn(true),
+        onPressed: CheckInState.isCheckedIn ? null : () => _handleCheckIn(true),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -295,12 +295,13 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
   }
 
   Widget _buildCheckOutButtonSection() {
-    return Container(
+    return SizedBox(
       height: 8.h,
       width: 40.w,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: !CheckInState.isCheckedIn ? Colors.grey : const Color(0xFFE53935),
+          backgroundColor:
+              !CheckInState.isCheckedIn ? Colors.grey : const Color(0xFFE53935),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -309,16 +310,13 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
           shadowColor: Colors.black.withOpacity(0.2),
           padding: EdgeInsets.symmetric(horizontal: 20),
         ),
-        onPressed: !CheckInState.isCheckedIn
-            ? null
-            : _handleCheckOut,
+        onPressed: !CheckInState.isCheckedIn ? null : _handleCheckOut,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.logout_rounded, color: Colors.white),
             SizedBox(width: 8),
-            Text('چوونەدەرەوە',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            Text('چوونەدەرەوە', style: TextStyle(fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -381,7 +379,8 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
 
     if (snapshot.docs.isEmpty) return true;
 
-    final lastCheckIn = (snapshot.docs.first.data()['time'] as Timestamp).toDate();
+    final lastCheckIn =
+        (snapshot.docs.first.data()['time'] as Timestamp).toDate();
     return lastCheckIn.day != DateTime.now().day;
   }
 
@@ -438,14 +437,17 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
 
     DateTime? changedWorkTimeEnd;
     try {
-      changedWorkTimeEnd = (userDoc.data()!['changedworkend'] as Timestamp).toDate();
+      changedWorkTimeEnd =
+          (userDoc.data()!['changedworkend'] as Timestamp).toDate();
     } catch (e) {
       changedWorkTimeEnd = null;
     }
 
     if (changedWorkTimeEnd?.isAfter(checkInTime) ?? false) {
-      CheckInState.workStartHour = int.parse(userDoc.data()!['changedworkstarthour']);
-      CheckInState.workStartMinute = int.parse(userDoc.data()!['changedworkstartmin']);
+      CheckInState.workStartHour =
+          int.parse(userDoc.data()!['changedworkstarthour']);
+      CheckInState.workStartMinute =
+          int.parse(userDoc.data()!['changedworkstartmin']);
     }
 
     if (CheckInState.workingDays.contains(checkInTime.weekday) &&
@@ -543,10 +545,17 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     }
   }
 
+
   Future<DateTime> _getNetworkTime() async {
-    final localTime = DateTime.now().toLocal();
-    final offset = await NTP.getNtpOffset(localTime: localTime);
-    return localTime.add(Duration(milliseconds: offset));
+    if (kIsWeb) {
+      // For web, just use the local time since we can't reliably get NTP time
+      return DateTime.now().toLocal();
+    } else {
+      // For mobile, use NTP as before
+      final localTime = DateTime.now().toLocal();
+      final offset = await NTP.getNtpOffset(localTime: localTime);
+      return localTime.add(Duration(milliseconds: offset));
+    }
   }
 
   void _showLoadingDialog(String message) {
@@ -561,9 +570,8 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
               const CircularProgressIndicator(),
               SizedBox(height: 2.h),
               Text(message,
-                  style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600)),
+                  style:
+                      TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
             ],
           ),
         ),
@@ -634,8 +642,8 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
             ),
             onPressed: onConfirm,
             child: Text(
-              CheckInState.showCheckInForm ? 'چوونەژوورەوە' : 'چوونەدەرەوە',
-              style: TextStyle(fontWeight: FontWeight.w600)),
+                CheckInState.showCheckInForm ? 'چوونەژوورەوە' : 'چوونەدەرەوە',
+                style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
