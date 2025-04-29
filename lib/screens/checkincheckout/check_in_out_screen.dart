@@ -1,4 +1,5 @@
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/shared/confirm_dialog.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -323,50 +324,90 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     );
   }
 
+  // Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
+  //   _showLoadingDialog('تکایە چاوەڕێکەوە');
+
+  //   try {
+  //     await _getCurrentPosition();
+  //     await _loadUserInfo();
+
+  //     if (!isOutsideWorkplace) {
+  //       final distance = Geolocator.distanceBetween(
+  //         CheckInState.workplaceLatitude,
+  //         CheckInState.workplaceLongitude,
+  //         CheckInState.currentLatitude,
+  //         CheckInState.currentLongitude,
+  //       );
+
+  //       if (distance > 100) {
+  //         Navigator.pop(context);
+  //         _showErrorDialog(
+  //           'هەڵە',
+  //           'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە',
+  //         );
+  //         return;
+  //       }
+  //     }
+
+  //     if (CheckInState.isCheckedIn) {
+  //       Navigator.pop(context);
+  //       _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
+  //       return;
+  //     }
+
+  //     final isNewDay = await _isNewDayCheckIn();
+
+  //     Navigator.pop(context);
+  //     await _showConfirmationDialog(
+  //       'دڵنیایت لە چوونەژوورەوە؟',
+  //       () => _processCheckIn(isNewDay),
+  //     );
+  //   } catch (e) {
+  //     Navigator.pop(context);
+  //     _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+  //   }
+  // }
   Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
-    _showLoadingDialog('تکایە چاوەڕێکەوە');
+  try {
+    await _getCurrentPosition();
+    await _loadUserInfo();
 
-    try {
-      await _getCurrentPosition();
-      await _loadUserInfo();
+    if (!isOutsideWorkplace) {
+      final distance = Geolocator.distanceBetween(
+        CheckInState.workplaceLatitude,
+        CheckInState.workplaceLongitude,
+        CheckInState.currentLatitude,
+        CheckInState.currentLongitude,
+      );
 
-      if (!isOutsideWorkplace) {
-        final distance = Geolocator.distanceBetween(
-          CheckInState.workplaceLatitude,
-          CheckInState.workplaceLongitude,
-          CheckInState.currentLatitude,
-          CheckInState.currentLongitude,
+      if (distance > 100) {
+        _showErrorDialog(
+          'هەڵە',
+          'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە',
         );
-
-        if (distance > 100) {
-          Navigator.pop(context);
-          _showErrorDialog(
-            'هەڵە',
-            'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە',
-          );
-          return;
-        }
-      }
-
-      if (CheckInState.isCheckedIn) {
-        Navigator.pop(context);
-        _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
         return;
       }
-
-      final isNewDay = await _isNewDayCheckIn();
-
-      Navigator.pop(context);
-      await _showConfirmationDialog(
-        'دڵنیاکردنەوە',
-        'دڵنیایت لە چوونەژوورەوە؟',
-        () => _processCheckIn(isNewDay),
-      );
-    } catch (e) {
-      Navigator.pop(context);
-      _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
     }
+
+    if (CheckInState.isCheckedIn) {
+      _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
+      return;
+    }
+
+    final isNewDay = await _isNewDayCheckIn();
+    
+    await _showConfirmationDialog(
+      'دڵنیایت لە چوونەژوورەوە؟',
+      () {
+        _showLoadingDialog('تکایە چاوەڕێکەوە');
+        _processCheckIn(isNewDay);
+      },
+    );
+  } catch (e) {
+    _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
   }
+}
+
 
   Future<bool> _isNewDayCheckIn() async {
     final snapshot = await FirebaseFirestore.instance
@@ -479,30 +520,51 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     }
   }
 
+  // Future<void> _handleCheckOut() async {
+  //   _showLoadingDialog('تکایە چاوەڕێکەوە');
+
+  //   try {
+  //     await _loadUserInfo();
+  //     await _getCurrentPosition();
+
+  //     if (!CheckInState.isCheckedIn) {
+  //       Navigator.pop(context);
+  //       _showErrorDialog('هەڵە', 'تکایە چوونەژوورەوە بکە');
+  //       return;
+  //     }
+
+  //     Navigator.pop(context);
+  //     await _showConfirmationDialog(
+  //       'دڵنیایت لە چوونەدەرەوە؟',
+  //       _processCheckOut,
+  //     );
+  //   } catch (e) {
+  //     Navigator.pop(context);
+  //     _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+  //   }
+  // }
   Future<void> _handleCheckOut() async {
-    _showLoadingDialog('تکایە چاوەڕێکەوە');
+  try {
+    await _loadUserInfo();
+    await _getCurrentPosition();
 
-    try {
-      await _loadUserInfo();
-      await _getCurrentPosition();
-
-      if (!CheckInState.isCheckedIn) {
-        Navigator.pop(context);
-        _showErrorDialog('هەڵە', 'تکایە چوونەژوورەوە بکە');
-        return;
-      }
-
-      Navigator.pop(context);
-      await _showConfirmationDialog(
-        'دڵنیاکردنەوە',
-        'دڵنیایت لە چوونەدەرەوە؟',
-        _processCheckOut,
-      );
-    } catch (e) {
-      Navigator.pop(context);
-      _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+    if (!CheckInState.isCheckedIn) {
+      _showErrorDialog('هەڵە', 'تکایە چوونەژوورەوە بکە');
+      return;
     }
+
+    await _showConfirmationDialog(
+      'دڵنیایت لە چوونەدەرەوە؟',
+      () {
+        _showLoadingDialog('تکایە چاوەڕێکەوە');
+        _processCheckOut();
+      },
+    );
+  } catch (e) {
+    _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
   }
+}
+
 
   Future<void> _processCheckOut() async {
     _showLoadingDialog('تکایە چاوەڕێکەوە');
@@ -545,7 +607,6 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     }
   }
 
-
   Future<DateTime> _getNetworkTime() async {
     if (kIsWeb) {
       // For web, just use the local time since we can't reliably get NTP time
@@ -562,16 +623,25 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Center(
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: EdgeInsets.all(24),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(),
-              SizedBox(height: 2.h),
-              Text(message,
-                  style:
-                      TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+              CircularProgressIndicator(
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(Material1.primaryColor),
+              ),
+              SizedBox(height: 16),
+              Text(
+                message,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),
@@ -582,96 +652,127 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
   void _showErrorDialog(String title, String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Text(message),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Material1.primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red[700],
+                ),
               ),
-              elevation: 2,
-            ),
-            onPressed: () => Navigator.pop(context),
-            child: Text('باشە', style: TextStyle(fontWeight: FontWeight.w600)),
+              SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14.sp),
+              ),
+              SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.grey[200],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'باشە',
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Future<void> _showConfirmationDialog(
-    String title,
     String message,
     VoidCallback onConfirm,
   ) async {
-    await showDialog(
+    await ConfirmationDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Text(message),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[200],
-              foregroundColor: Colors.black87,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 2,
-            ),
-            onPressed: () => Navigator.pop(context),
-            child: Text('پەشیمان بوونەوە',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: CheckInState.showCheckInForm
-                  ? Material1.primaryColor
-                  : const Color(0xFFE53935),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 4,
-            ),
-            onPressed: onConfirm,
-            child: Text(
-                CheckInState.showCheckInForm ? 'چوونەژوورەوە' : 'چوونەدەرەوە',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
+      content: message,
+      // okOnPressed: () async => onConfirm(),
+      onConfirm: onConfirm,
+      showCheckInForm: CheckInState.showCheckInForm,
+    ).show();
   }
 
   void _showLateCheckInWarning(int lateMinutes) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('ئاگاداری', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Text(
-            'لەکاتی خۆی درەنگتر چوونەژوورەوەت کردوە و سزا دراویت دەتوانیت لە بەشی پاداشت و سزا بیبیت'),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Material1.primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.warning_amber_rounded,
+                  size: 40, color: Colors.orange[700]),
+              SizedBox(height: 8),
+              Text(
+                'ئاگاداری',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              elevation: 2,
-            ),
-            onPressed: () => Navigator.pop(context),
-            child: Text('باشە', style: TextStyle(fontWeight: FontWeight.w600)),
-          )
-        ],
+              SizedBox(height: 12),
+              Text(
+                'لەکاتی خۆی درەنگتر چوونەژوورەوەت کردوە و سزا دراویت دەتوانیت لە بەشی پاداشت و سزا بیبیت',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14.sp),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Material1.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'باشە',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

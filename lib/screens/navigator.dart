@@ -1,6 +1,6 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/screens/checkincheckout/checkinandout.dart';
+import 'package:british_body_admin/screens/checkincheckout/check_in_out_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/dashboard.dart';
 import 'package:british_body_admin/screens/email/email.dart';
 import 'package:british_body_admin/screens/notifications/notifications.dart';
