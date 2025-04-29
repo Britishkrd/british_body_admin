@@ -81,6 +81,13 @@ class _CheckinandoutState extends State<Checkinandout> {
           decoration: BoxDecoration(
             color: checkin ? Colors.green : Colors.red,
             borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              )
+            ],
           ),
           margin: EdgeInsets.only(top: 3.h),
           child: Center(
@@ -91,7 +98,8 @@ class _CheckinandoutState extends State<Checkinandout> {
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.bold),
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5),
             ),
           ),
         ),
@@ -112,8 +120,15 @@ class _CheckinandoutState extends State<Checkinandout> {
                 decoration: BoxDecoration(
                   color: checkin
                       ? Colors.grey
-                      : Material1.primaryColor, // Grey out if disabled
+                      : Material1.primaryColor,
                   borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    )
+                  ],
                 ),
                 margin: EdgeInsets.only(top: 3.h),
                 child: Row(
@@ -121,9 +136,13 @@ class _CheckinandoutState extends State<Checkinandout> {
                   children: [
                     Text(
                       'چوونەژوورەوە',
-                      style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                      style: TextStyle(
+                        color: Colors.white, 
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600
+                      ),
                     ),
-                    const Icon(Icons.timer, color: Colors.white),
+                    Icon(Icons.login_rounded, color: Colors.white),
                   ],
                 ),
               ),
@@ -142,8 +161,15 @@ class _CheckinandoutState extends State<Checkinandout> {
                 decoration: BoxDecoration(
                   color: !checkin
                       ? Colors.grey
-                      : Material1.primaryColor, // Grey out if disabled
+                      : Color(0xFFE53935), // Red color for logout
                   borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    )
+                  ],
                 ),
                 margin: EdgeInsets.only(top: 3.h),
                 child: Row(
@@ -151,9 +177,13 @@ class _CheckinandoutState extends State<Checkinandout> {
                   children: [
                     Text(
                       'چوونەدەرەوە',
-                      style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                      style: TextStyle(
+                        color: Colors.white, 
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600
+                      ),
                     ),
-                    const Icon(Icons.timer_outlined, color: Colors.red),
+                    Icon(Icons.logout_rounded, color: Colors.white),
                   ],
                 ),
               ),
@@ -168,334 +198,401 @@ class _CheckinandoutState extends State<Checkinandout> {
                       height: 8.h,
                       width: 90.w,
                       decoration: BoxDecoration(
-                        color: Colors
-                            .white, //const Color.fromARGB(255, 205, 63, 63),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          )
+                        ],
                       ),
                       child: Material1.textfield(
                           hint: 'تێبینی(هەڵبژاردەییە)',
                           textColor: Material1.primaryColor,
                           controller: notecontroller)),
+                  SizedBox(height: 2.h),
                   Container(
-                      margin: EdgeInsets.only(top: 3.h),
-                      height: 8.h,
-                      width: 40.w,
-                      decoration: BoxDecoration(
-                        color: checkin ? Colors.grey : Material1.primaryColor,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              checkin ? Colors.red : Material1.primaryColor,
-                          foregroundColor: Colors.white,
+                    margin: EdgeInsets.only(top: 1.h),
+                    height: 8.h,
+                    width: 40.w,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: checkin ? Colors.grey : Material1.primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        onPressed: checkin
-                            ? null
-                            : () async {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: Center(
-                                          child: Column(
-                                            children: [
-                                              CircularProgressIndicator(),
-                                              SizedBox(height: 2.h),
-                                              Text('تکایە چاوەڕێکەوە',
-                                                  style: TextStyle(
-                                                      fontSize: 16.sp)),
-                                            ],
-                                          ),
+                        elevation: 4,
+                        shadowColor: Colors.black.withOpacity(0.2),
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                      ),
+                      onPressed: checkin
+                          ? null
+                          : () async {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      title: Center(
+                                        child: Column(
+                                          children: [
+                                            CircularProgressIndicator(),
+                                            SizedBox(height: 2.h),
+                                            Text('تکایە چاوەڕێکەوە',
+                                                style: TextStyle(
+                                                    fontSize: 16.sp,
+                                                    fontWeight: FontWeight.w600)),
+                                          ],
                                         ),
-                                      );
-                                    });
+                                      ),
+                                    );
+                                  });
 
-                                await _getCurrentPosition();
-                                await getuserinfo();
-                                double distanceInMeters =
-                                    Geolocator.distanceBetween(worklatitude,
-                                        worklongtitude, latitude, longtitude);
+                              await _getCurrentPosition();
+                              await getuserinfo();
+                              double distanceInMeters =
+                                  Geolocator.distanceBetween(worklatitude,
+                                      worklongtitude, latitude, longtitude);
 
-                                if (distanceInMeters > 100) {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Text('هەڵە'),
-                                          content: Text(
-                                              'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە'),
-                                          actions: [
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Material1.primaryColor,
-                                                foregroundColor: Colors.white,
-                                              ),
-                                              child: Text('باشە'),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      });
-                                  return;
-                                }
-
-                                if (checkin) {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Text('هەڵە'),
-                                          content:
-                                              Text('تکایە چوونەدەرەووە بکە'),
-                                          actions: [
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Material1.primaryColor,
-                                                foregroundColor: Colors.white,
-                                              ),
-                                              child: Text('باشە'),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      });
-                                  return;
-                                }
-
-                                bool isNewDay = false;
-                                await FirebaseFirestore.instance
-                                    .collection('user')
-                                    .doc(email)
-                                    .collection('checkincheckouts')
-                                    .orderBy('time', descending: true)
-                                    .limit(1)
-                                    .get()
-                                    .then((value2) {
-                                  if ((value2.docs.first.data()['time']
-                                              as Timestamp)
-                                          .toDate()
-                                          .day !=
-                                      DateTime.now().day) {
-                                    isNewDay = true;
-                                  }
-                                });
-
+                              if (distanceInMeters > 100) {
                                 showDialog(
                                     context: context,
                                     builder: (context) {
                                       return AlertDialog(
-                                        title: Text('دڵنیاکردنەوە'),
-                                        content:
-                                            Text('دڵنیایت لە چوونەژوورەوە؟'),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        title: Text('هەڵە',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        content: Text(
+                                            'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە'),
                                         actions: [
                                           ElevatedButton(
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
                                                   Material1.primaryColor,
                                               foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              elevation: 2,
                                             ),
-                                            child: Text('پەشیمان بوونەوە'),
+                                            child: Text('باشە',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w600)),
                                             onPressed: () {
                                               Navigator.pop(context);
+                                              Navigator.pop(context);
                                             },
-                                          ),
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: checkin
-                                                  ? Colors.grey
-                                                  : Material1.primaryColor,
-                                              foregroundColor: Colors.white,
-                                            ),
-                                            onPressed: checkin
-                                                ? null
-                                                : () async {
-                                                    DateTime startDate =
-                                                        DateTime.now()
-                                                            .toLocal();
-                                                    int offset =
-                                                        await NTP.getNtpOffset(
-                                                            localTime:
-                                                                startDate);
-                                                    DateTime now =
-                                                        startDate.add(Duration(
-                                                            milliseconds:
-                                                                offset));
-
-                                                    FirebaseFirestore.instance
-                                                        .collection('user')
-                                                        .doc(email)
-                                                        .collection(
-                                                            'checkincheckouts')
-                                                        .doc(now
-                                                            .toIso8601String())
-                                                        .set({
-                                                      'latitude': latitude,
-                                                      'longtitude': longtitude,
-                                                      'time': now,
-                                                      'note':
-                                                          notecontroller.text,
-                                                      'checkout': false,
-                                                      'checkin': true,
-                                                    }).then((value) {
-                                                      FirebaseFirestore.instance
-                                                          .collection('user')
-                                                          .doc(email)
-                                                          .get()
-                                                          .then((value) {
-                                                        value.reference.update({
-                                                          'checkin': true
-                                                        }).then((value1) {
-                                                          if (isNewDay) {
-                                                            DateTime?
-                                                                changedworktimeend;
-
-                                                            try {
-                                                              changedworktimeend =
-                                                                  (value.data()![
-                                                                              'changedworkend']
-                                                                          as Timestamp)
-                                                                      .toDate();
-                                                            } catch (e) {
-                                                              changedworktimeend =
-                                                                  null;
-                                                            }
-
-                                                            if (changedworktimeend
-                                                                    ?.isAfter(
-                                                                        now) ??
-                                                                false) {
-                                                              log('changedworktimeend');
-                                                              starthour = int
-                                                                  .parse(value
-                                                                          .data()![
-                                                                      'changedworkstarthour']);
-                                                              startmin = int.parse(
-                                                                  value.data()![
-                                                                      'changedworkstartmin']);
-                                                            }
-
-                                                            if (now.hour >=
-                                                                    starthour &&
-                                                                ((now.hour ==
-                                                                        starthour)
-                                                                    ? now.minute >
-                                                                        startmin
-                                                                    : true)) {
-                                                              Duration late = now
-                                                                  .difference(DateTime(
-                                                                      now.year,
-                                                                      now.month,
-                                                                      now.day,
-                                                                      starthour,
-                                                                      startmin));
-                                                              FirebaseFirestore
-                                                                  .instance
-                                                                  .collection(
-                                                                      'user')
-                                                                  .doc(email)
-                                                                  .collection(
-                                                                      'rewardpunishment')
-                                                                  .doc(
-                                                                      'punishment-late-login${DateTime.now()}')
-                                                                  .set({
-                                                                'addedby':
-                                                                    'system',
-                                                                'amount': (late
-                                                                            .inMinutes *
-                                                                        100)
-                                                                    .toString(),
-                                                                'date': DateTime
-                                                                    .now(),
-                                                                'reason':
-                                                                    'for late login ${late.inMinutes} minutes',
-                                                                'type':
-                                                                    'punishment'
-                                                              }).then((value) {
-                                                                showDialog(
-                                                                    context:
-                                                                        context,
-                                                                    builder:
-                                                                        (context) {
-                                                                      return AlertDialog(
-                                                                        title: Text(
-                                                                            'ئاگاداری'),
-                                                                        content:
-                                                                            Text('لەکاتی خۆی درەنگتر چوونەژوورەوەت کردوە و سزا دراویت دەتوانیت لە بەشی پاداشت و سزا بیبیت '),
-                                                                        actions: [
-                                                                          ElevatedButton(
-                                                                            style:
-                                                                                ElevatedButton.styleFrom(
-                                                                              backgroundColor: Material1.primaryColor,
-                                                                              foregroundColor: Colors.white,
-                                                                            ),
-                                                                            child:
-                                                                                Text('باشە'),
-                                                                            onPressed:
-                                                                                () {
-                                                                              Navigator.pop(context);
-                                                                            },
-                                                                          )
-                                                                        ],
-                                                                      );
-                                                                    });
-                                                              });
-                                                            }
-                                                          }
-
-                                                          Sharedpreference
-                                                              .checkin(
-                                                                  now.toString(),
-                                                                  latitude,
-                                                                  longtitude,
-                                                                  true);
-                                                          Navigator.pop(
-                                                              context);
-                                                          Navigator.pop(
-                                                              context);
-                                                          setState(() {
-                                                            checkin = true;
-                                                          });
-                                                        });
-                                                      });
-                                                    });
-                                                  },
-                                            child: Text('چوونەژوورەوە'),
                                           ),
                                         ],
                                       );
                                     });
-                              },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.timer, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text('چوونەژوورەوە'),
-                          ],
-                        ),
-                      )),
+                                return;
+                              }
+
+                              if (checkin) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        title: Text('هەڵە',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        content: Text('تکایە چوونەدەرەووە بکە'),
+                                        actions: [
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Material1.primaryColor,
+                                              foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              elevation: 2,
+                                            ),
+                                            child: Text('باشە',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w600)),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    });
+                                return;
+                              }
+
+                              bool isNewDay = false;
+                              await FirebaseFirestore.instance
+                                  .collection('user')
+                                  .doc(email)
+                                  .collection('checkincheckouts')
+                                  .orderBy('time', descending: true)
+                                  .limit(1)
+                                  .get()
+                                  .then((value2) {
+                                if ((value2.docs.first.data()['time']
+                                            as Timestamp)
+                                        .toDate()
+                                        .day !=
+                                    DateTime.now().day) {
+                                  isNewDay = true;
+                                }
+                              });
+
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      title: Text('دڵنیاکردنەوە',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      content: Text('دڵنیایت لە چوونەژوورەوە؟'),
+                                      actions: [
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.grey[200],
+                                            foregroundColor: Colors.black87,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            elevation: 2,
+                                          ),
+                                          child: Text('پەشیمان بوونەوە',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w600)),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: checkin
+                                                ? Colors.grey
+                                                : Material1.primaryColor,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            elevation: 4,
+                                          ),
+                                          onPressed: checkin
+                                              ? null
+                                              : () async {
+                                                  DateTime startDate =
+                                                      DateTime.now()
+                                                          .toLocal();
+                                                  int offset =
+                                                      await NTP.getNtpOffset(
+                                                          localTime:
+                                                              startDate);
+                                                  DateTime now =
+                                                      startDate.add(Duration(
+                                                          milliseconds:
+                                                              offset));
+
+                                                  FirebaseFirestore.instance
+                                                      .collection('user')
+                                                      .doc(email)
+                                                      .collection(
+                                                          'checkincheckouts')
+                                                      .doc(now
+                                                          .toIso8601String())
+                                                      .set({
+                                                    'latitude': latitude,
+                                                    'longtitude': longtitude,
+                                                    'time': now,
+                                                    'note':
+                                                        notecontroller.text,
+                                                    'checkout': false,
+                                                    'checkin': true,
+                                                  }).then((value) {
+                                                    FirebaseFirestore.instance
+                                                        .collection('user')
+                                                        .doc(email)
+                                                        .get()
+                                                        .then((value) {
+                                                      value.reference.update({
+                                                        'checkin': true
+                                                      }).then((value1) {
+                                                        if (isNewDay) {
+                                                          DateTime?
+                                                              changedworktimeend;
+
+                                                          try {
+                                                            changedworktimeend =
+                                                                (value.data()![
+                                                                            'changedworkend']
+                                                                        as Timestamp)
+                                                                    .toDate();
+                                                          } catch (e) {
+                                                            changedworktimeend =
+                                                                null;
+                                                          }
+
+                                                          if (changedworktimeend
+                                                                  ?.isAfter(
+                                                                      now) ??
+                                                              false) {
+                                                            log('changedworktimeend');
+                                                            starthour = int
+                                                                .parse(value
+                                                                        .data()![
+                                                                    'changedworkstarthour']);
+                                                            startmin = int.parse(
+                                                                value.data()![
+                                                                    'changedworkstartmin']);
+                                                          }
+
+                                                          if (now.hour >=
+                                                                  starthour &&
+                                                              ((now.hour ==
+                                                                      starthour)
+                                                                  ? now.minute >
+                                                                      startmin
+                                                                  : true)) {
+                                                            Duration late = now
+                                                                .difference(DateTime(
+                                                                    now.year,
+                                                                    now.month,
+                                                                    now.day,
+                                                                    starthour,
+                                                                    startmin));
+                                                            FirebaseFirestore
+                                                                .instance
+                                                                .collection(
+                                                                    'user')
+                                                                .doc(email)
+                                                                .collection(
+                                                                    'rewardpunishment')
+                                                                .doc(
+                                                                    'punishment-late-login${DateTime.now()}')
+                                                                .set({
+                                                              'addedby':
+                                                                  'system',
+                                                              'amount': (late
+                                                                          .inMinutes *
+                                                                      100)
+                                                                  .toString(),
+                                                              'date':
+                                                                  DateTime.now(),
+                                                              'reason':
+                                                                  'for late login ${late.inMinutes} minutes',
+                                                              'type':
+                                                                  'punishment'
+                                                            }).then((value) {
+                                                              showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  builder:
+                                                                      (context) {
+                                                                    return AlertDialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius: BorderRadius.circular(
+                                                                            20),
+                                                                      ),
+                                                                      title: Text(
+                                                                          'ئاگاداری',
+                                                                          style: TextStyle(
+                                                                              fontWeight:
+                                                                                  FontWeight.bold)),
+                                                                      content: Text(
+                                                                          'لەکاتی خۆی درەنگتر چوونەژوورەوەت کردوە و سزا دراویت دەتوانیت لە بەشی پاداشت و سزا بیبیت '),
+                                                                      actions: [
+                                                                        ElevatedButton(
+                                                                          style:
+                                                                              ElevatedButton.styleFrom(
+                                                                            backgroundColor:
+                                                                                Material1.primaryColor,
+                                                                            foregroundColor:
+                                                                                Colors.white,
+                                                                            shape:
+                                                                                RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(10),
+                                                                            ),
+                                                                            elevation:
+                                                                                2,
+                                                                          ),
+                                                                          child:
+                                                                              Text('باشە', style: TextStyle(fontWeight: FontWeight.w600)),
+                                                                          onPressed:
+                                                                              () {
+                                                                            Navigator.pop(context);
+                                                                          },
+                                                                        )
+                                                                      ],
+                                                                    );
+                                                                  });
+                                                            });
+                                                          }
+                                                        }
+
+                                                        Sharedpreference
+                                                            .checkin(
+                                                                now.toString(),
+                                                                latitude,
+                                                                longtitude,
+                                                                true);
+                                                        Navigator.pop(
+                                                            context);
+                                                        Navigator.pop(
+                                                            context);
+                                                        setState(() {
+                                                          checkin = true;
+                                                        });
+                                                      });
+                                                    });
+                                                  });
+                                                },
+                                          child: Text('چوونەژوورەوە',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w600)),
+                                        ),
+                                      ],
+                                    );
+                                  });
+                            },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.login_rounded, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text('چوونەژوورەوە',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    )),
+                  SizedBox(height: 2.h),
                   permissions.contains('workoutside')
                       ? Container(
-                          margin: EdgeInsets.only(top: 3.h),
                           height: 8.h,
                           width: 80.w,
-                          decoration: BoxDecoration(
-                            color:
-                                checkin ? Colors.grey : Material1.primaryColor,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Material1.primaryColor,
+                              backgroundColor: checkin
+                                  ? Colors.grey
+                                  : Material1.primaryColor,
                               foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              elevation: 4,
+                              shadowColor: Colors.black.withOpacity(0.2),
+                              padding: EdgeInsets.symmetric(horizontal: 20),
                             ),
                             onPressed: checkin
                                 ? null
@@ -506,9 +603,16 @@ class _CheckinandoutState extends State<Checkinandout> {
                                           context: context,
                                           builder: (context) {
                                             return AlertDialog(
-                                              title: Text('هەڵە'),
-                                              content: Text(
-                                                  'تکایە چوونەدەرەووە بکە'),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              title: Text('هەڵە',
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              content:
+                                                  Text('تکایە چوونەدەرەووە بکە'),
                                               actions: [
                                                 ElevatedButton(
                                                   style:
@@ -517,11 +621,20 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                         Material1.primaryColor,
                                                     foregroundColor:
                                                         Colors.white,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                    ),
+                                                    elevation: 2,
                                                   ),
                                                   onPressed: () {
                                                     Navigator.pop(context);
                                                   },
-                                                  child: Text('باشە'),
+                                                  child: Text('باشە',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w600)),
                                                 ),
                                               ],
                                             );
@@ -551,32 +664,63 @@ class _CheckinandoutState extends State<Checkinandout> {
                                         context: context,
                                         builder: (context) {
                                           return AlertDialog(
-                                            title: Text('دڵنیاکردنەوە'),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            title: Text('دڵنیاکردنەوە',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                             content: Text(
                                                 'دڵنیایت لە چوونەژوورەوە؟'),
                                             actions: [
                                               ElevatedButton(
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor:
-                                                      Material1.primaryColor,
-                                                  foregroundColor: Colors.white,
+                                                      Colors.grey[200],
+                                                  foregroundColor:
+                                                      Colors.black87,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  elevation: 2,
                                                 ),
                                                 onPressed: () {
                                                   Navigator.pop(context);
                                                 },
-                                                child: Text('پەشیمان بوونەوە'),
+                                                child: Text('پەشیمان بوونەوە',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600)),
                                               ),
                                               ElevatedButton(
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor:
                                                       Material1.primaryColor,
-                                                  foregroundColor: Colors.white,
+                                                  foregroundColor:
+                                                      Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  elevation: 4,
                                                 ),
                                                 onPressed: () async {
                                                   showDialog(
                                                       context: context,
                                                       builder: (context) {
                                                         return AlertDialog(
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
+                                                          ),
                                                           title: Center(
                                                             child: Column(
                                                               children: [
@@ -588,7 +732,9 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                                     'تکایە چاوەڕێکەوە',
                                                                     style: TextStyle(
                                                                         fontSize:
-                                                                            16.sp)),
+                                                                            16.sp,
+                                                                        fontWeight:
+                                                                            FontWeight.w600)),
                                                               ],
                                                             ),
                                                           ),
@@ -667,8 +813,17 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                                 builder:
                                                                     (context) {
                                                                   return AlertDialog(
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              20),
+                                                                    ),
                                                                     title: Text(
-                                                                        'ئاگاداری'),
+                                                                        'ئاگاداری',
+                                                                        style: TextStyle(
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
                                                                     content: Text(
                                                                         'لەکاتی خۆی درەنگتر چوونەژوورەوەت کردوە و سزا دراویت دەتوانیت لە بەشی پاداشت و سزا بیبیت'),
                                                                     actions: [
@@ -679,6 +834,13 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                                               Material1.primaryColor,
                                                                           foregroundColor:
                                                                               Colors.white,
+                                                                          shape:
+                                                                              RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(10),
+                                                                          ),
+                                                                          elevation:
+                                                                              2,
                                                                         ),
                                                                         onPressed:
                                                                             () {
@@ -686,7 +848,9 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                                               context);
                                                                         },
                                                                         child: Text(
-                                                                            'باشە'),
+                                                                            'باشە',
+                                                                            style:
+                                                                                TextStyle(fontWeight: FontWeight.w600)),
                                                                       )
                                                                     ],
                                                                   );
@@ -715,7 +879,10 @@ class _CheckinandoutState extends State<Checkinandout> {
                                                     });
                                                   });
                                                 },
-                                                child: Text('چوونەژوورەوە'),
+                                                child: Text('چوونەژوورەوە',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600)),
                                               )
                                             ],
                                           );
@@ -724,9 +891,11 @@ class _CheckinandoutState extends State<Checkinandout> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.timer, color: Colors.white),
+                                Icon(Icons.login_rounded, color: Colors.white),
                                 SizedBox(width: 8),
-                                Text('چوونەژوورەوە لە دەروەی شوێنی ئیشکردن'),
+                                Text('چوونەژوورەوە لە دەروەی شوێنی ئیشکردن',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w600)),
                               ],
                             ),
                           ),
@@ -743,157 +912,198 @@ class _CheckinandoutState extends State<Checkinandout> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          )
+                        ],
                       ),
                       child: Material1.textfield(
                           hint: 'تێبینی(هەڵبژاردەییە)',
                           textColor: Material1.primaryColor,
                           controller: notecontroller)),
+                  SizedBox(height: 2.h),
                   Container(
-                      margin: EdgeInsets.only(top: 3.h),
-                      height: 8.h,
-                      width: 40.w,
-                      decoration: BoxDecoration(
-                        color: !checkin ? Colors.grey : Material1.primaryColor,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Material1.primaryColor,
-                          foregroundColor: Colors.white,
+                    height: 8.h,
+                    width: 40.w,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            !checkin ? Colors.grey : Color(0xFFE53935),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        onPressed: !checkin
-                            ? null
-                            : () async {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: Center(
-                                          child: Column(
-                                            children: [
-                                              CircularProgressIndicator(),
-                                              SizedBox(height: 2.h),
-                                              Text('تکایە چاوەڕێکەوە',
-                                                  style: TextStyle(
-                                                      fontSize: 16.sp)),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    });
-
-                                await getuserinfo();
-                                await _getCurrentPosition();
-
-                                if (!checkin) {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Text('هەڵە'),
-                                          content:
-                                              Text('تکایە چوونەژوورەوە بکە'),
-                                          actions: [
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Material1.primaryColor,
-                                                foregroundColor: Colors.white,
-                                              ),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text('باشە'),
-                                            ),
+                        elevation: 4,
+                        shadowColor: Colors.black.withOpacity(0.2),
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                      ),
+                      onPressed: !checkin
+                          ? null
+                          : () async {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      title: Center(
+                                        child: Column(
+                                          children: [
+                                            CircularProgressIndicator(),
+                                            SizedBox(height: 2.h),
+                                            Text('تکایە چاوەڕێکەوە',
+                                                style: TextStyle(
+                                                    fontSize: 16.sp,
+                                                    fontWeight: FontWeight.w600)),
                                           ],
-                                        );
-                                      });
-                                  return;
-                                }
+                                        ),
+                                      ),
+                                    );
+                                  });
 
+                              await getuserinfo();
+                              await _getCurrentPosition();
+
+                              if (!checkin) {
                                 showDialog(
                                     context: context,
                                     builder: (context) {
                                       return AlertDialog(
-                                        title: Text('دڵنیاکردنەوە'),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        title: Text('هەڵە',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
                                         content:
-                                            Text('دڵنیایت لە چوونەدەرەوە؟'),
+                                            Text('تکایە چوونەژوورەوە بکە'),
                                         actions: [
                                           ElevatedButton(
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
                                                   Material1.primaryColor,
                                               foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              elevation: 2,
                                             ),
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
-                                            child: Text('پەشیمان بوونەوە'),
+                                            child: Text('باشە',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w600)),
                                           ),
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Material1.primaryColor,
-                                              foregroundColor: Colors.white,
-                                            ),
-                                            onPressed: () async {
-                                              DateTime startDate =
-                                                  DateTime.now().toLocal();
-                                              int offset =
-                                                  await NTP.getNtpOffset(
-                                                      localTime: startDate);
-                                              DateTime now = startDate.add(
-                                                  Duration(
-                                                      milliseconds: offset));
-
-                                              FirebaseFirestore.instance
-                                                  .collection('user')
-                                                  .doc(email)
-                                                  .collection(
-                                                      'checkincheckouts')
-                                                  .doc(now.toIso8601String())
-                                                  .set({
-                                                'latitude': latitude,
-                                                'longtitude': longtitude,
-                                                'time': now,
-                                                'note': notecontroller.text,
-                                                'checkout': true,
-                                                'checkin': false,
-                                              }).then((value) {
-                                                FirebaseFirestore.instance
-                                                    .collection('user')
-                                                    .doc(email)
-                                                    .update({
-                                                  'checkin': false
-                                                }).then((value) {
-                                                  Sharedpreference.checkin(
-                                                      now.toString(),
-                                                      latitude,
-                                                      longtitude,
-                                                      false);
-                                                  Navigator.pop(context);
-                                                  Navigator.pop(context);
-                                                  setState(() {
-                                                    checkin = false;
-                                                  });
-                                                });
-                                              });
-                                            },
-                                            child: Text('چوونەدەرەوە'),
-                                          )
                                         ],
                                       );
                                     });
-                              },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.timer_outlined, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('چوونەدەرەوە'),
-                          ],
-                        ),
-                      )),
+                                return;
+                              }
+
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      title: Text('دڵنیاکردنەوە',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      content: Text('دڵنیایت لە چوونەدەرەوە؟'),
+                                      actions: [
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.grey[200],
+                                            foregroundColor: Colors.black87,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            elevation: 2,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text('پەشیمان بوونەوە',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w600)),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0xFFE53935),
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            elevation: 4,
+                                          ),
+                                          onPressed: () async {
+                                            DateTime startDate =
+                                                DateTime.now().toLocal();
+                                            int offset = await NTP.getNtpOffset(
+                                                localTime: startDate);
+                                            DateTime now = startDate.add(
+                                                Duration(
+                                                    milliseconds: offset));
+
+                                            FirebaseFirestore.instance
+                                                .collection('user')
+                                                .doc(email)
+                                                .collection('checkincheckouts')
+                                                .doc(now.toIso8601String())
+                                                .set({
+                                              'latitude': latitude,
+                                              'longtitude': longtitude,
+                                              'time': now,
+                                              'note': notecontroller.text,
+                                              'checkout': true,
+                                              'checkin': false,
+                                            }).then((value) {
+                                              FirebaseFirestore.instance
+                                                  .collection('user')
+                                                  .doc(email)
+                                                  .update({
+                                                'checkin': false
+                                              }).then((value) {
+                                                Sharedpreference.checkin(
+                                                    now.toString(),
+                                                    latitude,
+                                                    longtitude,
+                                                    false);
+                                                Navigator.pop(context);
+                                                Navigator.pop(context);
+                                                setState(() {
+                                                  checkin = false;
+                                                });
+                                              });
+                                            });
+                                          },
+                                          child: Text('چوونەدەرەوە',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w600)),
+                                        )
+                                      ],
+                                    );
+                                  });
+                            },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.logout_rounded, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text('چوونەدەرەوە',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    )),
                 ],
               )
       ],
