@@ -42,7 +42,9 @@ class Sharedpreference {
     preference.setBool('logedin', logedin);
     preference.setBool('checkin', checkin);
     preference.setString('token', token);
-    preference.setStringList('weekdays', List<String>.from(workdays));//atwane aw string y lista labay agar error bw
+    // preference.setStringList('weekdays', List<String>.from(workdays));//atwane aw string y lista labay agar error bw
+    preference.setStringList(
+        'weekdays', workdays.map((e) => e.toString()).toList());
     preference.setStringList('permissions', permissionsString);
   }
 
