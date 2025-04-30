@@ -4,7 +4,6 @@ import 'package:british_body_admin/screens/checkincheckout/check_in_out_screen.d
 import 'package:british_body_admin/screens/dashborad.dart/dashboard.dart';
 import 'package:british_body_admin/screens/email/email.dart';
 import 'package:british_body_admin/screens/notifications/notifications.dart';
-import 'package:british_body_admin/screens/profile/profile.dart';
 import 'package:british_body_admin/screens/tasks/tasks.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,7 +35,6 @@ class _NavigationState extends State<Navigation> {
       Icons.email,
       Icons.task,
       Icons.timelapse,
-      Icons.person,
       Icons.dashboard,
     ];
     getuserinfo() async {
@@ -80,18 +78,16 @@ class _NavigationState extends State<Navigation> {
           },
           gapWidth: 0,
         ),
-        body: _bottomNavIndex == 4
+        body: _bottomNavIndex == 3
             ? Dashboard()
-            : _bottomNavIndex == 3
-                ? const Profile()
-                : _bottomNavIndex == 2
-                    ? CheckInOutScreen()
-                    : _bottomNavIndex == 1
-                        ? Tasks(
-                            email: widget.email,
-                          )
-                        : Email(
-                            email: widget.email,
-                          ));
+            : _bottomNavIndex == 2
+                ? CheckInOutScreen()
+                : _bottomNavIndex == 1
+                    ? Tasks(
+                        email: widget.email,
+                      )
+                    : Email(
+                        email: widget.email,
+                      ));
   }
 }

@@ -36,19 +36,16 @@ class _ViewingselfloginlogoutState extends State<Viewingselfloginlogout> {
                     .collection('user')
                     .doc(widget.email)
                     .collection('checkincheckouts')
-                    .where('time',
-                        isGreaterThanOrEqualTo:
-                            DateTime(widget.date.year, widget.date.month, 1))
-                    .where('time',
-                        isLessThanOrEqualTo: DateTime(
-                            widget.date.year,
-                            widget.date.month,
-                            (DateTime(
-                                    widget.date.year, widget.date.month + 1, 0)
-                                .day)))
-                    .get(),
+                    .orderBy('time', descending: true) // Add ordering
+                    .get(), // Remove date filters initially for testing
                 builder: (BuildContext context,
                     AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasError) {
+      return Text("Error: ${snapshot.error}");
+    }
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return Text("No records found");
+    }
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -58,6 +55,13 @@ class _ViewingselfloginlogoutState extends State<Viewingselfloginlogout> {
                     child: ListView.builder(
                         itemCount: snapshot.data?.docs.length ?? 0,
                         itemBuilder: (BuildContext context, int index) {
+                          if (snapshot.hasError) {
+                            return Text("Error: ${snapshot.error}");
+                          }
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return Text("No records found");
+                          }
                           return SizedBox(
                               height: 20.h,
                               width: 90.w,
@@ -202,16 +206,6 @@ class _ViewingselfloginlogoutState extends State<Viewingselfloginlogout> {
                         .collection('user')
                         .doc(widget.email)
                         .collection('checkincheckouts')
-                        .where('time',
-                            isGreaterThanOrEqualTo: DateTime(
-                                widget.date.year, widget.date.month, 1))
-                        .where('time',
-                            isLessThanOrEqualTo: DateTime(
-                                widget.date.year,
-                                widget.date.month,
-                                (DateTime(widget.date.year,
-                                        widget.date.month + 1, 0)
-                                    .day)))
                         .get()
                         .then((value) {
                       Duration totalworkedtime = Duration();

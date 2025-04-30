@@ -197,40 +197,38 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     required Color color,
     required VoidCallback? onTap,
   }) {
-    return Flexible(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 56,
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: color.withOpacity(onTap == null ? 0.5 : 1.0),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              if (onTap != null)
-                BoxShadow(
-                  color: color.withOpacity(0.3),
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
-                ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.white, size: 24),
-              SizedBox(width: 8),
-              Text(
-                text,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 56,
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(onTap == null ? 0.5 : 1.0),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            if (onTap != null)
+              BoxShadow(
+                color: color.withOpacity(0.3),
+                blurRadius: 6,
+                offset: Offset(0, 3),
               ),
-            ],
-          ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 24),
+            SizedBox(width: 8),
+            Text(
+              text,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -834,7 +832,7 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
                   Expanded(
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Colors.grey[200],
+                        backgroundColor: Colors.transparent,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
