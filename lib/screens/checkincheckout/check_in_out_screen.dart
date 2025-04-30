@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/shared/confirm_dialog.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
@@ -37,10 +39,70 @@ class CheckInOutScreen extends StatefulWidget {
 }
 
 class _CheckInOutScreenState extends State<CheckInOutScreen> {
+  bool checkin = true;
+  double worklatitude = 0.0;
+  double worklongtitude = 0.0;
+
+  TextEditingController notecontroller = TextEditingController();
+
+  String email = '';
+  String name = '';
+
+  // لە ناو State class
+  // Timer and duration variables
+  Timer? _liveTimer;
+  Duration _currentSessionDuration = Duration.zero;
+  Duration _todayWorkingHours = Duration.zero;
+  Duration _todayBreakTime = Duration.zero;
+  bool _isLoadingStats = false;
+  DateTime? _lastCheckInTime;
+  DateTime? _lastCheckOutTime;
+
   @override
   void initState() {
-    _loadUserInfo();
     super.initState();
+    _loadUserInfo();
+    _startLiveTimer();
+    _calculateDailyStats();
+  }
+
+  @override
+  void dispose() {
+    _liveTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startLiveTimer() {
+    _liveTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (CheckInState.isCheckedIn) {
+        setState(() {
+          _currentSessionDuration += Duration(seconds: 1);
+          _todayWorkingHours += Duration(seconds: 1);
+        });
+      } else {
+        // Don't increment break time after logout - use the exact time from database
+        setState(() {
+          _currentSessionDuration = Duration.zero;
+        });
+      }
+    });
+  }
+  // @override
+  // void initState() {
+  //   // _loadUserInfo();
+
+  //   _loadUserInfo().then((_) => _calculateDailyStats());
+  //   super.initState();
+  // }
+
+  getuserinfo() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    email = preference.getString('email') ?? '';
+    name = preference.getString('name') ?? '';
+    checkin = preference.getBool('checkin') ?? false;
+    worklatitude = preference.getDouble('worklat') ?? 0.0;
+    worklongtitude = preference.getDouble('worklong') ?? 0.0;
+    setState(() {});
   }
 
   Future<void> _loadUserInfo() async {
@@ -59,6 +121,9 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
       CheckInState.workEndHour = prefs.getInt('endhour') ?? 0;
       CheckInState.workStartMinute = prefs.getInt('startmin') ?? 0;
       CheckInState.workEndMinute = prefs.getInt('endmin') ?? 0;
+      // Add these two lines:
+      name = prefs.getString('name') ?? '';
+      email = prefs.getString('email') ?? '';
     });
   }
 
@@ -70,44 +135,104 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     });
   }
 
-  Widget _buildStatusHeader() {
-    return Container(
-      height: 8.h,
-      width: 90.w,
-      decoration: BoxDecoration(
-        color: CheckInState.isCheckedIn ? Colors.green : Colors.red,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      margin: EdgeInsets.only(top: 3.h),
-      child: Center(
-        child: Text(
-          CheckInState.isCheckedIn
-              ? 'تۆ لە ئێستادا لەکاردایت'
-              : 'تۆ لە ئێستادا لەکاردا نیت تکایە چوونەژوورەوە بکە',
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5),
+  // Widget _buildActionButtons() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //     children: [
+  //       _buildCheckInButton(),
+  //       _buildCheckOutButton(),
+  //     ],
+  //   );
+  // }
+  Widget _buildActionButtons() {
+    return Column(
+      children: [
+        // Check-in/out buttons in a row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Check-in button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: _buildModernButton(
+                icon: Icons.login_rounded,
+                text: 'چوونەژوورەوە',
+                color: CheckInState.isCheckedIn
+                    ? Colors.grey
+                    : Material1.primaryColor,
+                onTap: CheckInState.isCheckedIn
+                    ? null
+                    : () => setState(() => CheckInState.showCheckInForm = true),
+              ),
+            ),
+
+            // Check-out button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: _buildModernButton(
+                icon: Icons.logout_rounded,
+                text: 'چوونەدەرەوە',
+                color:
+                    !CheckInState.isCheckedIn ? Colors.grey : Color(0xFFE53935),
+                onTap: !CheckInState.isCheckedIn
+                    ? null
+                    : () =>
+                        setState(() => CheckInState.showCheckInForm = false),
+              ),
+            ),
+          ],
         ),
-      ),
+
+        SizedBox(height: 16),
+
+        // Additional action buttons if needed
+        // _buildSecondaryActions(),
+      ],
     );
   }
 
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildCheckInButton(),
-        _buildCheckOutButton(),
-      ],
+  Widget _buildModernButton({
+    required IconData icon,
+    required String text,
+    required Color color,
+    required VoidCallback? onTap,
+  }) {
+    return Flexible(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 56,
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: color.withOpacity(onTap == null ? 0.5 : 1.0),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              if (onTap != null)
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: 24),
+              SizedBox(width: 8),
+              Text(
+                text,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -187,39 +312,41 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     );
   }
 
-  Widget _buildNoteField() {
-    return Container(
-      margin: EdgeInsets.only(top: 3.h),
-      height: 8.h,
-      width: 90.w,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          )
-        ],
-      ),
-      child: Material1.textfield(
-        hint: 'تێبینی(هەڵبژاردەییە)',
-        textColor: Material1.primaryColor,
-        controller: _noteController,
-      ),
-    );
-  }
-
   Widget _buildCheckInButtonSection() {
     return Column(
       children: [
-        _buildNoteField(),
-        SizedBox(height: 2.h),
-        _buildMainCheckInButton(),
-        SizedBox(height: 2.h),
-        if (CheckInState.userPermissions.contains('workoutside'))
-          _buildWorkOutsideCheckInButton(),
+        // Note field
+        _buildModernNoteField(),
+
+        SizedBox(height: 24),
+
+        // Action buttons
+        Column(
+          children: [
+            // Main check-in button
+            _buildModernActionButton(
+              icon: Icons.login_rounded,
+              label: 'چوونەژوورەوە',
+              color: Material1.primaryColor,
+              onPressed:
+                  CheckInState.isCheckedIn ? null : () => _handleCheckIn(false),
+            ),
+
+            SizedBox(height: 12),
+
+            // Work outside button (conditionally shown)
+            if (CheckInState.userPermissions.contains('workoutside'))
+              _buildModernActionButton(
+                icon: Icons.pin_drop_outlined,
+                label: 'چوونەژوورەوە لە دەروەی شوێنی ئیشکردن',
+                color: Material1.primaryColor,
+                onPressed: CheckInState.isCheckedIn
+                    ? null
+                    : () => _handleCheckIn(true),
+                isFullWidth: true,
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -288,10 +415,92 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
   Widget _buildCheckOutSection() {
     return Column(
       children: [
-        _buildNoteField(),
-        SizedBox(height: 2.h),
-        _buildCheckOutButtonSection(),
+        // Note field
+        _buildModernNoteField(),
+
+        SizedBox(height: 24),
+
+        // Check-out button
+        _buildModernActionButton(
+          icon: Icons.logout_rounded,
+          label: 'چوونەدەرەوە',
+          color: Color(0xFFE53935),
+          onPressed: !CheckInState.isCheckedIn ? null : _handleCheckOut,
+        ),
       ],
+    );
+  }
+
+  Widget _buildModernNoteField() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _noteController,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          hintText: 'تێبینی(هەڵبژاردەییە)',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback? onPressed,
+    bool isFullWidth = false,
+  }) {
+    return SizedBox(
+      width: isFullWidth ? double.infinity : null,
+      height: 56,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: onPressed == null ? Colors.grey : color,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 4,
+          shadowColor: color.withOpacity(0.3),
+          padding: EdgeInsets.symmetric(horizontal: 24),
+        ),
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 20),
+            SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -324,90 +533,46 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     );
   }
 
-  // Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
-  //   _showLoadingDialog('تکایە چاوەڕێکەوە');
-
-  //   try {
-  //     await _getCurrentPosition();
-  //     await _loadUserInfo();
-
-  //     if (!isOutsideWorkplace) {
-  //       final distance = Geolocator.distanceBetween(
-  //         CheckInState.workplaceLatitude,
-  //         CheckInState.workplaceLongitude,
-  //         CheckInState.currentLatitude,
-  //         CheckInState.currentLongitude,
-  //       );
-
-  //       if (distance > 100) {
-  //         Navigator.pop(context);
-  //         _showErrorDialog(
-  //           'هەڵە',
-  //           'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە',
-  //         );
-  //         return;
-  //       }
-  //     }
-
-  //     if (CheckInState.isCheckedIn) {
-  //       Navigator.pop(context);
-  //       _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
-  //       return;
-  //     }
-
-  //     final isNewDay = await _isNewDayCheckIn();
-
-  //     Navigator.pop(context);
-  //     await _showConfirmationDialog(
-  //       'دڵنیایت لە چوونەژوورەوە؟',
-  //       () => _processCheckIn(isNewDay),
-  //     );
-  //   } catch (e) {
-  //     Navigator.pop(context);
-  //     _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
-  //   }
-  // }
   Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
-  try {
-    await _getCurrentPosition();
-    await _loadUserInfo();
+    try {
+      await _getCurrentPosition();
+      await _loadUserInfo();
 
-    if (!isOutsideWorkplace) {
-      final distance = Geolocator.distanceBetween(
-        CheckInState.workplaceLatitude,
-        CheckInState.workplaceLongitude,
-        CheckInState.currentLatitude,
-        CheckInState.currentLongitude,
-      );
-
-      if (distance > 100) {
-        _showErrorDialog(
-          'هەڵە',
-          'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە',
+      if (!isOutsideWorkplace) {
+        final distance = Geolocator.distanceBetween(
+          CheckInState.workplaceLatitude,
+          CheckInState.workplaceLongitude,
+          CheckInState.currentLatitude,
+          CheckInState.currentLongitude,
         );
+
+        if (distance > 100) {
+          _showErrorDialog(
+            'هەڵە',
+            'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە',
+          );
+          return;
+        }
+      }
+
+      if (CheckInState.isCheckedIn) {
+        _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
         return;
       }
-    }
 
-    if (CheckInState.isCheckedIn) {
-      _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
-      return;
-    }
+      final isNewDay = await _isNewDayCheckIn();
 
-    final isNewDay = await _isNewDayCheckIn();
-    
-    await _showConfirmationDialog(
-      'دڵنیایت لە چوونەژوورەوە؟',
-      () {
-        _showLoadingDialog('تکایە چاوەڕێکەوە');
-        _processCheckIn(isNewDay);
-      },
-    );
-  } catch (e) {
-    _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+      await _showConfirmationDialog(
+        'دڵنیایت لە چوونەژوورەوە؟',
+        () {
+          _showLoadingDialog('تکایە چاوەڕێکەوە');
+          _processCheckIn(isNewDay);
+        },
+      );
+    } catch (e) {
+      _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+    }
   }
-}
-
 
   Future<bool> _isNewDayCheckIn() async {
     final snapshot = await FirebaseFirestore.instance
@@ -461,7 +626,11 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
         true,
       );
 
-      setState(() => CheckInState.isCheckedIn = true);
+      setState(() {
+        CheckInState.isCheckedIn = true;
+        _currentSessionDuration = Duration.zero; // Reset session timer
+      });
+
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
@@ -520,67 +689,44 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     }
   }
 
-  // Future<void> _handleCheckOut() async {
-  //   _showLoadingDialog('تکایە چاوەڕێکەوە');
-
-  //   try {
-  //     await _loadUserInfo();
-  //     await _getCurrentPosition();
-
-  //     if (!CheckInState.isCheckedIn) {
-  //       Navigator.pop(context);
-  //       _showErrorDialog('هەڵە', 'تکایە چوونەژوورەوە بکە');
-  //       return;
-  //     }
-
-  //     Navigator.pop(context);
-  //     await _showConfirmationDialog(
-  //       'دڵنیایت لە چوونەدەرەوە؟',
-  //       _processCheckOut,
-  //     );
-  //   } catch (e) {
-  //     Navigator.pop(context);
-  //     _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
-  //   }
-  // }
   Future<void> _handleCheckOut() async {
-  try {
-    await _loadUserInfo();
-    await _getCurrentPosition();
+    try {
+      await _loadUserInfo();
+      await _getCurrentPosition();
 
-    if (!CheckInState.isCheckedIn) {
-      _showErrorDialog('هەڵە', 'تکایە چوونەژوورەوە بکە');
-      return;
+      if (!CheckInState.isCheckedIn) {
+        _showErrorDialog('هەڵە', 'تکایە چوونەژوورەوە بکە');
+        return;
+      }
+
+      await _showConfirmationDialog(
+        'دڵنیایت لە چوونەدەرەوە؟',
+        () {
+          _showLoadingDialog('تکایە چاوەڕێکەوە');
+          _processCheckOut();
+        },
+      );
+    } catch (e) {
+      _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
     }
-
-    await _showConfirmationDialog(
-      'دڵنیایت لە چوونەدەرەوە؟',
-      () {
-        _showLoadingDialog('تکایە چاوەڕێکەوە');
-        _processCheckOut();
-      },
-    );
-  } catch (e) {
-    _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
   }
-}
-
 
   Future<void> _processCheckOut() async {
     _showLoadingDialog('تکایە چاوەڕێکەوە');
 
     try {
       final now = await _getNetworkTime();
+      final exactCheckOutTime = now; // This is the exact time we'll use
 
       await FirebaseFirestore.instance
           .collection('user')
           .doc(CheckInState.userEmail)
           .collection('checkincheckouts')
-          .doc(now.toIso8601String())
+          .doc(exactCheckOutTime.toIso8601String())
           .set({
         'latitude': CheckInState.currentLatitude,
         'longtitude': CheckInState.currentLongitude,
-        'time': now,
+        'time': exactCheckOutTime,
         'note': _noteController.text,
         'checkout': true,
         'checkin': false,
@@ -592,13 +738,21 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
           .update({'checkin': false});
 
       await Sharedpreference.checkin(
-        now.toString(),
+        exactCheckOutTime.toString(),
         CheckInState.currentLatitude,
         CheckInState.currentLongitude,
         false,
       );
 
-      setState(() => CheckInState.isCheckedIn = false);
+      setState(() {
+        CheckInState.isCheckedIn = false;
+        _currentSessionDuration = Duration.zero;
+        _lastCheckOutTime = exactCheckOutTime; // Store the exact logout time
+      });
+
+      // Recalculate stats using the exact time
+      await _calculateDailyStats();
+
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
@@ -777,16 +931,474 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
     );
   }
 
+// working calculating
+  // Duration _todayWorkingHours = Duration.zero;
+  // Duration _todayBreakTime = Duration.zero;
+  // bool _isLoadingStats = false;
+// Add this method to calculate working hours and break times
+//   Future<void> _calculateDailyStats() async {
+//     setState(() => _isLoadingStats = true);
+
+//     try {
+//       final now = DateTime.now();
+//       final startOfDay = DateTime(now.year, now.month, now.day);
+
+//       final snapshot = await FirebaseFirestore.instance
+//           .collection('user')
+//           .doc(CheckInState.userEmail)
+//           .collection('checkincheckouts')
+//           .where('time', isGreaterThanOrEqualTo: startOfDay)
+//           .orderBy('time', descending: true)
+//           .get();
+
+//       Duration workingHours = Duration.zero;
+//       Duration breakTime = Duration.zero;
+//       DateTime? lastCheckInTime;
+
+//       for (var doc in snapshot.docs) {
+//         final data = doc.data();
+//         final timestamp = data['time'] as Timestamp;
+//         final time = timestamp.toDate();
+//         final isCheckIn = data['checkin'] as bool;
+
+//         if (isCheckIn) {
+//           lastCheckInTime = time;
+//         } else if (lastCheckInTime != null) {
+//           final sessionDuration = time.difference(lastCheckInTime);
+//           workingHours += sessionDuration;
+//           lastCheckInTime = null;
+//         }
+//       }
+
+//       // Calculate break time (time between check-out and next check-in)
+// // Calculate break time (time between check-out and next check-in)
+//       for (int i = 1; i < snapshot.docs.length; i++) {
+//         final prevDoc = snapshot.docs[i - 1];
+//         final currentDoc = snapshot.docs[i];
+
+//         final prevData = prevDoc.data();
+//         final currentData = currentDoc.data();
+
+//         final prevWasCheckout = prevData['checkin'] == false;
+//         final currentIsCheckin = currentData['checkin'] == true;
+
+//         if (prevWasCheckout && currentIsCheckin) {
+//           final prevTime = (prevData['time'] as Timestamp).toDate();
+//           final currentTime = (currentData['time'] as Timestamp).toDate();
+//           breakTime += currentTime.difference(prevTime);
+//         }
+//       }
+
+//       setState(() {
+//         _todayWorkingHours = workingHours;
+//         _todayBreakTime = breakTime;
+//         _isLoadingStats = false;
+//       });
+//     } catch (e) {
+//       setState(() => _isLoadingStats = false);
+//       if (kDebugMode) print('Error calculating stats: $e');
+//     }
+//   }
+  Future<void> _calculateDailyStats() async {
+    setState(() => _isLoadingStats = true);
+
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(CheckInState.userEmail)
+          .collection('checkincheckouts')
+          .where('time', isGreaterThanOrEqualTo: startOfDay)
+          .orderBy('time', descending: false)
+          .get();
+
+      Duration workingHours = Duration.zero;
+      Duration breakTime = Duration.zero;
+      DateTime? lastCheckInTime;
+      DateTime? lastCheckOutTime;
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final timestamp = data['time'] as Timestamp;
+        final time = timestamp.toDate();
+        final isCheckIn = data['checkin'] == true;
+
+        if (isCheckIn) {
+          lastCheckInTime = time;
+
+          if (lastCheckOutTime != null) {
+            breakTime += time.difference(lastCheckOutTime);
+            lastCheckOutTime = null;
+          }
+        } else {
+          lastCheckOutTime = time;
+
+          if (lastCheckInTime != null) {
+            workingHours += time.difference(lastCheckInTime);
+            lastCheckInTime = null;
+          }
+        }
+      }
+
+      // If currently checked in, add the time since last check-in
+      if (CheckInState.isCheckedIn && lastCheckInTime != null) {
+        workingHours += now.difference(lastCheckInTime);
+      }
+
+      setState(() {
+        _todayWorkingHours = workingHours;
+        _todayBreakTime = breakTime;
+        _isLoadingStats = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingStats = false);
+      if (kDebugMode) print('هەڵە لە هەژمارکردنی کاتەکان: $e');
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    return '${duration.inHours}:${(duration.inMinutes % 60).toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+  }
+
+//   Widget _buildLiveTimeDisplay() {
+//     return Column(
+//       children: [
+//         // Current session status
+//         Text(
+//           CheckInState.isCheckedIn ? 'لە کاردایت' : 'لە کاردا نیت',
+//           style: TextStyle(
+//             fontSize: 16.sp,
+//             color: CheckInState.isCheckedIn ? Colors.green : Colors.red,
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+
+//         SizedBox(height: 16),
+
+//         // Today's totals
+//         Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceAround,
+//           children: [
+//             Column(
+//               children: [
+//                 Text(
+//                   'کۆی کارکردن',
+//                   style: TextStyle(
+//                     fontSize: 14.sp,
+//                     color: Colors.green,
+//                   ),
+//                 ),
+//                 Text(
+//                   _formatDuration(_todayWorkingHours),
+//                   style: TextStyle(
+//                     fontSize: 16.sp,
+//                     fontWeight: FontWeight.bold,
+//                     color: Colors.green,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             Column(
+//               children: [
+//                 Text(
+//                   'کۆی پشوو',
+//                   style: TextStyle(
+//                     fontSize: 14.sp,
+//                     color: Colors.red,
+//                   ),
+//                 ),
+//                 Text(
+//                   _formatDuration(_todayBreakTime),
+//                   style: TextStyle(
+//                     fontSize: 16.sp,
+//                     fontWeight: FontWeight.bold,
+//                     color: Colors.red,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ],
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       children: [
+//         Container(
+//           height: 28.h,
+//           width: 90.w,
+//           color: Colors.yellow,
+//           child: Column(
+//             children: [
+//               Text('ناوی کارمەند: $name',
+//                   style: TextStyle(
+//                       fontSize: 16.sp,
+//                       fontWeight: FontWeight.w600,
+//                       color: Colors.black)),
+//               Text('ژمارەی پەیوەندیدانی کارمەند: $email',
+//                   style: TextStyle(
+//                       fontSize: 16.sp,
+//                       fontWeight: FontWeight.w600,
+//                       color: Colors.black)),
+//               SizedBox(height: 8),
+//               _isLoadingStats
+//                   ? CircularProgressIndicator()
+//                   : Container(
+//                       margin: EdgeInsets.all(10),
+//                       padding: EdgeInsets.all(15),
+//                       decoration: BoxDecoration(
+//                         color: Colors.white,
+//                         borderRadius: BorderRadius.circular(15),
+//                         boxShadow: [
+//                           BoxShadow(
+//                             color: Colors.black12,
+//                             blurRadius: 10,
+//                           ),
+//                         ],
+//                       ),
+//                       child: _buildLiveTimeDisplay(),
+//                     ),
+//             ],
+//           ),
+//         ),
+//         _buildActionButtons(),
+//         CheckInState.showCheckInForm
+//             ? _buildCheckInButtonSection()
+//             : _buildCheckOutSection(),
+//       ],
+//     );
+//   }
+// }
+
+  Widget _buildLiveTimeDisplay() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Status indicator with icon
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: CheckInState.isCheckedIn
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  CheckInState.isCheckedIn ? Icons.check_circle : Icons.pending,
+                  color: CheckInState.isCheckedIn ? Colors.green : Colors.red,
+                  size: 18,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  CheckInState.isCheckedIn ? 'لە کاردایت' : 'لە کاردا نیت',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: CheckInState.isCheckedIn ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 16),
+
+          // Stats cards
+          Row(
+            children: [
+              // Working hours card
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.green.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'کۆی کارکردن',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Colors.green,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        _formatDuration(_todayWorkingHours),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(width: 12),
+
+              // Break time card
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.red.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'کۆی پشوو',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Colors.red,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        _formatDuration(_todayBreakTime),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildStatusHeader(),
-        _buildActionButtons(),
-        CheckInState.showCheckInForm
-            ? _buildCheckInButtonSection()
-            : _buildCheckOutSection(),
-      ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // User info card
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor:
+                            Material1.primaryColor.withOpacity(0.2),
+                        child:
+                            Icon(Icons.person, color: Material1.primaryColor),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              email,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  _isLoadingStats
+                      ? Center(child: CircularProgressIndicator())
+                      : _buildLiveTimeDisplay(),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 24),
+
+            // Action buttons
+            _buildActionButtons(),
+
+            SizedBox(height: 24),
+
+            // Check in/out form
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: CheckInState.showCheckInForm
+                  ? _buildCheckInButtonSection()
+                  : _buildCheckOutSection(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
