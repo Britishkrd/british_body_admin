@@ -2,7 +2,7 @@
 
 import 'dart:developer';
 
-import 'package:british_body_admin/screens/auth/login.dart';
+import 'package:british_body_admin/screens/auth/login_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/acceptingabsence.dart';
 import 'package:british_body_admin/screens/dashborad.dart/addingnotes/choosingtaskforaddingnotes.dart';
@@ -10,6 +10,7 @@ import 'package:british_body_admin/screens/dashborad.dart/alert/viewingalerts.da
 import 'package:british_body_admin/screens/dashborad.dart/changingworkerphone/changingworkerphone.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/adminfeedback.dart/adminfeedback.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/employeefeedback/employeefeedback.dart';
+import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/choosinguseroforloginlogout.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/self-login/viewingselfloginlogout.dart';
 import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/choosinguser.dart';
@@ -18,7 +19,6 @@ import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/adm
 import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/choosingdept.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/choosingusertogivesalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/receivingsalary/choosingmonthtoreceiversalary.dart';
-import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
 import 'package:british_body_admin/screens/dashborad.dart/selfnotification/selfnotification.dart';
 import 'package:british_body_admin/screens/dashborad.dart/selftaskview/selftaskview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/sound-preview/soundpreview.dart';
@@ -37,6 +37,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+
 import '../../../material/materials.dart';
 import 'adduser/choosinguserforusermanagement.dart';
 import 'alert/choosinguserforalerts.dart';
@@ -313,7 +314,7 @@ class _DashboardState extends State<Dashboard> {
                           0, 0, 0, 0, 0, 0, 0, false, '', false, [], []);
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {
-                        return Login();
+                        return LoginScreen();
                       }));
                     },
                     child: controlpanelcard(Icons.logout, 'دەرچوون', 13),

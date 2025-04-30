@@ -1,28 +1,30 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
 import 'dart:developer';
-import 'package:british_body_admin/screens/auth/login.dart';
+import 'dart:io' show Platform;
+
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/screens/auth/login_screen.dart';
 import 'package:british_body_admin/screens/navigator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore: depend_on_referenced_packages
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 // import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-import 'dart:io' show Platform;
-// ignore: depend_on_referenced_packages
-import 'package:firebase_core/firebase_core.dart';
-import 'package:upgrader/upgrader.dart';
-import 'firebase_options.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:app_badge_plus/app_badge_plus.dart';
+import 'package:upgrader/upgrader.dart';
+
+import 'firebase_options.dart';
 
 Future<void> _firebaseMessaginBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -485,12 +487,12 @@ Future<void> main() async {
             messagingSenderId: "528586385117",
             appId: "1:528586385117:web:673bc1552ac4605be99d34",
             measurementId: "G-6XTCNC81HG"));
-  }else{
+  } else {
     await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   }
-  
+
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
     announcement: false,
@@ -526,14 +528,14 @@ Future<void> main() async {
         sound: true,
       );
   if (!kIsWeb) {
-  try {
-    await AppBadgePlus.updateBadge(0);
-  } catch (e) {
-    if (kDebugMode) {
-      print(e);
+    try {
+      await AppBadgePlus.updateBadge(0);
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
-}
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
@@ -670,13 +672,13 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     // FlutterIsolate.spawn(settinglocalnotifications, "hello world");
     if (!kIsWeb) {
-  FlutterIsolate.spawn(settinglocalnotifications, "hello world");
-}
+      FlutterIsolate.spawn(settinglocalnotifications, "hello world");
+    }
     // locationsfunction();
 
-   if (!kIsWeb && Platform.isAndroid) {
-  _createNewChannel();
-}
+    if (!kIsWeb && Platform.isAndroid) {
+      _createNewChannel();
+    }
     islogeding();
     setupInteractedMessage();
     _handlePermission();
@@ -771,7 +773,7 @@ class _MyAppState extends State<MyApp> {
             // localizationsDelegates: localization.localizationsDelegates,
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
-              fontFamily: 'rabar',
+              fontFamily: 'kurdish',
               colorScheme:
                   ColorScheme.fromSeed(seedColor: Material1.primaryColor),
               useMaterial3: true,
@@ -780,7 +782,7 @@ class _MyAppState extends State<MyApp> {
             routes: {
               '/': (context) {
                 islogeding();
-                return logedin ? Navigation(email: email) : const Login();
+                return logedin ? Navigation(email: email) : const LoginScreen();
               }
             },
           ),
