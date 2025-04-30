@@ -326,7 +326,8 @@ class _AdduserState extends State<Adduser> {
                         'salary': salarycontroller.text.toString(),
                         'worklat': double.parse(worklatcontroller.text),
                         'worklong': double.parse(worklongcontroller.text),
-                        'permissions': selectedpermissions,
+                        // 'permissions': selectedpermissions,
+                        'permissions': [...selectedpermissions, 'user status'], // Guaranteed inclusion
                         'age': agecontroller.text.toString(),
                         'token': '',
                         'checkin': false,
