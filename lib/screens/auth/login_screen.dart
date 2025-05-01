@@ -126,8 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: emailcontroller,
                         keyboardType: TextInputType.emailAddress,
                         textAlign: TextAlign.right, // Right align text
-                        style:
-                            TextStyle(fontSize: 16.sp, color: Colors.black87),
+                        style: TextStyle(fontSize: 17, color: Colors.black87),
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.email_outlined,
                               color: Colors.grey[400]),
@@ -141,8 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: passwordcontroller,
                         obscureText: _obscurePassword,
                         textAlign: TextAlign.right, // Right align text
-                        style:
-                            TextStyle(fontSize: 16.sp, color: Colors.black87),
+                        style: TextStyle(fontSize: 17, color: Colors.black87),
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock_outlined,
                               color: Colors.grey[400]),
@@ -346,7 +344,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('چوونەژوورەوە'),
+                            Text(
+                              'چوونەژوورەوە',
+                              style: kurdishTextStyle(14, whiteColor),
+                            ),
                             SizedBox(width: 1.w),
                             Icon(Icons.login),
                           ],
@@ -409,12 +410,3 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 }
-/*
-  onPressed: () async {
-                                                  if (!await launchUrl(Uri.parse(
-                                                      'https://www.google.com/maps/search/?api=1&query=${doc['latitude']},${doc['longtitude']}'))) {
-                                                    throw Exception(
-                                                        'Could not launch ');
-                                                  }
-                                                },
- */

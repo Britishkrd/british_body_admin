@@ -26,6 +26,10 @@ class CheckInState {
   static int workStartMinute = 0;
   static int workEndMinute = 0;
   static List<int> workingDays = [];
+  //work time Store these 3 below for it
+    static Duration cachedWorkingHours = Duration.zero;
+  static Duration cachedBreakTime = Duration.zero;
+  static DateTime? lastCalculationTime;
 }
 
 final TextEditingController _noteController = TextEditingController();
@@ -38,7 +42,7 @@ class CheckInOutScreen extends StatefulWidget {
   State<CheckInOutScreen> createState() => _CheckInOutScreenState();
 }
 
-class _CheckInOutScreenState extends State<CheckInOutScreen> {
+class _CheckInOutScreenState extends State<CheckInOutScreen> with WidgetsBindingObserver {
   bool checkin = true;
   double worklatitude = 0.0;
   double worklongtitude = 0.0;
@@ -58,42 +62,67 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
   DateTime? _lastCheckInTime;
   DateTime? _lastCheckOutTime;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadUserInfo();
-    _startLiveTimer();
+@override
+void initState() {
+  super.initState();
+  
+  WidgetsBinding.instance.addObserver(this);
+  _loadUserInfo();
+  _startLiveTimer();
+  _checkForNewDay().then((_) => _calculateDailyStats());
+}
+
+@override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  if (state == AppLifecycleState.resumed) {
+    _checkForNewDay();
     _calculateDailyStats();
   }
+}
 
   @override
   void dispose() {
+    
+  WidgetsBinding.instance.removeObserver(this);
     _liveTimer?.cancel();
     super.dispose();
   }
 
-  void _startLiveTimer() {
-    _liveTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (CheckInState.isCheckedIn) {
-        setState(() {
-          _currentSessionDuration += Duration(seconds: 1);
-          _todayWorkingHours += Duration(seconds: 1);
-        });
-      } else {
-        // Don't increment break time after logout - use the exact time from database
-        setState(() {
-          _currentSessionDuration = Duration.zero;
-        });
+void _startLiveTimer() {
+  _liveTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    if (CheckInState.isCheckedIn) {
+      final prefs = await SharedPreferences.getInstance();
+      
+      setState(() {
+        _currentSessionDuration += Duration(seconds: 1);
+        _todayWorkingHours += Duration(seconds: 1);
+      });
+      
+      // Update SharedPreferences every minute to reduce writes
+      if (_currentSessionDuration.inSeconds % 60 == 0) {
+        await prefs.setInt('workingHours', _todayWorkingHours.inSeconds);
       }
-    });
-  }
-  // @override
-  // void initState() {
-  //   // _loadUserInfo();
+    } else {
+      setState(() {
+        _currentSessionDuration = Duration.zero;
+      });
+    }
+  });
+}
 
-  //   _loadUserInfo().then((_) => _calculateDailyStats());
-  //   super.initState();
-  // }
+Future<void> _checkForNewDay() async {
+  final prefs = await SharedPreferences.getInstance();
+  final now = DateTime.now();
+  final startOfDay = DateTime(now.year, now.month, now.day);
+  final lastSavedDay = prefs.getString('lastCalculationDay');
+  
+  if (lastSavedDay != startOfDay.toIso8601String()) {
+    await prefs.remove('workingHours');
+    await prefs.remove('breakTime');
+    await prefs.setString('lastCalculationDay', startOfDay.toIso8601String());
+    _calculateDailyStats(); // Recalculate for the new day
+  }
+}
 
   getuserinfo() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
@@ -998,63 +1027,82 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> {
 //     }
 //   }
   Future<void> _calculateDailyStats() async {
-    setState(() => _isLoadingStats = true);
+  setState(() => _isLoadingStats = true);
+  
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
 
-    try {
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
+    // Load cached data if it exists and is from today
+    final lastSavedDay = prefs.getString('lastCalculationDay');
+    if (lastSavedDay == startOfDay.toIso8601String()) {
+      final savedWorkingHours = prefs.getInt('workingHours') ?? 0;
+      final savedBreakTime = prefs.getInt('breakTime') ?? 0;
+      
+      setState(() {
+        _todayWorkingHours = Duration(seconds: savedWorkingHours);
+        _todayBreakTime = Duration(seconds: savedBreakTime);
+      });
+    }
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('user')
-          .doc(CheckInState.userEmail)
-          .collection('checkincheckouts')
-          .where('time', isGreaterThanOrEqualTo: startOfDay)
-          .orderBy('time', descending: false)
-          .get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('user')
+        .doc(CheckInState.userEmail)
+        .collection('checkincheckouts')
+        .where('time', isGreaterThanOrEqualTo: startOfDay)
+        .orderBy('time', descending: false)
+        .get();
 
-      Duration workingHours = Duration.zero;
-      Duration breakTime = Duration.zero;
-      DateTime? lastCheckInTime;
-      DateTime? lastCheckOutTime;
+    Duration workingHours = Duration.zero;
+    Duration breakTime = Duration.zero;
+    DateTime? lastCheckInTime;
+    DateTime? lastCheckOutTime;
 
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        final timestamp = data['time'] as Timestamp;
-        final time = timestamp.toDate();
-        final isCheckIn = data['checkin'] == true;
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final timestamp = data['time'] as Timestamp;
+      final time = timestamp.toDate();
+      final isCheckIn = data['checkin'] == true;
 
-        if (isCheckIn) {
-          lastCheckInTime = time;
+      if (isCheckIn) {
+        lastCheckInTime = time;
 
-          if (lastCheckOutTime != null) {
-            breakTime += time.difference(lastCheckOutTime);
-            lastCheckOutTime = null;
-          }
-        } else {
-          lastCheckOutTime = time;
+        if (lastCheckOutTime != null) {
+          breakTime += time.difference(lastCheckOutTime);
+          lastCheckOutTime = null;
+        }
+      } else {
+        lastCheckOutTime = time;
 
-          if (lastCheckInTime != null) {
-            workingHours += time.difference(lastCheckInTime);
-            lastCheckInTime = null;
-          }
+        if (lastCheckInTime != null) {
+          workingHours += time.difference(lastCheckInTime);
+          lastCheckInTime = null;
         }
       }
-
-      // If currently checked in, add the time since last check-in
-      if (CheckInState.isCheckedIn && lastCheckInTime != null) {
-        workingHours += now.difference(lastCheckInTime);
-      }
-
-      setState(() {
-        _todayWorkingHours = workingHours;
-        _todayBreakTime = breakTime;
-        _isLoadingStats = false;
-      });
-    } catch (e) {
-      setState(() => _isLoadingStats = false);
-      if (kDebugMode) print('هەڵە لە هەژمارکردنی کاتەکان: $e');
     }
+
+    // If currently checked in, add the time since last check-in
+    if (CheckInState.isCheckedIn && lastCheckInTime != null) {
+      final additionalTime = now.difference(lastCheckInTime);
+      workingHours += additionalTime;
+    }
+
+    // Save to SharedPreferences
+    await prefs.setInt('workingHours', workingHours.inSeconds);
+    await prefs.setInt('breakTime', breakTime.inSeconds);
+    await prefs.setString('lastCalculationDay', startOfDay.toIso8601String());
+
+    setState(() {
+      _todayWorkingHours = workingHours;
+      _todayBreakTime = breakTime;
+      _isLoadingStats = false;
+    });
+  } catch (e) {
+    setState(() => _isLoadingStats = false);
+    if (kDebugMode) print('هەڵە لە هەژمارکردنی کاتەکان: $e');
   }
+}
 
   String _formatDuration(Duration duration) {
     return '${duration.inHours}:${(duration.inMinutes % 60).toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
