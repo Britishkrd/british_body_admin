@@ -52,7 +52,6 @@ class _CheckInOutScreenState extends State<CheckInOutScreen> with WidgetsBinding
   String email = '';
   String name = '';
 
-  // لە ناو State class
   // Timer and duration variables
   Timer? _liveTimer;
   Duration _currentSessionDuration = Duration.zero;
@@ -301,44 +300,6 @@ Future<void> _checkForNewDay() async {
     );
   }
 
-  Widget _buildCheckOutButton() {
-    return GestureDetector(
-      onTap: !CheckInState.isCheckedIn
-          ? null
-          : () => setState(() => CheckInState.showCheckInForm = false),
-      child: Container(
-        height: 8.h,
-        width: 40.w,
-        decoration: BoxDecoration(
-          color:
-              !CheckInState.isCheckedIn ? Colors.grey : const Color(0xFFE53935),
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            )
-          ],
-        ),
-        margin: EdgeInsets.only(top: 3.h),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Text(
-              'چوونەدەرەوە',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600),
-            ),
-            const Icon(Icons.logout_rounded, color: Colors.white),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildCheckInButtonSection() {
     return Column(
       children: [
@@ -409,35 +370,6 @@ Future<void> _checkForNewDay() async {
     );
   }
 
-  Widget _buildWorkOutsideCheckInButton() {
-    return SizedBox(
-      height: 8.h,
-      width: 80.w,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor:
-              CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          elevation: 4,
-          shadowColor: Colors.black.withOpacity(0.2),
-          padding: EdgeInsets.symmetric(horizontal: 20),
-        ),
-        onPressed: CheckInState.isCheckedIn ? null : () => _handleCheckIn(true),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.login_rounded, color: Colors.white),
-            SizedBox(width: 8),
-            Text('چوونەژوورەوە لە دەروەی شوێنی ئیشکردن',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildCheckOutSection() {
     return Column(
@@ -531,34 +463,6 @@ Future<void> _checkForNewDay() async {
     );
   }
 
-  Widget _buildCheckOutButtonSection() {
-    return SizedBox(
-      height: 8.h,
-      width: 40.w,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor:
-              !CheckInState.isCheckedIn ? Colors.grey : const Color(0xFFE53935),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          elevation: 4,
-          shadowColor: Colors.black.withOpacity(0.2),
-          padding: EdgeInsets.symmetric(horizontal: 20),
-        ),
-        onPressed: !CheckInState.isCheckedIn ? null : _handleCheckOut,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.logout_rounded, color: Colors.white),
-            SizedBox(width: 8),
-            Text('چوونەدەرەوە', style: TextStyle(fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
-    );
-  }
 
   Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
     try {
@@ -1107,119 +1011,6 @@ Future<void> _checkForNewDay() async {
   String _formatDuration(Duration duration) {
     return '${duration.inHours}:${(duration.inMinutes % 60).toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
   }
-
-//   Widget _buildLiveTimeDisplay() {
-//     return Column(
-//       children: [
-//         // Current session status
-//         Text(
-//           CheckInState.isCheckedIn ? 'لە کاردایت' : 'لە کاردا نیت',
-//           style: TextStyle(
-//             fontSize: 16.sp,
-//             color: CheckInState.isCheckedIn ? Colors.green : Colors.red,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-
-//         SizedBox(height: 16),
-
-//         // Today's totals
-//         Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceAround,
-//           children: [
-//             Column(
-//               children: [
-//                 Text(
-//                   'کۆی کارکردن',
-//                   style: TextStyle(
-//                     fontSize: 14.sp,
-//                     color: Colors.green,
-//                   ),
-//                 ),
-//                 Text(
-//                   _formatDuration(_todayWorkingHours),
-//                   style: TextStyle(
-//                     fontSize: 16.sp,
-//                     fontWeight: FontWeight.bold,
-//                     color: Colors.green,
-//                   ),
-//                 ),
-//               ],
-//             ),
-//             Column(
-//               children: [
-//                 Text(
-//                   'کۆی پشوو',
-//                   style: TextStyle(
-//                     fontSize: 14.sp,
-//                     color: Colors.red,
-//                   ),
-//                 ),
-//                 Text(
-//                   _formatDuration(_todayBreakTime),
-//                   style: TextStyle(
-//                     fontSize: 16.sp,
-//                     fontWeight: FontWeight.bold,
-//                     color: Colors.red,
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       children: [
-//         Container(
-//           height: 28.h,
-//           width: 90.w,
-//           color: Colors.yellow,
-//           child: Column(
-//             children: [
-//               Text('ناوی کارمەند: $name',
-//                   style: TextStyle(
-//                       fontSize: 16.sp,
-//                       fontWeight: FontWeight.w600,
-//                       color: Colors.black)),
-//               Text('ژمارەی پەیوەندیدانی کارمەند: $email',
-//                   style: TextStyle(
-//                       fontSize: 16.sp,
-//                       fontWeight: FontWeight.w600,
-//                       color: Colors.black)),
-//               SizedBox(height: 8),
-//               _isLoadingStats
-//                   ? CircularProgressIndicator()
-//                   : Container(
-//                       margin: EdgeInsets.all(10),
-//                       padding: EdgeInsets.all(15),
-//                       decoration: BoxDecoration(
-//                         color: Colors.white,
-//                         borderRadius: BorderRadius.circular(15),
-//                         boxShadow: [
-//                           BoxShadow(
-//                             color: Colors.black12,
-//                             blurRadius: 10,
-//                           ),
-//                         ],
-//                       ),
-//                       child: _buildLiveTimeDisplay(),
-//                     ),
-//             ],
-//           ),
-//         ),
-//         _buildActionButtons(),
-//         CheckInState.showCheckInForm
-//             ? _buildCheckInButtonSection()
-//             : _buildCheckOutSection(),
-//       ],
-//     );
-//   }
-// }
 
   Widget _buildLiveTimeDisplay() {
     return Container(
