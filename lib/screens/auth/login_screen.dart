@@ -5,6 +5,7 @@ import 'package:british_body_admin/screens/auth/forgetpassword.dart';
 import 'package:british_body_admin/screens/navigator.dart';
 import 'package:british_body_admin/shared/confirm_dialog.dart';
 import 'package:british_body_admin/shared/custom_email.dart';
+import 'package:british_body_admin/shared/custom_password.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:british_body_admin/utils/color.dart';
 import 'package:british_body_admin/utils/textstyle.dart';
@@ -131,31 +132,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: emailcontroller                    
                         ),
                         Divider(height: 1, color: Colors.grey[300]),
-                        TextFormField(
+                        CustomPasswordField(
                           controller: passwordcontroller,
-                          obscureText: _obscurePassword,
-                          textAlign: TextAlign.right, // Right align text
-                          style: TextStyle(fontSize: 17, color: Colors.black87),
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.lock_outlined,
-                                color: Colors.grey[400]),
-                            labelText: 'وشەی نهێنی',
-                            labelStyle: TextStyle(color: Colors.grey[600]),
-                            border: InputBorder.none,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: Colors.grey[400],
-                              ),
-                              onPressed: () {
+                          isObscurePassword: _obscurePassword,
+                          onPressed: () {
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
                                 });
                               },
-                            ),
-                          ),
                         ),
                         SizedBox(height: 2.h),
                         Align(
