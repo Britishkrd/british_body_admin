@@ -1,26 +1,25 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:british_body_admin/utils/color.dart';
+import 'package:british_body_admin/utils/textstyle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomEmailField extends StatelessWidget {
-  // final void Function(String?)? onSaved;
   final TextEditingController? controller;
-  final FormFieldValidator<String>? validator;
 
-  const CustomEmailField({super.key, this.controller, this.validator});
+  const CustomEmailField({super.key, this.controller});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       decoration: InputDecoration(
-        labelText: 'Email',
-        labelStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 14),
+        labelText: 'ئیمێڵ',
+        labelStyle: kurdishTextStyle(14, Colors.grey[600]!),
         floatingLabelStyle: TextStyle(color: foregroundColor),
         prefixIcon: Icon(
           Icons.email_outlined,
-          color: Colors.grey.withValues(alpha: 0.6 * 255),
+          color: Colors.grey[400],
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -32,7 +31,7 @@ class CustomEmailField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: foregroundColor, width: 1.5),
+          borderSide: BorderSide.none,
         ),
         filled: true,
         fillColor: backgroundColor,
@@ -45,19 +44,16 @@ class CustomEmailField extends StatelessWidget {
       keyboardType: TextInputType.emailAddress,
       inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
       controller: controller,
-      validator:
-          validator ??
-          (value) {
-            const pattern =
-                r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)';
-            final regExp = RegExp(pattern);
-            if (value!.isEmpty) {
-              return 'Please enter your email';
-            } else if (!regExp.hasMatch(value)) {
-              return 'Please enter a valid email';
-            }
-            return null;
-          },
+      validator: (value) {
+        const pattern = r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)';
+        final regExp = RegExp(pattern);
+        if (value!.isEmpty) {
+          return 'تکایە ئیمێڵەکەت داخڵ بکە';
+        } else if (!regExp.hasMatch(value)) {
+          return 'تکایە ئیمێڵی درووست داخڵ';
+        }
+        return null;
+      },
     );
   }
 }

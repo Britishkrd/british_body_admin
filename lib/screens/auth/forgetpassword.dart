@@ -1,5 +1,6 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/shared/confirm_dialog.dart';
+import 'package:british_body_admin/shared/custom_email.dart';
 import 'package:british_body_admin/utils/color.dart';
 import 'package:british_body_admin/utils/textstyle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,7 +15,7 @@ class Forgetpassword extends StatefulWidget {
 }
 
 class _ForgetpasswordState extends State<Forgetpassword> {
-  TextEditingController emailcontroller = TextEditingController();
+  final TextEditingController _emailcontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -66,23 +67,13 @@ class _ForgetpasswordState extends State<Forgetpassword> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        TextFormField(
-                          controller: emailcontroller,
-                          keyboardType: TextInputType.emailAddress,
-                          textAlign: TextAlign.right, // Right align text
-                          style: TextStyle(fontSize: 17, color: Colors.black87),
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.email_outlined,
-                                color: Colors.grey[400]),
-                            labelText: 'ئیمێڵ',
-                            labelStyle: TextStyle(color: Colors.grey[600]),
-                            border: InputBorder.none,
-                          ),
+                        CustomEmailField(
+                          controller: _emailcontroller,
                         ),
                         SizedBox(height: 4.h),
                         ElevatedButton(
                           onPressed: () async {
-                            String email = emailcontroller.text;
+                            String email = _emailcontroller.text;
                             try {
                               await FirebaseAuth.instance
                                   .sendPasswordResetEmail(email: email)

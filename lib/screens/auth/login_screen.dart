@@ -127,36 +127,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        TextFormField(
-                          controller: emailcontroller,
-                          keyboardType: TextInputType.emailAddress,
-                          textAlign: TextAlign.right, // Right align text
-                          style: TextStyle(fontSize: 17, color: Colors.black87),
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.email_outlined,
-                                color: Colors.grey[400]),
-                            labelText: 'ئیمێڵ',
-                            labelStyle: TextStyle(color: Colors.grey[600]),
-                            border: InputBorder.none,
-                          ),
+                        CustomEmailField(
+                          controller: emailcontroller                    
                         ),
-                        // CustomEmailField(
-                        //   controller: emailcontroller,
-                          
-                        //     validator: (value) {
-                        //     const pattern =
-                        //         r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)';
-                        //     final regExp = RegExp(pattern);
-                        //     if (value!.isEmpty) {
-                        //       return 'تکایە ئیمێڵەکەت داخڵ بکە';
-                        //     } else if (!regExp.hasMatch(value)) {
-                        //       return 'تکایە ئیمێڵی درووست داخڵ';
-                        //     }
-                        //     return null;
-                          
-                        //   },
-                        
-                        // ),
                         Divider(height: 1, color: Colors.grey[300]),
                         TextFormField(
                           controller: passwordcontroller,
