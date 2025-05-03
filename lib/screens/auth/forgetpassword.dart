@@ -1,10 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io';
-
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/shared/confirm_dialog.dart';
+import 'package:british_body_admin/utils/color.dart';
+import 'package:british_body_admin/utils/textstyle.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 
 class Forgetpassword extends StatefulWidget {
   const Forgetpassword({super.key});
@@ -18,83 +18,135 @@ class _ForgetpasswordState extends State<Forgetpassword> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Forget Password'),
-          backgroundColor: Material1.primaryColor,
-          foregroundColor: Colors.white,
-        ),
-        body: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 60.w,
-                  height: 20.h,
-                  child: Icon(
-                    Icons.email,
-                    size: 50.sp,
-                    color: Material1.primaryColor,
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        body: Directionality(
+          textDirection: TextDirection.rtl, // RTL for Kurdish
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 110,
+                    width: 110,
+                    child: Image.asset('lib/assets/logo.png'),
                   ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: 5.h),
-                  width: 90.w,
-                  height: 8.h,
-                  child: Material1.textfield(
-                      hint: 'example@example.com',
-                      controller: emailcontroller,
-                      inputType: TextInputType.number,
-                      textColor: Material1.primaryColor),
-                ),
-                Container(
-                    margin: EdgeInsets.only(top: 2.h),
-                    width: 90.w,
-                    height: 8.h,
-                    child: Material1.button(
-                        label: 'send password reset email',
-                        buttoncolor: Material1.primaryColor,
-                        textcolor: Colors.white,
-                        function: () async {
-                          String email = emailcontroller.text;
-                          try {
-                            await FirebaseAuth.instance
-                                .sendPasswordResetEmail(email: email)
-                                .then((value) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                  SizedBox(height: 3.h),
+                  Text(
+                    'وشەی نهێنیت لەبیرکردووە؟',
+                    textAlign: TextAlign.center,
+                    style: kurdishTextStyle(
+                      18,
+                      blackColor,
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    'ئیمێڵەکەت بنووسە بۆ ناردنی بەستەری گۆڕینی وشەی نهێنی',
+                    textAlign: TextAlign.center,
+                    style: kurdishTextStyle(
+                      16,
+                      Colors.grey[600]!,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Container(
+                    padding: EdgeInsets.all(16.sp),
+                    decoration: BoxDecoration(
+                      color: whiteColor,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          controller: emailcontroller,
+                          keyboardType: TextInputType.emailAddress,
+                          textAlign: TextAlign.right, // Right align text
+                          style: TextStyle(fontSize: 17, color: Colors.black87),
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.email_outlined,
+                                color: Colors.grey[400]),
+                            labelText: 'ئیمێڵ',
+                            labelStyle: TextStyle(color: Colors.grey[600]),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        ElevatedButton(
+                          onPressed: () async {
+                            String email = emailcontroller.text;
+                            try {
+                              await FirebaseAuth.instance
+                                  .sendPasswordResetEmail(email: email)
+                                  .then((value) {
+                                ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                      content: Text('email sent to $email')));
-                              Navigator.pop(context);
-                            });
-                          } catch (e) {
-                            Material1.showdialog(
-                                context, 'Error', 'email is not correct', [
-                              Material1.button(
-                                  label: 'ok',
-                                  buttoncolor: Material1.primaryColor,
-                                  textcolor: Colors.white,
-                                  function: () {
-                                    Navigator.pop(context);
-                                  })
-                            ]);
-                          }
-                        })),
-              ],
+                                    content: Text(
+                                      ' $email ئیمێڵ نێردرا بۆ',
+                                      textAlign: TextAlign.center,
+                                      style: kurdishTextStyle(14, whiteColor),
+                                    ),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                                Navigator.pop(context);
+                              });
+                            } catch (e) {
+                              LoginConfirmationDialog(
+                                      context: context,
+                                      content: 'ئیمێڵەکە هەڵەیە')
+                                  .show();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Material1.primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            textStyle: TextStyle(fontSize: 18.sp),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'ناردنی ئیمێڵ',
+                                style: kurdishTextStyle(14, whiteColor),
+                              ),
+                              SizedBox(width: 1.w),
+                              Icon(Icons.send),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 5.h),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'گەڕانەوە بۆ پەڕەی چوونەژوورەوە',
+                      style: kurdishTextStyle(14, Material1.primaryColor),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ));
-  }
-
-  Future<String> getDeviceId() async {
-    var deviceInfo = DeviceInfoPlugin();
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      return androidInfo.id;
-    } else {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      return iosInfo.identifierForVendor ?? iosInfo.localizedModel;
-    }
+        ),
+      ),
+    );
   }
 }

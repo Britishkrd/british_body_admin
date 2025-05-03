@@ -4,6 +4,7 @@ import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/auth/forgetpassword.dart';
 import 'package:british_body_admin/screens/navigator.dart';
 import 'package:british_body_admin/shared/confirm_dialog.dart';
+import 'package:british_body_admin/shared/custom_email.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:british_body_admin/utils/color.dart';
 import 'package:british_body_admin/utils/textstyle.dart';
@@ -139,6 +140,23 @@ class _LoginScreenState extends State<LoginScreen> {
                             border: InputBorder.none,
                           ),
                         ),
+                        // CustomEmailField(
+                        //   controller: emailcontroller,
+                          
+                        //     validator: (value) {
+                        //     const pattern =
+                        //         r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)';
+                        //     final regExp = RegExp(pattern);
+                        //     if (value!.isEmpty) {
+                        //       return 'تکایە ئیمێڵەکەت داخڵ بکە';
+                        //     } else if (!regExp.hasMatch(value)) {
+                        //       return 'تکایە ئیمێڵی درووست داخڵ';
+                        //     }
+                        //     return null;
+                          
+                        //   },
+                        
+                        // ),
                         Divider(height: 1, color: Colors.grey[300]),
                         TextFormField(
                           controller: passwordcontroller,
@@ -249,11 +267,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                 if (value.data()?['deviceid'] != '' &&
                                     value.data()?['deviceid'] != deviceid) {
-                                  
-                                      LoginConfirmationDialog(
-                                      context: context,
-                                      content:
-                                          'ناتوانیت لەم ئامێرە چوونەژوورەوە بکەیت').show();
+                                  LoginConfirmationDialog(
+                                          context: context,
+                                          content:
+                                              'ناتوانیت لەم ئامێرە چوونەژوورەوە بکەیت')
+                                      .show();
                                   return;
                                 }
                                 String fcm = '';
@@ -304,17 +322,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                 ));
                               } else {
-                                Material1.showdialog(
-                                    context, 'هەڵە', 'ئیمێڵ هەڵەیە', [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text('باشە',
-                                        style: TextStyle(
-                                            color: Material1.primaryColor)),
-                                  )
-                                ]);
+                                LoginConfirmationDialog(
+                                        context: context,
+                                        content: 'ئیمێڵەکە هەڵەیە')
+                                    .show();
                               }
                             });
                           },
