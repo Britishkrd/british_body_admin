@@ -49,7 +49,6 @@ class Material1 {
               hintText: hint,
             ),
             obscureText: obscure ?? false,
-            
           ));
 
   static button(
@@ -113,8 +112,14 @@ class Material1 {
     showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
+        title: Text(
+          title,
+          textDirection: TextDirection.rtl,
+        ),
+        content: Text(
+          body,
+          textDirection: TextDirection.rtl,
+        ),
         actions: actions,
       ),
     );

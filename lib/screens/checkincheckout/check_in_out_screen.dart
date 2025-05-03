@@ -163,15 +163,6 @@ Future<void> _checkForNewDay() async {
     });
   }
 
-  // Widget _buildActionButtons() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-  //     children: [
-  //       _buildCheckInButton(),
-  //       _buildCheckOutButton(),
-  //     ],
-  //   );
-  // }
   Widget _buildActionButtons() {
     return Column(
       children: [
@@ -262,43 +253,6 @@ Future<void> _checkForNewDay() async {
     );
   }
 
-  Widget _buildCheckInButton() {
-    return GestureDetector(
-      onTap: CheckInState.isCheckedIn
-          ? null
-          : () => setState(() => CheckInState.showCheckInForm = true),
-      child: Container(
-        height: 8.h,
-        width: 40.w,
-        decoration: BoxDecoration(
-          color:
-              CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            )
-          ],
-        ),
-        margin: EdgeInsets.only(top: 3.h),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Text(
-              'چوونەژوورەوە',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600),
-            ),
-            const Icon(Icons.login_rounded, color: Colors.white),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildCheckInButtonSection() {
     return Column(
@@ -339,36 +293,6 @@ Future<void> _checkForNewDay() async {
     );
   }
 
-  Widget _buildMainCheckInButton() {
-    return Container(
-      margin: EdgeInsets.only(top: 1.h),
-      height: 8.h,
-      width: 40.w,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor:
-              CheckInState.isCheckedIn ? Colors.grey : Material1.primaryColor,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          elevation: 4,
-          shadowColor: Colors.black.withOpacity(0.2),
-          padding: EdgeInsets.symmetric(horizontal: 20),
-        ),
-        onPressed:
-            CheckInState.isCheckedIn ? null : () => _handleCheckIn(false),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.login_rounded, color: Colors.white),
-            SizedBox(width: 8),
-            Text('چوونەژوورەوە', style: TextStyle(fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
-    );
-  }
 
 
   Widget _buildCheckOutSection() {

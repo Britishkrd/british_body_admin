@@ -101,13 +101,14 @@ class LoginConfirmationDialog {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'هەڵە',
+            'ئاگادارکردنەوە',
             textAlign: TextAlign.right, // Add this line
             textDirection: TextDirection.rtl, // Add this line
             style: TextStyle(
               fontFamily: 'kurdish',
-              fontWeight: FontWeight.w600,
               color: blackColor,
+              fontWeight: FontWeight.w400,
+              fontSize: 22,
             ),
           ),
           content: Text(
