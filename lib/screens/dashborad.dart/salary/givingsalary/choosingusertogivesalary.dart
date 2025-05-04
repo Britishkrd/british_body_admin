@@ -51,16 +51,16 @@ class _ChoosingUserForGivingSalaryState
               final name = data['name'] as String? ?? 'No Name';
               final phone = data['phonenumber'] as String? ?? 'No Phone';
               final email = data['email'] as String? ?? 'No Email';
-              final salary = (data['salary'] as String? ?? '0');
+              final salary = (data['salary'] as int? ?? 0);
               
               // Handle potentially missing fields
               final loan = data.containsKey('loan') 
                   ? data['loan'] as String? ?? '0'
                   : '0';
                   
-              final monthlyPayback = data.containsKey('monthlypayback')
-                  ? (data['monthlypayback'] as int? ?? 0).toString()
-                  : '0';
+              final num monthlyPayback = data.containsKey('monthlypayback')
+                  ? (data['monthlypayback'] as num? ?? 0)
+                  : 0;
 
               return GestureDetector(
                 onTap: () {
@@ -86,9 +86,9 @@ class _ChoosingUserForGivingSalaryState
     required BuildContext context,
     required String name,
     required String email,
-    required String salary,
+    required int salary,
     required String loan,
-    required String monthlyPayback,
+    required num monthlyPayback,
   }) {
     showDialog(
       context: context,
@@ -119,9 +119,9 @@ class _ChoosingUserForGivingSalaryState
     BuildContext context,
     String name,
     String email,
-    String salary,
+    int salary,
     String loan,
-    String monthlyPayback,
+    num monthlyPayback,
   ) async {
     final dates = await showMonthRangePicker(
       context: context,
@@ -162,9 +162,9 @@ class _ChoosingUserForGivingSalaryState
             date: dates[0],
             totalworkedtime: totalWorkedTime,
             worktarget: workTarget.inHours,
-            salary: int.tryParse(salary) ?? 0,
+            salary:salary,
             loan: loan,
-            monthlypayback: int.tryParse(monthlyPayback) ?? 0,
+            monthlypayback:monthlyPayback,
             reward: reward,
             punishment: punishment,
           ),

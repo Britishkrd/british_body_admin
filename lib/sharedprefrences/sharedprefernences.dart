@@ -6,7 +6,7 @@ class Sharedpreference {
     String phonenumber,
     String location,
     String email,
-    String salary,
+    int salary,
     String age,
     double lat,
     double long,
@@ -29,7 +29,7 @@ class Sharedpreference {
     preference.setString('phonenumber', phonenumber);
     preference.setString('location', location);
     preference.setString('email', email);
-    preference.setString('salary', salary);
+    preference.setInt('salary', salary);
     preference.setString('age', age);
     preference.setDouble('lat', lat);
     preference.setDouble('long', long);

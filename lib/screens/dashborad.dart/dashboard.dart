@@ -310,7 +310,7 @@ class _DashboardState extends State<Dashboard> {
                             });
                         return;
                       }
-                      Sharedpreference.setuser('', '', '', 'aa', 'aa', 'aa', 0,
+                      Sharedpreference.setuser('', '', '', 'aa', 0, 'aa', 0,
                           0, 0, 0, 0, 0, 0, 0, false, '', false, [], []);
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {

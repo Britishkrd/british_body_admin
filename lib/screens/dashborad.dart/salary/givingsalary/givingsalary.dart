@@ -12,9 +12,9 @@ class Givingsalary extends StatefulWidget {
   final DateTime date;
   final Duration totalworkedtime;
   final int worktarget;
-  final int salary;
+  final num salary;
   final String loan;
-  final int monthlypayback;
+  final num monthlypayback;
   final num reward;
   final num punishment;
   const Givingsalary(
