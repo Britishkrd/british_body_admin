@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/givingsalary.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,279 +26,247 @@ class _ChoosingUserForGivingSalaryState
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
       ),
-      body: StreamBuilder(
+      body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('user').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No employees found'));
+          }
+
           return ListView.builder(
-              itemCount: snapshot.data?.docs.length ?? 0,
-              itemBuilder: (BuildContext context, int index) {
-                return GestureDetector(
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text(
-                                'دڵنیایت لە پێدانی موچەی ئەم کارمەندە؟'),
-                            actions: [
-                              TextButton(
-                                  onPressed: () async {
-                                    Duration totalworkedtime = Duration();
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              final doc = snapshot.data!.docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+              
+              // Safely get all fields with defaults
+              final name = data['name'] as String? ?? 'No Name';
+              final phone = data['phonenumber'] as String? ?? 'No Phone';
+              final email = data['email'] as String? ?? 'No Email';
+              final salary = (data['salary'] as String? ?? '0');
+              
+              // Handle potentially missing fields
+              final loan = data.containsKey('loan') 
+                  ? data['loan'] as String? ?? '0'
+                  : '0';
+                  
+              final monthlyPayback = data.containsKey('monthlypayback')
+                  ? (data['monthlypayback'] as int? ?? 0).toString()
+                  : '0';
 
-                                    showMonthRangePicker(
-                                      context: context,
-                                      firstDate:
-                                          DateTime(DateTime.now().year - 1, 1),
-                                      rangeList: false,
-                                    ).then((List<DateTime>? dates) async {
-                                      if (dates?.isNotEmpty ?? false) {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                  title: Column(
-                                                children: [
-                                                  Center(
-                                                      child:
-                                                          CircularProgressIndicator()),
-                                                  Text('تکایە چاوەڕێکە...'),
-                                                ],
-                                              ));
-                                            });
-                                        int totalWorkDays = 0;
-                                        DateTime firstDayOfMonth = DateTime(
-                                            dates![0].year, dates[0].month, 1);
-                                        DateTime lastDayOfMonth = DateTime(
-                                            dates[0].year,
-                                            dates[0].month + 1,
-                                            0);
-                                        final SharedPreferences preference =
-                                            await SharedPreferences
-                                                .getInstance();
-
-                                        int starthour = 0;
-                                        int endhour = 0;
-                                        int startmin = 0;
-                                        int endmin = 0;
-                                        starthour =
-                                            preference.getInt('starthour') ?? 0;
-                                        endhour =
-                                            preference.getInt('endhour') ?? 0;
-                                        startmin =
-                                            preference.getInt('startmin') ?? 0;
-                                        endmin =
-                                            preference.getInt('endmin') ?? 0;
-                                        Duration targetWorkTime = Duration();
-                                        log(starthour.toString());
-                                        log(endhour.toString());
-                                        targetWorkTime = Duration(
-                                            hours: endhour - starthour,
-                                            minutes: endmin - startmin);
-
-                                        for (DateTime day = firstDayOfMonth;
-                                            day.isBefore(lastDayOfMonth) ||
-                                                day.isAtSameMomentAs(
-                                                    lastDayOfMonth);
-                                            day = day
-                                                .add(const Duration(days: 1))) {
-                                          if (day.weekday != DateTime.friday) {
-                                            totalWorkDays++;
-                                          }
-                                        }
-                                        targetWorkTime *= totalWorkDays - 1;
-                                        log(targetWorkTime.toString());
-                                        FirebaseFirestore.instance
-                                            .collection('user')
-                                            .doc(widget.email)
-                                            .collection('checkincheckouts')
-                                            .where('time',
-                                                isGreaterThanOrEqualTo:
-                                                    DateTime(dates.first.year,
-                                                        dates.first.month, 1))
-                                            .where('time',
-                                                isLessThanOrEqualTo: DateTime(
-                                                    dates.first.year,
-                                                    dates.first.month,
-                                                    (DateTime(
-                                                            dates.first.year,
-                                                            dates.first.month +
-                                                                1,
-                                                            0)
-                                                        .day)))
-                                            .get()
-                                            .then((value) {
-                                          for (var i = 0;
-                                              i < value.docs.length;
-                                              i = i + 2) {
-                                            if (i + 1 == value.docs.length) {
-                                              break;
-                                            }
-                                            if (value.docs[i]['checkin'] ==
-                                                false) {
-                                              if (i + 2 == value.docs.length) {
-                                                break;
-                                              }
-
-                                              totalworkedtime += value
-                                                  .docs[i + 2]['time']
-                                                  .toDate()
-                                                  .difference(value.docs[i + 1]
-                                                          ['time']
-                                                      .toDate());
-                                            } else {
-                                              totalworkedtime += value
-                                                  .docs[i + 1]['time']
-                                                  .toDate()
-                                                  .difference(value.docs[i]
-                                                          ['time']
-                                                      .toDate());
-                                            }
-                                          }
-                                        }).then((value) {
-                                          num reward = 0;
-                                          num punishment = 0;
-                                          FirebaseFirestore.instance
-                                              .collection('user')
-                                              .doc(widget.email)
-                                              .collection('rewardpunishment')
-                                              .where('date',
-                                                  isGreaterThanOrEqualTo:
-                                                      DateTime(dates.first.year,
-                                                          dates.first.month, 1))
-                                              .where('date',
-                                                  isLessThanOrEqualTo: DateTime(
-                                                      dates.first.year,
-                                                      dates.first.month,
-                                                      (DateTime(
-                                                              dates.first.year,
-                                                              dates.first
-                                                                      .month +
-                                                                  1,
-                                                              0)
-                                                          .day)))
-                                              .get()
-                                              .then((value) {
-                                            for (var i = 0;
-                                                i < value.docs.length;
-                                                i++) {
-                                              if (value.docs[i]
-                                                      .data()['type'] ==
-                                                  'punishment') {
-                                                punishment += num.tryParse(value
-                                                        .docs[i]
-                                                        .data()['amount']) ??
-                                                    0;
-                                              } else {
-                                                reward += num.tryParse(value
-                                                        .docs[i]
-                                                        .data()['amount']) ??
-                                                    0;
-                                              }
-                                            }
-                                          }).then((value) {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        Givingsalary(
-                                                          name: snapshot.data
-                                                                          ?.docs[
-                                                                      index]
-                                                                  ['name'] ??
-                                                              snapshot.data!
-                                                                          .docs[
-                                                                      index]
-                                                                  ['email'],
-                                                          adminemail:
-                                                              widget.email,
-                                                          email: snapshot.data!
-                                                                  .docs[index]
-                                                              ['email'],
-                                                          date: dates.first,
-                                                          totalworkedtime:
-                                                              totalworkedtime,
-                                                          worktarget:
-                                                              targetWorkTime
-                                                                  .inHours,
-                                                          salary: int.parse(
-                                                              snapshot.data!
-                                                                          .docs[
-                                                                      index]
-                                                                  ['salary']),
-                                                          loan: snapshot.data!
-                                                                  .docs[index]
-                                                              ['loan'],
-                                                          monthlypayback: snapshot
-                                                              .data!
-                                                              .docs[index][
-                                                                  'monthlypayback']
-                                                              .toInt(),
-                                                          reward: reward,
-                                                          punishment:
-                                                              punishment,
-                                                        )));
-                                          });
-                                        });
-                                      }
-                                    });
-                                  },
-                                  child: const Text('پێدانی موچە')),
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('پەشیمانبوونەوە')),
-                            ],
-                          );
-                        });
-                  },
-                  child: SizedBox(
-                      height: 15.h,
-                      width: 90.w,
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-                        padding: EdgeInsets.all(1.h),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(5),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.grey,
-                              blurRadius: 5,
-                            )
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "${snapshot.data!.docs[index]['name']} : ناو",
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "${snapshot.data!.docs[index]['phonenumber']} : ژمارەی مۆبایل",
-                              style: const TextStyle(
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              "${snapshot.data!.docs[index]['email']} : ئیمەیل",
-                              style: const TextStyle(
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )),
-                );
-              });
+              return GestureDetector(
+                onTap: () {
+                  _handleEmployeeTap(
+                    context: context,
+                    name: name,
+                    email: email,
+                    salary: salary,
+                    loan: loan,
+                    monthlyPayback: monthlyPayback,
+                  );
+                },
+                child: _buildEmployeeCard(name, phone, email),
+              );
+            },
+          );
         },
+      ),
+    );
+  }
+
+  void _handleEmployeeTap({
+    required BuildContext context,
+    required String name,
+    required String email,
+    required String salary,
+    required String loan,
+    required String monthlyPayback,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('دڵنیایت لە پێدانی موچەی ئەم کارمەندە؟'),
+        actions: [
+          TextButton(
+            onPressed: () => _proceedWithSalary(
+              context,
+              name,
+              email,
+              salary,
+              loan,
+              monthlyPayback,
+            ),
+            child: const Text('پێدانی موچە'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('پەشیمانبوونەوە'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _proceedWithSalary(
+    BuildContext context,
+    String name,
+    String email,
+    String salary,
+    String loan,
+    String monthlyPayback,
+  ) async {
+    final dates = await showMonthRangePicker(
+      context: context,
+      firstDate: DateTime(DateTime.now().year - 1, 1),
+      rangeList: false,
+    );
+
+    if (dates == null || dates.isEmpty) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        title: Column(
+          children: [
+            Center(child: CircularProgressIndicator()),
+            Text('تکایە چاوەڕێکە...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final totalWorkedTime = await _calculateTotalWorkedTime(email, dates[0]);
+      final workTarget = await _calculateWorkTarget();
+      final (reward, punishment) = await _calculateRewardAndPunishment(email, dates[0]);
+
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading dialog
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Givingsalary(
+            name: name,
+            adminemail: widget.email,
+            email: email,
+            date: dates[0],
+            totalworkedtime: totalWorkedTime,
+            worktarget: workTarget.inHours,
+            salary: int.tryParse(salary) ?? 0,
+            loan: loan,
+            monthlypayback: int.tryParse(monthlyPayback) ?? 0,
+            reward: reward,
+            punishment: punishment,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  Future<Duration> _calculateTotalWorkedTime(String email, DateTime date) async {
+    Duration totalWorkedTime = Duration.zero;
+    
+    final checkinCheckouts = await FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .collection('checkincheckouts')
+        .where('time', isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
+        .where('time', isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
+        .get();
+
+    for (var i = 0; i < checkinCheckouts.docs.length; i += 2) {
+      if (i + 1 >= checkinCheckouts.docs.length) break;
+      
+      if (checkinCheckouts.docs[i]['checkin'] == false) {
+        if (i + 2 >= checkinCheckouts.docs.length) break;
+        totalWorkedTime += checkinCheckouts.docs[i + 2]['time'].toDate()
+            .difference(checkinCheckouts.docs[i + 1]['time'].toDate());
+      } else {
+        totalWorkedTime += checkinCheckouts.docs[i + 1]['time'].toDate()
+            .difference(checkinCheckouts.docs[i]['time'].toDate());
+      }
+    }
+    
+    return totalWorkedTime;
+  }
+
+  Future<Duration> _calculateWorkTarget() async {
+    final prefs = await SharedPreferences.getInstance();
+    final starthour = prefs.getInt('starthour') ?? 0;
+    final endhour = prefs.getInt('endhour') ?? 0;
+    final startmin = prefs.getInt('startmin') ?? 0;
+    final endmin = prefs.getInt('endmin') ?? 0;
+    
+    return Duration(
+      hours: endhour - starthour,
+      minutes: endmin - startmin,
+    );
+  }
+
+  Future<(num, num)> _calculateRewardAndPunishment(String email, DateTime date) async {
+    num reward = 0;
+    num punishment = 0;
+    
+    final rewardPunishment = await FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .collection('rewardpunishment')
+        .where('date', isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
+        .where('date', isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
+        .get();
+
+    for (var doc in rewardPunishment.docs) {
+      final type = doc['type'] as String?;
+      final amount = num.tryParse(doc['amount'] as String? ?? '0') ?? 0;
+      
+      if (type == 'punishment') {
+        punishment += amount;
+      } else {
+        reward += amount;
+      }
+    }
+    
+    return (reward, punishment);
+  }
+
+  Widget _buildEmployeeCard(String name, String phone, String email) {
+    return SizedBox(
+      height: 15.h,
+      width: 90.w,
+      child: Container(
+        margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+        padding: EdgeInsets.all(1.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(5),
+          boxShadow: const [
+            BoxShadow(color: Colors.grey, blurRadius: 5),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text("$name : ناو", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text("$phone : ژمارەی مۆبایل", style: const TextStyle(fontSize: 15)),
+            Text("$email : ئیمەیل", style: const TextStyle(fontSize: 15)),
+          ],
+        ),
       ),
     );
   }

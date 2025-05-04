@@ -128,18 +128,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        CustomEmailField(
-                          controller: emailcontroller                    
-                        ),
+                        CustomEmailField(controller: emailcontroller),
                         Divider(height: 1, color: Colors.grey[300]),
                         CustomPasswordField(
                           controller: passwordcontroller,
                           isObscurePassword: _obscurePassword,
                           onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
                         ),
                         SizedBox(height: 2.h),
                         Align(
