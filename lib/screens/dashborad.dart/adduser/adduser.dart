@@ -323,7 +323,7 @@ class _AdduserState extends State<Adduser> {
                         'name': namecontroller.text,
                         'location': locationcontroller.text,
                         'phonenumber': phonenumbercontroller.text.toString(),
-                        'salary': salarycontroller.text.toString(),
+                        'salary': salarycontroller.text,
                         'worklat': double.parse(worklatcontroller.text),
                         'worklong': double.parse(worklongcontroller.text),
                         // 'permissions': selectedpermissions,

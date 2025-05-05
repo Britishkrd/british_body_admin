@@ -11,7 +11,7 @@ class Edituserr extends StatefulWidget {
   final String name;
   final String location;
   final String phonenumber;
-  final String salary;
+  final int salary;
   final String age;
   final String workhourtarget;
   final String worklat;
@@ -89,7 +89,7 @@ class _EdituserrState extends State<Edituserr> {
     namecontroller.text = widget.name;
     locationcontroller.text = widget.location;
     phonenumbercontroller.text = widget.phonenumber;
-    salarycontroller.text = widget.salary;
+    salarycontroller.text = widget.salary.toString();
     agecontroller.text = widget.age;
     workhourtargetcontroller.text = widget.workhourtarget;
     worklatcontroller.text = widget.worklat;
@@ -348,7 +348,7 @@ class _EdituserrState extends State<Edituserr> {
                       'name': namecontroller.text,
                       'location': locationcontroller.text,
                       'phonenumber': phonenumbercontroller.text.toString(),
-                      'salary': salarycontroller.text.toString(),
+                      'salary': int.parse(salarycontroller.text),
                       'worklat': double.parse(worklatcontroller.text),
                       'worklong': double.parse(worklongcontroller.text),
                       'permissions': selectedpermissions,
