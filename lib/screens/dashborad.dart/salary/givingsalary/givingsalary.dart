@@ -47,7 +47,7 @@ class _GivingsalaryState extends State<Givingsalary> {
 
   @override
   void initState() {
-    punishmentamountcontroller.text = 10000.toString();
+    punishmentamountcontroller.text = 500.toString();
     monthlypaymentcontroller.text = widget.monthlypayback.toString();
     super.initState();
   }
@@ -148,7 +148,7 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'بڕی سزای کەمی کاتی کارکردن : ${NumberFormat("#,###").format((widget.worktarget - widget.totalworkedtime.inHours) * int.parse(punishmentamountcontroller.value.text))} دینار',
+'بڕی سزای کەمی کاتی کارکردن : ${NumberFormat("#,###").format(_calculatePunishment())} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize: 16.sp,
@@ -286,7 +286,7 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 5.h),
             child: Text(
-              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - (int.parse(monthlypaymentcontroller.value.text) + ((widget.worktarget - widget.totalworkedtime.inHours) * int.parse(punishmentamountcontroller.value.text))) + widget.reward - widget.punishment)} دینار',
+              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - _calculatePunishment() - int.parse(monthlypaymentcontroller.value.text) + widget.reward - widget.punishment)} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize: 18.sp,
@@ -353,17 +353,7 @@ class _GivingsalaryState extends State<Givingsalary> {
                                     'missedhoursofwork': (widget.worktarget -
                                         widget.totalworkedtime.inHours),
                                     'isreceived': false,
-                                    'givensalary': (widget.salary -
-                                        (int.parse(monthlypaymentcontroller
-                                                .value.text) +
-                                            ((widget.worktarget -
-                                                    widget.totalworkedtime
-                                                        .inHours) *
-                                                int.parse(
-                                                    punishmentamountcontroller
-                                                        .value.text))) +
-                                        widget.reward -
-                                        widget.punishment)
+                                    'givensalary': (widget.salary - _calculatePunishment() - int.parse(monthlypaymentcontroller.value.text) + widget.reward - widget.punishment)
                                   }).then((value) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
@@ -389,4 +379,14 @@ class _GivingsalaryState extends State<Givingsalary> {
       ),
     );
   }
+  
+  num _calculatePunishment() {
+  final missedHours = widget.worktarget - widget.totalworkedtime.inHours;
+  
+  // ئەگەر کاتی کارکردن زیاتر بێت لە ئامانج، سزای ٠ دینار
+  if (missedHours <= 0) return 0;
+  
+  // حسابکردنی سزاکە بە پێی کاتژمێرەکان
+  return missedHours * int.parse(punishmentamountcontroller.value.text);
+}
 }
