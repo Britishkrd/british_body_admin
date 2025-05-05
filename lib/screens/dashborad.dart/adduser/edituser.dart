@@ -353,7 +353,8 @@ class _EdituserrState extends State<Edituserr> {
                       'worklong': double.parse(worklongcontroller.text),
                       'permissions': selectedpermissions,
                       'age': agecontroller.text.toString(),
-                      'worktarget': workhourtargetcontroller.text,
+                      
+      'worktarget': int.parse(workhourtargetcontroller.text), // Fixed this line
                       'password': passwordcontroller.text,
                       'weekdays': workdays,
                       'starthour': starthour.hour,
