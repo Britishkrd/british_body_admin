@@ -115,69 +115,109 @@ class _ChoosingUserForGivingSalaryState
     );
   }
 
-  Future<void> _proceedWithSalary(
-    BuildContext context,
-    String name,
-    String email,
-    int salary,
-    String loan,
-    num monthlyPayback,
-  ) async {
-    final dates = await showMonthRangePicker(
-      context: context,
-      firstDate: DateTime(DateTime.now().year - 1, 1),
-      rangeList: false,
-    );
 
-    if (dates == null || dates.isEmpty) return;
+Future<void> _proceedWithSalary(
+  BuildContext context,
+  String name,
+  String email,
+  int salary,
+  String loan,
+  num monthlyPayback,
+) async {
+  final userDoc = await FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .get();
+  
+  final dailyWorkHours = userDoc['worktarget'] as int? ?? 8;
+  
+  // Get the user's selected work days
+  List<int> workDays = [];
+  final dynamicWeekdays = userDoc['weekdays'];
+  
+  if (dynamicWeekdays is List) {
+    // Convert to List<int> and ensure valid values (1-7)
+    workDays = dynamicWeekdays.whereType<int>()
+      .where((day) => day >= 1 && day <= 7)
+      .toList();
+  }
+  
+  // If no days selected or invalid data, use default (Mon-Fri)
+  if (workDays.isEmpty) {
+    workDays = [6, 7, 1, 2, 3, 4]; // Sat, Sun, Mon, Tue, Wed, Thu
+    
+  }
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        title: Column(
-          children: [
-            Center(child: CircularProgressIndicator()),
-            Text('تکایە چاوەڕێکە...'),
-          ],
+  final dates = await showMonthRangePicker(
+    context: context,
+    firstDate: DateTime(DateTime.now().year - 1, 1),
+    rangeList: false,
+  );
+
+  if (dates == null || dates.isEmpty) return;
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => const AlertDialog(
+      title: Column(
+        children: [
+          Center(child: CircularProgressIndicator()),
+          Text('تکایە چاوەڕێکە...'),
+        ],
+      ),
+    ),
+  );
+
+  try {
+    final totalWorkedTime = await _calculateTotalWorkedTime(email, dates[0]);
+    final monthlyTarget = _calculateMonthlyTarget(dates[0], dailyWorkHours, workDays);
+    final (reward, punishment) = await _calculateRewardAndPunishment(email, dates[0]);
+
+    if (!mounted) return;
+    Navigator.pop(context);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Givingsalary(
+          name: name,
+          adminemail: widget.email,
+          email: email,
+          date: dates[0],
+          totalworkedtime: totalWorkedTime,
+          worktarget: monthlyTarget,
+          salary: salary,
+          loan: loan,
+          monthlypayback: monthlyPayback,
+          reward: reward,
+          punishment: punishment,
         ),
       ),
     );
+  } catch (e) {
+    if (!mounted) return;
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  }
+}
 
-    try {
-      final totalWorkedTime = await _calculateTotalWorkedTime(email, dates[0]);
-      final workTarget = await _calculateWorkTarget();
-      final (reward, punishment) = await _calculateRewardAndPunishment(email, dates[0]);
-
-      if (!mounted) return;
-      Navigator.pop(context); // Close loading dialog
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Givingsalary(
-            name: name,
-            adminemail: widget.email,
-            email: email,
-            date: dates[0],
-            totalworkedtime: totalWorkedTime,
-            worktarget: workTarget.inHours,
-            salary:salary,
-            loan: loan,
-            monthlypayback:monthlyPayback,
-            reward: reward,
-            punishment: punishment,
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.pop(context); // Close loading dialog
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+int _calculateMonthlyTarget(DateTime date, int dailyWorkHours, List<int> workDays) {
+  final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
+  int workDaysCount = 0;
+  
+  for (int day = 1; day <= daysInMonth; day++) {
+    final currentDate = DateTime(date.year, date.month, day);
+    final weekday = currentDate.weekday; // 1=Monday, 7=Sunday
+    if (workDays.contains(weekday)) {
+      workDaysCount++;
     }
   }
+  
+  return dailyWorkHours * workDaysCount;
+}
 
   Future<Duration> _calculateTotalWorkedTime(String email, DateTime date) async {
     Duration totalWorkedTime = Duration.zero;

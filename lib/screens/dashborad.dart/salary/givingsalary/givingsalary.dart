@@ -2,8 +2,8 @@ import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
+import 'package:sizer/sizer.dart';
 
 class Givingsalary extends StatefulWidget {
   final String email;
@@ -38,6 +38,12 @@ class Givingsalary extends StatefulWidget {
 class _GivingsalaryState extends State<Givingsalary> {
   TextEditingController punishmentamountcontroller = TextEditingController();
   TextEditingController monthlypaymentcontroller = TextEditingController();
+
+  // Add this helper function to your _GivingsalaryState class
+  int calculateMonthlyTarget(int dailyHours, DateTime date) {
+    final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
+    return dailyHours * daysInMonth;
+  }
 
   @override
   void initState() {
@@ -122,12 +128,13 @@ class _GivingsalaryState extends State<Givingsalary> {
                   fontWeight: FontWeight.bold),
             ),
           ),
+// In Givingsalary widget, update the target display
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'ئامانجی کارکردن : ${widget.worktarget} کاتژمێر',
+              'ئامانجی کارکردن : ${widget.worktarget} کاتژمێر (${(widget.worktarget / 8).toStringAsFixed(0)} ڕۆژ)',
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize: 16.sp,
@@ -135,6 +142,7 @@ class _GivingsalaryState extends State<Givingsalary> {
                   fontWeight: FontWeight.bold),
             ),
           ),
+
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -324,11 +332,11 @@ class _GivingsalaryState extends State<Givingsalary> {
                                     'date': widget.date,
                                     'totalmissedworkhours': (widget.worktarget -
                                         widget.totalworkedtime.inHours),
-                                    'punishmentformissingwork': ((widget.worktarget -
-                                                widget
-                                                    .totalworkedtime.inHours) *
-                                            int.parse(punishmentamountcontroller
-                                                .value.text)),
+                                    'punishmentformissingwork': ((widget
+                                                .worktarget -
+                                            widget.totalworkedtime.inHours) *
+                                        int.parse(punishmentamountcontroller
+                                            .value.text)),
                                     'punishmentpermissedworkinghour':
                                         punishmentamountcontroller.value.text,
                                     'totalpunishment': ((widget.worktarget -
