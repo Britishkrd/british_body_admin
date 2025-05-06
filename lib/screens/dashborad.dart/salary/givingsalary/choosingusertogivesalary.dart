@@ -116,6 +116,7 @@ class _ChoosingUserForGivingSalaryState
   }
 
 
+// In your ChoosingUserForGivingSalary widget
 Future<void> _proceedWithSalary(
   BuildContext context,
   String name,
@@ -136,16 +137,13 @@ Future<void> _proceedWithSalary(
   final dynamicWeekdays = userDoc['weekdays'];
   
   if (dynamicWeekdays is List) {
-    // Convert to List<int> and ensure valid values (1-7)
     workDays = dynamicWeekdays.whereType<int>()
       .where((day) => day >= 1 && day <= 7)
       .toList();
   }
   
-  // If no days selected or invalid data, use default (Mon-Fri)
   if (workDays.isEmpty) {
     workDays = [6, 7, 1, 2, 3, 4]; // Sat, Sun, Mon, Tue, Wed, Thu
-    
   }
 
   final dates = await showMonthRangePicker(
@@ -171,7 +169,8 @@ Future<void> _proceedWithSalary(
 
   try {
     final totalWorkedTime = await _calculateTotalWorkedTime(email, dates[0]);
-    final monthlyTarget = _calculateMonthlyTarget(dates[0], dailyWorkHours, workDays);
+    final workingDays = await calculateWorkingDays(dates[0], workDays);
+    final monthlyTarget = dailyWorkHours * workingDays;
     final (reward, punishment) = await _calculateRewardAndPunishment(email, dates[0]);
 
     if (!mounted) return;
@@ -203,61 +202,127 @@ Future<void> _proceedWithSalary(
     );
   }
 }
-
-int _calculateMonthlyTarget(DateTime date, int dailyWorkHours, List<int> workDays) {
-  final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
-  int workDaysCount = 0;
+Future<int> calculateWorkingDays(DateTime month, List<int> workDays) async {
+  final firstDay = DateTime(month.year, month.month, 1);
+  final lastDay = DateTime(month.year, month.month + 1, 0);
   
-  for (int day = 1; day <= daysInMonth; day++) {
-    final currentDate = DateTime(date.year, date.month, day);
-    final weekday = currentDate.weekday; // 1=Monday, 7=Sunday
-    if (workDays.contains(weekday)) {
-      workDaysCount++;
+  // Get all holidays that overlap with this month
+  final holidaysSnapshot = await FirebaseFirestore.instance
+      .collection('holidays')
+      .where('endDate', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDay))
+      .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
+      .get();
+
+  int workingDays = 0;
+  
+  for (DateTime day = firstDay; 
+      day.isBefore(lastDay) || day.isAtSameMomentAs(lastDay); 
+      day = day.add(const Duration(days: 1))) {
+    
+    // Check if day is a working day according to employee's schedule
+    if (workDays.contains(day.weekday)) {
+      bool isHoliday = false;
+      
+      // Check if this day falls within any holiday period
+      for (var holidayDoc in holidaysSnapshot.docs) {
+        final holidayStart = (holidayDoc['startDate'] as Timestamp).toDate();
+        final holidayEnd = (holidayDoc['endDate'] as Timestamp).toDate();
+        
+        if ((day.isAfter(holidayStart) || day.isAtSameMomentAs(holidayStart)) &&
+            (day.isBefore(holidayEnd) || day.isAtSameMomentAs(holidayEnd))) {
+          isHoliday = true;
+          break;
+        }
+      }
+      
+      if (!isHoliday) {
+        workingDays++;
+      }
     }
   }
   
+  return workingDays;
+}
+
+Future<int> _calculateMonthlyTarget(DateTime date, int dailyWorkHours, List<int> workDays) async {
+  final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
+  int workDaysCount = 0;
+
+  // Get all holidays for this month
+  final holidays = await FirebaseFirestore.instance
+      .collection('holidays')
+      .where('endDate', isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
+      .where('startDate', isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
+      .get();
+
+  for (int day = 1; day <= daysInMonth; day++) {
+    final currentDate = DateTime(date.year, date.month, day);
+    final weekday = currentDate.weekday; // 1=Monday, 7=Sunday
+    
+    // Check if this is a work day
+    if (workDays.contains(weekday)) {
+      // Check if this day is in any holiday range
+      bool isHoliday = holidays.docs.any((holiday) {
+        final holidayStart = holiday['startDate'].toDate();
+        final holidayEnd = holiday['endDate'].toDate();
+        return isDateInRange(currentDate, holidayStart, holidayEnd);
+      });
+      
+      if (!isHoliday) {
+        workDaysCount++;
+      }
+    }
+  }
+
   return dailyWorkHours * workDaysCount;
 }
 
   Future<Duration> _calculateTotalWorkedTime(String email, DateTime date) async {
-    Duration totalWorkedTime = Duration.zero;
-    
-    final checkinCheckouts = await FirebaseFirestore.instance
-        .collection('user')
-        .doc(email)
-        .collection('checkincheckouts')
-        .where('time', isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
-        .where('time', isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
-        .get();
+  Duration totalWorkedTime = Duration.zero;
 
-    for (var i = 0; i < checkinCheckouts.docs.length; i += 2) {
-      if (i + 1 >= checkinCheckouts.docs.length) break;
-      
-      if (checkinCheckouts.docs[i]['checkin'] == false) {
-        if (i + 2 >= checkinCheckouts.docs.length) break;
-        totalWorkedTime += checkinCheckouts.docs[i + 2]['time'].toDate()
-            .difference(checkinCheckouts.docs[i + 1]['time'].toDate());
-      } else {
-        totalWorkedTime += checkinCheckouts.docs[i + 1]['time'].toDate()
-            .difference(checkinCheckouts.docs[i]['time'].toDate());
-      }
+  // Get all holidays that overlap with this month
+  final holidays = await FirebaseFirestore.instance
+      .collection('holidays')
+      .where('endDate', isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
+      .where('startDate', isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
+      .get();
+
+  final checkinCheckouts = await FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('checkincheckouts')
+      .where('time', isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
+      .where('time', isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
+      .orderBy('time')
+      .get();
+
+  for (var i = 0; i < checkinCheckouts.docs.length; i += 2) {
+    if (i + 1 >= checkinCheckouts.docs.length) break;
+    
+    final checkinTime = checkinCheckouts.docs[i]['time'].toDate();
+    final checkoutTime = checkinCheckouts.docs[i + 1]['time'].toDate();
+    
+    // Skip if this day is a holiday
+    bool isHoliday = holidays.docs.any((holiday) {
+      final holidayStart = holiday['startDate'].toDate();
+      final holidayEnd = holiday['endDate'].toDate();
+      return isDateInRange(checkinTime, holidayStart, holidayEnd);
+    });
+    
+    if (!isHoliday) {
+      totalWorkedTime += checkoutTime.difference(checkinTime);
     }
-    
-    return totalWorkedTime;
   }
 
-  Future<Duration> _calculateWorkTarget() async {
-    final prefs = await SharedPreferences.getInstance();
-    final starthour = prefs.getInt('starthour') ?? 0;
-    final endhour = prefs.getInt('endhour') ?? 0;
-    final startmin = prefs.getInt('startmin') ?? 0;
-    final endmin = prefs.getInt('endmin') ?? 0;
-    
-    return Duration(
-      hours: endhour - starthour,
-      minutes: endmin - startmin,
-    );
-  }
+  return totalWorkedTime;
+}
+
+bool isDateInRange(DateTime date, DateTime rangeStart, DateTime rangeEnd) {
+  return date.isAfter(rangeStart.subtract(const Duration(days: 1))) && 
+         date.isBefore(rangeEnd.add(const Duration(days: 1)));
+}
+
+
 
   Future<(num, num)> _calculateRewardAndPunishment(String email, DateTime date) async {
     num reward = 0;

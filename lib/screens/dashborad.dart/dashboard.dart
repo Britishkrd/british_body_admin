@@ -10,6 +10,7 @@ import 'package:british_body_admin/screens/dashborad.dart/alert/viewingalerts.da
 import 'package:british_body_admin/screens/dashborad.dart/changingworkerphone/changingworkerphone.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/adminfeedback.dart/adminfeedback.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/employeefeedback/employeefeedback.dart';
+import 'package:british_body_admin/screens/dashborad.dart/holiday/holiday.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/choosinguseroforloginlogout.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/self-login/viewingselfloginlogout.dart';
@@ -310,8 +311,8 @@ class _DashboardState extends State<Dashboard> {
                             });
                         return;
                       }
-                      Sharedpreference.setuser('', '', '', 'aa', 0, 'aa', 0,
-                          0, 0, 0, 0, 0, 0, 0, false, '', false, [], []);
+                      Sharedpreference.setuser('', '', '', 'aa', 0, 'aa', 0, 0,
+                          0, 0, 0, 0, 0, 0, false, '', false, [], []);
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {
                         return LoginScreen();
@@ -541,6 +542,21 @@ class _DashboardState extends State<Dashboard> {
                       },
                       child: controlpanelcard(
                           Icons.person_off_sharp, 'بارو دۆخی کارمەند', 30),
+                    ),
+                  if (permissions.contains('user status'))
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return HolidayManagement();
+                            },
+                          ),
+                        );
+                      },
+                      child: controlpanelcard(
+                          Icons.beach_access, 'پشووە فەرمیەکان', 32),
                     ),
                 ],
               ),

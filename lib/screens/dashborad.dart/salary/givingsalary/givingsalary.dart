@@ -379,14 +379,15 @@ class _GivingsalaryState extends State<Givingsalary> {
       ),
     );
   }
-  
-  num _calculatePunishment() {
+// In your Givingsalary widget
+num _calculatePunishment() {
+  // Only punish if they worked less than expected, excluding holidays
   final missedHours = widget.worktarget - widget.totalworkedtime.inHours;
   
-  // ئەگەر کاتی کارکردن زیاتر بێت لە ئامانج، سزای ٠ دینار
+  // If worked enough or more, no punishment
   if (missedHours <= 0) return 0;
   
-  // حسابکردنی سزاکە بە پێی کاتژمێرەکان
+  // Calculate punishment based on missed hours
   return missedHours * int.parse(punishmentamountcontroller.value.text);
 }
 }
