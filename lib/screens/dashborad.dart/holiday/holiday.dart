@@ -1,4 +1,5 @@
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/sendingnotification.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -140,7 +141,6 @@ Future<void> _addHoliday() async {
     return;
   }
   
-  // Ensure end date is not before start date
   if (_endDate.isBefore(_startDate)) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('ڕۆژی کۆتایی پێویستە دوای ڕۆژی دەستپێکردن بێت')),
@@ -149,12 +149,16 @@ Future<void> _addHoliday() async {
   }
 
   try {
+    // First add the holiday to Firestore
     await FirebaseFirestore.instance.collection('holidays').add({
       'startDate': Timestamp.fromDate(_startDate),
       'endDate': Timestamp.fromDate(_endDate),
       'description': _descriptionController.text,
       'createdAt': Timestamp.now(),
     });
+    
+    // Then send notifications to all users
+    await _sendHolidayNotifications();
     
     _descriptionController.clear();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -164,6 +168,38 @@ Future<void> _addHoliday() async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('هەڵە: $e')),
     );
+  }
+}
+
+Future<void> _sendHolidayNotifications() async {
+  try {
+    // Get all users from Firestore
+    final usersSnapshot = await FirebaseFirestore.instance
+        .collection('user')
+        .get();
+
+    // Prepare notification details
+    final title = 'پشووی فەرمی';
+    final body = '${_descriptionController.text}\n'
+    'لە ${DateFormat('yyyy-MM-dd').format(_startDate)} '
+    'بۆ ${DateFormat('yyyy-MM-dd').format(_endDate)}';
+    final notificationType = 'default1'; // You can use this to handle different notification types
+
+    // Send notification to each user
+    for (final userDoc in usersSnapshot.docs) {
+      final token = userDoc.data()['token'] ?? '';
+      if (token.isNotEmpty) {
+        await sendingnotification(
+          title,
+          body,
+          token,
+          notificationType,
+        );
+      }
+    }
+  } catch (e) {
+    debugPrint('Error sending holiday notifications: $e');
+    // You might want to show a snackbar or log this error
   }
 }
 
