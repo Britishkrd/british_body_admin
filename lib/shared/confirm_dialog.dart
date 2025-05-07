@@ -14,7 +14,7 @@ class ConfirmationDialog {
     required this.content,
     // required this.okOnPressed,
     required this.onConfirm,
-    required this.showCheckInForm,
+     this.showCheckInForm = false,
   });
 
   Future<void> show() async {

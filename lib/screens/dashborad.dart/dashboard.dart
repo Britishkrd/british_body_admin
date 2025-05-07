@@ -10,7 +10,7 @@ import 'package:british_body_admin/screens/dashborad.dart/alert/viewingalerts.da
 import 'package:british_body_admin/screens/dashborad.dart/changingworkerphone/changingworkerphone.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/adminfeedback.dart/adminfeedback.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/employeefeedback/employeefeedback.dart';
-import 'package:british_body_admin/screens/dashborad.dart/holiday/holiday.dart';
+import 'package:british_body_admin/screens/dashborad.dart/holiday/holiday_management_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/choosinguseroforloginlogout.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/self-login/viewingselfloginlogout.dart';
@@ -550,13 +550,13 @@ class _DashboardState extends State<Dashboard> {
                           context,
                           MaterialPageRoute(
                             builder: (context) {
-                              return HolidayManagement();
+                              return HolidayManagementScreen();
                             },
                           ),
                         );
                       },
                       child: controlpanelcard(
-                          Icons.beach_access, 'پشووە فەرمیەکان', 32),
+                          Icons.beach_access, 'پشووە فەڕمییەکان', 32),
                     ),
                 ],
               ),
