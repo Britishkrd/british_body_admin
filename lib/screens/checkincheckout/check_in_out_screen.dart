@@ -887,6 +887,7 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -953,14 +954,7 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
               ),
             ),
 
-            // SizedBox(height: 24),
-
-            // // Action buttons
-            // _buildActionButtons(),
-
             SizedBox(height: 24),
-
-            // Check in/out form
 
             // Only show the check-in/out form
             Container(
