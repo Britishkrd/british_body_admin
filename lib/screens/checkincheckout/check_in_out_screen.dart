@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/shared/confirm_dialog.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -43,8 +42,8 @@ class CheckInOutScreen extends StatefulWidget {
 }
 
 class _CheckInOutScreenState extends State<CheckInOutScreen>
-    with WidgetsBindingObserver,AutomaticKeepAliveClientMixin {
-        @override
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+  @override
   bool get wantKeepAlive => true;
 
   bool checkin = true;
@@ -65,32 +64,32 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
   DateTime? _lastCheckInTime;
   DateTime? _lastCheckOutTime;
 
- @override
-void initState() {
-  super.initState();
-  WidgetsBinding.instance.addObserver(this);
-  _loadUserInfo();
-  _startLiveTimer();
-  _loadCachedStats(); // Add this
-  _checkForNewDay().then((_) => _calculateDailyStats());
-}
-
-Future<void> _loadCachedStats() async {
-  final prefs = await SharedPreferences.getInstance();
-  final now = DateTime.now();
-  final startOfDay = DateTime(now.year, now.month, now.day);
-  final lastSavedDay = prefs.getString('lastCalculationDay');
-
-  if (lastSavedDay == startOfDay.toIso8601String()) {
-    final savedWorkingHours = prefs.getInt('workingHours') ?? 0;
-    final savedBreakTime = prefs.getInt('breakTime') ?? 0;
-
-    setState(() {
-      _todayWorkingHours = Duration(seconds: savedWorkingHours);
-      _todayBreakTime = Duration(seconds: savedBreakTime);
-    });
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _loadUserInfo();
+    _startLiveTimer();
+    _loadCachedStats(); // Add this
+    _checkForNewDay().then((_) => _calculateDailyStats());
   }
-}
+
+  Future<void> _loadCachedStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final lastSavedDay = prefs.getString('lastCalculationDay');
+
+    if (lastSavedDay == startOfDay.toIso8601String()) {
+      final savedWorkingHours = prefs.getInt('workingHours') ?? 0;
+      final savedBreakTime = prefs.getInt('breakTime') ?? 0;
+
+      setState(() {
+        _todayWorkingHours = Duration(seconds: savedWorkingHours);
+        _todayBreakTime = Duration(seconds: savedBreakTime);
+      });
+    }
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -183,96 +182,6 @@ Future<void> _loadCachedStats() async {
     });
   }
 
-  Widget _buildActionButtons() {
-    return Column(
-      children: [
-        // Check-in/out buttons in a row
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // Check-in button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: _buildModernButton(
-                icon: Icons.login_rounded,
-                text: 'چوونەژوورەوە',
-                color: CheckInState.isCheckedIn
-                    ? Colors.grey
-                    : Material1.primaryColor,
-                onTap: CheckInState.isCheckedIn
-                    ? null
-                    : () => setState(() => CheckInState.showCheckInForm = true),
-              ),
-            ),
-
-            // Check-out button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: _buildModernButton(
-                icon: Icons.logout_rounded,
-                text: 'چوونەدەرەوە',
-                color:
-                    !CheckInState.isCheckedIn ? Colors.grey : Color(0xFFE53935),
-                onTap: !CheckInState.isCheckedIn
-                    ? null
-                    : () =>
-                        setState(() => CheckInState.showCheckInForm = false),
-              ),
-            ),
-          ],
-        ),
-
-        SizedBox(height: 16),
-
-        // Additional action buttons if needed
-        // _buildSecondaryActions(),
-      ],
-    );
-  }
-
-  Widget _buildModernButton({
-    required IconData icon,
-    required String text,
-    required Color color,
-    required VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        height: 56,
-        padding: EdgeInsets.symmetric(horizontal: 14),
-        decoration: BoxDecoration(
-          color: color.withOpacity(onTap == null ? 0.5 : 1.0),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            if (onTap != null)
-              BoxShadow(
-                color: color.withOpacity(0.3),
-                blurRadius: 6,
-                offset: Offset(0, 3),
-              ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: 24),
-            SizedBox(width: 8),
-            Text(
-              text,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildCheckInButtonSection() {
     return Column(
       children: [
@@ -281,52 +190,36 @@ Future<void> _loadCachedStats() async {
 
         SizedBox(height: 24),
 
-        // Action buttons
-        Column(
-          children: [
-            // Main check-in button
+        // Show either check-in or check-out button based on current state
+        if (!CheckInState.isCheckedIn) ...[
+          // Main check-in button
+          _buildModernActionButton(
+            icon: Icons.login_rounded,
+            label: 'چوونەژوورەوە',
+            color: Material1.primaryColor,
+            onPressed: () => _handleCheckIn(false),
+          ),
+
+          SizedBox(height: 12),
+
+          // Work outside button (conditionally shown)
+          if (CheckInState.userPermissions.contains('workoutside'))
             _buildModernActionButton(
-              icon: Icons.login_rounded,
-              label: 'چوونەژوورەوە',
+              icon: Icons.pin_drop_outlined,
+              label: 'لە دەروەی شوێنی ئیشکردن',
               color: Material1.primaryColor,
-              onPressed:
-                  CheckInState.isCheckedIn ? null : () => _handleCheckIn(false),
+              onPressed: () => _handleCheckIn(true),
+              isFullWidth: true,
             ),
-
-            SizedBox(height: 12),
-
-            // Work outside button (conditionally shown)
-            if (CheckInState.userPermissions.contains('workoutside'))
-              _buildModernActionButton(
-                icon: Icons.pin_drop_outlined,
-                label: 'چوونەژوورەوە لە دەروەی شوێنی ئیشکردن',
-                color: Material1.primaryColor,
-                onPressed: CheckInState.isCheckedIn
-                    ? null
-                    : () => _handleCheckIn(true),
-                isFullWidth: true,
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCheckOutSection() {
-    return Column(
-      children: [
-        // Note field
-        _buildModernNoteField(),
-
-        SizedBox(height: 24),
-
-        // Check-out button
-        _buildModernActionButton(
-          icon: Icons.logout_rounded,
-          label: 'چوونەدەرەوە',
-          color: Color(0xFFE53935),
-          onPressed: !CheckInState.isCheckedIn ? null : _handleCheckOut,
-        ),
+        ] else ...[
+          // Check-out button
+          _buildModernActionButton(
+            icon: Icons.logout_rounded,
+            label: 'چوونەدەرەوە',
+            color: Color(0xFFE53935),
+            onPressed: _handleCheckOut,
+          ),
+        ],
       ],
     );
   }
@@ -432,14 +325,8 @@ Future<void> _loadCachedStats() async {
       }
 
       final isNewDay = await _isNewDayCheckIn();
-
-      await _showConfirmationDialog(
-        'دڵنیایت لە چوونەژوورەوە؟',
-        () {
-          _showLoadingDialog('تکایە چاوەڕێکەوە');
-          _processCheckIn(isNewDay);
-        },
-      );
+      _showLoadingDialog('تکایە چاوەڕێکەوە');
+      _processCheckIn(isNewDay);
     } catch (e) {
       _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
     }
@@ -570,13 +457,8 @@ Future<void> _loadCachedStats() async {
         return;
       }
 
-      await _showConfirmationDialog(
-        'دڵنیایت لە چوونەدەرەوە؟',
-        () {
-          _showLoadingDialog('تکایە چاوەڕێکەوە');
-          _processCheckOut();
-        },
-      );
+      _showLoadingDialog('تکایە چاوەڕێکەوە');
+      _processCheckOut();
     } catch (e) {
       _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
     }
@@ -731,19 +613,6 @@ Future<void> _loadCachedStats() async {
     );
   }
 
-  Future<void> _showConfirmationDialog(
-    String message,
-    VoidCallback onConfirm,
-  ) async {
-    await ConfirmationDialog(
-      context: context,
-      content: message,
-      // okOnPressed: () async => onConfirm(),
-      onConfirm: onConfirm,
-      showCheckInForm: CheckInState.showCheckInForm,
-    ).show();
-  }
-
   void _showLateCheckInWarning(int lateMinutes) {
     showDialog(
       context: context,
@@ -805,8 +674,8 @@ Future<void> _loadCachedStats() async {
   Future<void> _calculateDailyStats() async {
     // setState(() => _isLoadingStats = true);
     if (_todayWorkingHours.inSeconds == 0 && _todayBreakTime.inSeconds == 0) {
-    setState(() => _isLoadingStats = true);
-  }
+      setState(() => _isLoadingStats = true);
+    }
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -1075,21 +944,25 @@ Future<void> _loadCachedStats() async {
                     ],
                   ),
                   SizedBox(height: 16),
-                  _isLoadingStats && _todayWorkingHours.inSeconds == 0 && _todayBreakTime.inSeconds == 0
-    ? Center(child: CircularProgressIndicator())
-    : _buildLiveTimeDisplay(),
+                  _isLoadingStats &&
+                          _todayWorkingHours.inSeconds == 0 &&
+                          _todayBreakTime.inSeconds == 0
+                      ? Center(child: CircularProgressIndicator())
+                      : _buildLiveTimeDisplay(),
                 ],
               ),
             ),
 
-            SizedBox(height: 24),
+            // SizedBox(height: 24),
 
-            // Action buttons
-            _buildActionButtons(),
+            // // Action buttons
+            // _buildActionButtons(),
 
             SizedBox(height: 24),
 
             // Check in/out form
+
+            // Only show the check-in/out form
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(16),
@@ -1104,9 +977,7 @@ Future<void> _loadCachedStats() async {
                   ),
                 ],
               ),
-              child: CheckInState.showCheckInForm
-                  ? _buildCheckInButtonSection()
-                  : _buildCheckOutSection(),
+              child: _buildCheckInButtonSection(),
             ),
           ],
         ),
