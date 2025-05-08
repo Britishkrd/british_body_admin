@@ -56,7 +56,9 @@ class _GivingsalaryState extends State<Givingsalary> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('پێدانی موچەی مانگانە'),
+        title: Text(
+          '${widget.date.year} / ${widget.date.month} بەروار',
+        ),
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
@@ -76,19 +78,19 @@ class _GivingsalaryState extends State<Givingsalary> {
                   fontWeight: FontWeight.bold),
             ),
           ),
-          Container(
-            width: 100.w,
-            alignment: Alignment.centerRight,
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
-            child: Text(
-              '${widget.date.year}-${widget.date.month} : کاتی پێدانی موچە',
-              textAlign: TextAlign.end,
-              style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
+          // Container(
+          //   width: 100.w,
+          //   alignment: Alignment.centerRight,
+          //   margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
+          //   child: Text(
+          //     '${widget.date.year}-${widget.date.month} : کاتی پێدانی موچە',
+          //     textAlign: TextAlign.end,
+          //     style: TextStyle(
+          //         fontSize: 16.sp,
+          //         color: Colors.black,
+          //         fontWeight: FontWeight.bold),
+          //   ),
+          // ),
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -148,7 +150,7 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-'بڕی سزای کەمی کاتی کارکردن : ${NumberFormat("#,###").format(_calculatePunishment())} دینار',
+              'بڕی سزای کەمی کاتی کارکردن : ${NumberFormat("#,###").format(_calculatePunishment())} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize: 16.sp,
@@ -353,7 +355,12 @@ class _GivingsalaryState extends State<Givingsalary> {
                                     'missedhoursofwork': (widget.worktarget -
                                         widget.totalworkedtime.inHours),
                                     'isreceived': false,
-                                    'givensalary': (widget.salary - _calculatePunishment() - int.parse(monthlypaymentcontroller.value.text) + widget.reward - widget.punishment)
+                                    'givensalary': (widget.salary -
+                                        _calculatePunishment() -
+                                        int.parse(monthlypaymentcontroller
+                                            .value.text) +
+                                        widget.reward -
+                                        widget.punishment)
                                   }).then((value) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
@@ -379,15 +386,16 @@ class _GivingsalaryState extends State<Givingsalary> {
       ),
     );
   }
+
 // In your Givingsalary widget
-num _calculatePunishment() {
-  // Only punish if they worked less than expected, excluding holidays
-  final missedHours = widget.worktarget - widget.totalworkedtime.inHours;
-  
-  // If worked enough or more, no punishment
-  if (missedHours <= 0) return 0;
-  
-  // Calculate punishment based on missed hours
-  return missedHours * int.parse(punishmentamountcontroller.value.text);
-}
+  num _calculatePunishment() {
+    // Only punish if they worked less than expected, excluding holidays
+    final missedHours = widget.worktarget - widget.totalworkedtime.inHours;
+
+    // If worked enough or more, no punishment
+    if (missedHours <= 0) return 0;
+
+    // Calculate punishment based on missed hours
+    return missedHours * int.parse(punishmentamountcontroller.value.text);
+  }
 }
