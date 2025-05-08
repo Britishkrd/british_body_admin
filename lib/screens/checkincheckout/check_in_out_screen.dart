@@ -43,7 +43,10 @@ class CheckInOutScreen extends StatefulWidget {
 }
 
 class _CheckInOutScreenState extends State<CheckInOutScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver,AutomaticKeepAliveClientMixin {
+        @override
+  bool get wantKeepAlive => true;
+
   bool checkin = true;
   double worklatitude = 0.0;
   double worklongtitude = 0.0;
@@ -62,15 +65,32 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
   DateTime? _lastCheckInTime;
   DateTime? _lastCheckOutTime;
 
-  @override
-  void initState() {
-    super.initState();
+ @override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addObserver(this);
+  _loadUserInfo();
+  _startLiveTimer();
+  _loadCachedStats(); // Add this
+  _checkForNewDay().then((_) => _calculateDailyStats());
+}
 
-    WidgetsBinding.instance.addObserver(this);
-    _loadUserInfo();
-    _startLiveTimer();
-    _checkForNewDay().then((_) => _calculateDailyStats());
+Future<void> _loadCachedStats() async {
+  final prefs = await SharedPreferences.getInstance();
+  final now = DateTime.now();
+  final startOfDay = DateTime(now.year, now.month, now.day);
+  final lastSavedDay = prefs.getString('lastCalculationDay');
+
+  if (lastSavedDay == startOfDay.toIso8601String()) {
+    final savedWorkingHours = prefs.getInt('workingHours') ?? 0;
+    final savedBreakTime = prefs.getInt('breakTime') ?? 0;
+
+    setState(() {
+      _todayWorkingHours = Duration(seconds: savedWorkingHours);
+      _todayBreakTime = Duration(seconds: savedBreakTime);
+    });
   }
+}
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -782,76 +802,11 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
     );
   }
 
-// working calculating
-  // Duration _todayWorkingHours = Duration.zero;
-  // Duration _todayBreakTime = Duration.zero;
-  // bool _isLoadingStats = false;
-// Add this method to calculate working hours and break times
-//   Future<void> _calculateDailyStats() async {
-//     setState(() => _isLoadingStats = true);
-
-//     try {
-//       final now = DateTime.now();
-//       final startOfDay = DateTime(now.year, now.month, now.day);
-
-//       final snapshot = await FirebaseFirestore.instance
-//           .collection('user')
-//           .doc(CheckInState.userEmail)
-//           .collection('checkincheckouts')
-//           .where('time', isGreaterThanOrEqualTo: startOfDay)
-//           .orderBy('time', descending: true)
-//           .get();
-
-//       Duration workingHours = Duration.zero;
-//       Duration breakTime = Duration.zero;
-//       DateTime? lastCheckInTime;
-
-//       for (var doc in snapshot.docs) {
-//         final data = doc.data();
-//         final timestamp = data['time'] as Timestamp;
-//         final time = timestamp.toDate();
-//         final isCheckIn = data['checkin'] as bool;
-
-//         if (isCheckIn) {
-//           lastCheckInTime = time;
-//         } else if (lastCheckInTime != null) {
-//           final sessionDuration = time.difference(lastCheckInTime);
-//           workingHours += sessionDuration;
-//           lastCheckInTime = null;
-//         }
-//       }
-
-//       // Calculate break time (time between check-out and next check-in)
-// // Calculate break time (time between check-out and next check-in)
-//       for (int i = 1; i < snapshot.docs.length; i++) {
-//         final prevDoc = snapshot.docs[i - 1];
-//         final currentDoc = snapshot.docs[i];
-
-//         final prevData = prevDoc.data();
-//         final currentData = currentDoc.data();
-
-//         final prevWasCheckout = prevData['checkin'] == false;
-//         final currentIsCheckin = currentData['checkin'] == true;
-
-//         if (prevWasCheckout && currentIsCheckin) {
-//           final prevTime = (prevData['time'] as Timestamp).toDate();
-//           final currentTime = (currentData['time'] as Timestamp).toDate();
-//           breakTime += currentTime.difference(prevTime);
-//         }
-//       }
-
-//       setState(() {
-//         _todayWorkingHours = workingHours;
-//         _todayBreakTime = breakTime;
-//         _isLoadingStats = false;
-//       });
-//     } catch (e) {
-//       setState(() => _isLoadingStats = false);
-//       if (kDebugMode) print('Error calculating stats: $e');
-//     }
-//   }
   Future<void> _calculateDailyStats() async {
+    // setState(() => _isLoadingStats = true);
+    if (_todayWorkingHours.inSeconds == 0 && _todayBreakTime.inSeconds == 0) {
     setState(() => _isLoadingStats = true);
+  }
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -1120,9 +1075,9 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
                     ],
                   ),
                   SizedBox(height: 16),
-                  _isLoadingStats
-                      ? Center(child: CircularProgressIndicator())
-                      : _buildLiveTimeDisplay(),
+                  _isLoadingStats && _todayWorkingHours.inSeconds == 0 && _todayBreakTime.inSeconds == 0
+    ? Center(child: CircularProgressIndicator())
+    : _buildLiveTimeDisplay(),
                 ],
               ),
             ),
