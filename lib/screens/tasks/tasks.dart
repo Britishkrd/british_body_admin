@@ -23,7 +23,7 @@ List<String> options = [
   'کارە تەواو نەکراوەکان',
   'تەواو بووە'
 ];
-
+//e
 Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
   if (tag == 1) {
     return FirebaseFirestore.instance
