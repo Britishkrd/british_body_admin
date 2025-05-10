@@ -58,8 +58,8 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
         .collection('user')
         .doc(email)
         .collection('tasks')
-        .where('end', isLessThan: DateTime.now())
-        .where('status', whereIn: ['pending', 'active']).snapshots();
+        .where('status', isEqualTo: 'incomplete')
+        .snapshots();
   } else if (tag == 6) {
     // Completed tasks
     return FirebaseFirestore.instance
