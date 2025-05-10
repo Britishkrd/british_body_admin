@@ -2,8 +2,8 @@ import 'package:british_body_admin/screens/tasks/taskdetails.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
+import 'package:sizer/sizer.dart';
 
 class Tasks extends StatefulWidget {
   final String email;
@@ -23,7 +23,6 @@ List<String> options = [
   'کارە تەواو نەکراوەکان',
   'تەواو بووە'
 ];
-//e
 Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
   if (tag == 1) {
     return FirebaseFirestore.instance
@@ -54,22 +53,23 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
         .where('isdaily', isEqualTo: true)
         .snapshots();
   } else if (tag == 5) {
+    // Incomplete tasks - time has passed but not completed
     return FirebaseFirestore.instance
         .collection('user')
         .doc(email)
         .collection('tasks')
         .where('end', isLessThan: DateTime.now())
-        .where('status', whereIn: ['pending', 'active'])
-        .snapshots();
+        .where('status', whereIn: ['pending', 'active']).snapshots();
   } else if (tag == 6) {
+    // Completed tasks
     return FirebaseFirestore.instance
         .collection('user')
         .doc(email)
         .collection('tasks')
         .where('status', isEqualTo: 'done')
-        .where('isdaily', isEqualTo: false)
         .snapshots();
   } else {
+    // All tasks
     return FirebaseFirestore.instance
         .collection('user')
         .doc(email)
@@ -152,17 +152,19 @@ class _TasksState extends State<Tasks> {
                       } catch (e) {
                         reward = '0';
                       }
-                      
+
                       // Only apply punishment if task is late and not already marked
                       if (snapshot.data!.docs[index]['end']
                               .toDate()
                               .isBefore(DateTime.now()) &&
                           snapshot.data!.docs[index]['status'] != 'done' &&
-                          snapshot.data!.docs[index]['status'] != 'incomplete') {
+                          snapshot.data!.docs[index]['status'] !=
+                              'incomplete') {
                         if (deduction == '0') {
                           snapshot.data!.docs[index].reference
                               .update({'status': 'incomplete'});
-                        } else {
+                        } 
+                        else {
                           FirebaseFirestore.instance
                               .collection('user')
                               .doc(widget.email)
@@ -230,7 +232,17 @@ class _TasksState extends State<Tasks> {
                               decoration: BoxDecoration(
                                 color: isweekly
                                     ? const Color.fromARGB(255, 149, 207, 239)
-                                    : const Color.fromRGBO(255, 255, 255, 1),
+                                    : snapshot.data!.docs[index]['status'] ==
+                                            'done'
+                                        ? Colors.green[
+                                            100] // Different color for done tasks
+                                        : snapshot.data!.docs[index]
+                                                    ['status'] ==
+                                                'incomplete'
+                                            ? Colors.red[
+                                                100] // Different color for incomplete tasks
+                                            : const Color.fromRGBO(
+                                                255, 255, 255, 1),
                                 borderRadius: BorderRadius.circular(5),
                                 boxShadow: const [
                                   BoxShadow(
