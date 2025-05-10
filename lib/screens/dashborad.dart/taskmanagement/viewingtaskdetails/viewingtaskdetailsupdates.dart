@@ -1,8 +1,8 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
+import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ViewingTaskDeatsilsupdates extends StatefulWidget {
@@ -45,8 +45,14 @@ class _ViewingTaskDeatsilsupdatesState
               .orderBy('time', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No updates available'));
             }
             return ListView.builder(
                 itemCount: snapshot.data?.docs.length ?? 0,

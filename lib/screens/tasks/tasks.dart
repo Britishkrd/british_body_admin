@@ -59,6 +59,7 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
         .doc(email)
         .collection('tasks')
         .where('end', isLessThan: DateTime.now())
+        .where('status', whereIn: ['pending', 'active'])
         .snapshots();
   } else if (tag == 6) {
     return FirebaseFirestore.instance
@@ -151,10 +152,13 @@ class _TasksState extends State<Tasks> {
                       } catch (e) {
                         reward = '0';
                       }
+                      
+                      // Only apply punishment if task is late and not already marked
                       if (snapshot.data!.docs[index]['end']
                               .toDate()
                               .isBefore(DateTime.now()) &&
-                          snapshot.data!.docs[index]['status'] != 'done') {
+                          snapshot.data!.docs[index]['status'] != 'done' &&
+                          snapshot.data!.docs[index]['status'] != 'incomplete') {
                         if (deduction == '0') {
                           snapshot.data!.docs[index].reference
                               .update({'status': 'incomplete'});
@@ -170,7 +174,7 @@ class _TasksState extends State<Tasks> {
                             'amount': deduction,
                             'date': DateTime.now(),
                             'reason':
-                                'for not doing task ${snapshot.data!.docs[index]['name']}',
+                                'for not completing task ${snapshot.data!.docs[index]['name']} on time',
                             'type': 'punishment'
                           }).then((value) {
                             snapshot.data!.docs[index].reference
