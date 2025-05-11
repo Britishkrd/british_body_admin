@@ -139,6 +139,9 @@ class _ChoosingUserForGivingSalaryState
       final (reward, punishment) =
           await _calculateRewardAndPunishment(email, dates[0]);
 
+            final (taskReward, taskPunishment) = await _calculateTaskRewardAndPunishment(email, dates[0]);
+
+
       if (!mounted) return;
       Navigator.pop(context);
 
@@ -157,6 +160,8 @@ class _ChoosingUserForGivingSalaryState
             monthlypayback: monthlyPayback,
             reward: reward,
             punishment: punishment,
+                    taskreward: taskReward,
+        taskpunishment: taskPunishment,
           ),
         ),
       );
@@ -326,6 +331,35 @@ class _ChoosingUserForGivingSalaryState
     return (reward, punishment);
   }
 
+//task
+Future<(num, num)> _calculateTaskRewardAndPunishment(String email, DateTime date) async {
+  num taskReward = 0;
+  num taskPunishment = 0;
+
+  final taskRewardPunishment = await FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('taskrewardpunishment')
+      .where('date',
+          isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
+      .where('date',
+          isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
+      .get();
+
+  for (var doc in taskRewardPunishment.docs) {
+    final type = doc['type'] as String?;
+    final amount = num.tryParse(doc['amount'] as String? ?? '0') ?? 0;
+
+    if (type == 'punishment') {
+      taskPunishment += amount;
+    } else {
+      taskReward += amount;
+    }
+  }
+
+  return (taskReward, taskPunishment);
+}
+  
   Widget _buildEmployeeCard(String name, String phone, String email) {
     return SizedBox(
       height: 15.h,

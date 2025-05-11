@@ -31,6 +31,7 @@ import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewing
 import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
+import 'package:british_body_admin/screens/tasks/tasksviewrewardpunishment.dart';
 import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -184,6 +185,16 @@ class _DashboardState extends State<Dashboard> {
                     },
                     child: controlpanelcard(Icons.card_giftcard_sharp,
                         'بینینی پاداشت و سزاکانت', 6),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return TasksViewingrewardpunishment(email: email);
+                      }));
+                    },
+                    child: controlpanelcard(Icons.card_giftcard_sharp,
+                        'بینینی پاداشت و سزای ئەرکەکان', 6),
                   ),
                   GestureDetector(
                     onTap: () {

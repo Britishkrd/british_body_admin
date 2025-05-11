@@ -17,6 +17,8 @@ class Givingsalary extends StatefulWidget {
   final num monthlypayback;
   final num reward;
   final num punishment;
+  final num taskreward;
+  final num taskpunishment;
   const Givingsalary(
       {super.key,
       required this.email,
@@ -29,7 +31,10 @@ class Givingsalary extends StatefulWidget {
       required this.loan,
       required this.monthlypayback,
       required this.reward,
-      required this.punishment});
+      required this.punishment,
+      required this.taskreward,
+      required this.taskpunishment,
+      });
 
   @override
   State<Givingsalary> createState() => _GivingsalaryState();
@@ -78,25 +83,13 @@ class _GivingsalaryState extends State<Givingsalary> {
                   fontWeight: FontWeight.bold),
             ),
           ),
-          // Container(
-          //   width: 100.w,
-          //   alignment: Alignment.centerRight,
-          //   margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
-          //   child: Text(
-          //     '${widget.date.year}-${widget.date.month} : کاتی پێدانی موچە',
-          //     textAlign: TextAlign.end,
-          //     style: TextStyle(
-          //         fontSize: 16.sp,
-          //         color: Colors.black,
-          //         fontWeight: FontWeight.bold),
-          //   ),
-          // ),
+         
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'بڕی کۆی پاداشتی پێدراو : ${NumberFormat("#,###").format(widget.reward)} دینار',
+              'کۆی پاداشتی ئەرکەکان : ${NumberFormat("#,###").format(widget.taskreward)} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize: 16.sp,
@@ -109,7 +102,33 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'بڕی سزا پێدراو  : ${NumberFormat("#,###").format(widget.punishment)} دینار',
+              'کۆی سزای ئەرکەکان : ${NumberFormat("#,###").format(widget.taskpunishment)} دینار',
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            width: 100.w,
+            alignment: Alignment.centerRight,
+            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
+            child: Text(
+              'کۆی پاداشتی پێدراو : ${NumberFormat("#,###").format(widget.reward)} دینار',
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            width: 100.w,
+            alignment: Alignment.centerRight,
+            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
+            child: Text(
+              'سزا پێدراو  : ${NumberFormat("#,###").format(widget.punishment)} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize: 16.sp,
@@ -288,7 +307,8 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 5.h),
             child: Text(
-              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - _calculatePunishment() - int.parse(monthlypaymentcontroller.value.text) + widget.reward - widget.punishment)} دینار',
+              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - _calculatePunishment() - int.parse(monthlypaymentcontroller.value.text) + widget.reward - widget.punishment + ( widget.taskreward -
+      widget.taskpunishment))} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize: 18.sp,
@@ -314,7 +334,8 @@ class _GivingsalaryState extends State<Givingsalary> {
                         return AlertDialog(
                           title: Text('پێدانی موچە'),
                           content: Text(
-                              'دڵنیایت لە پێدانی موچەی مانگی  ${widget.date.month} بە بڕی ${NumberFormat("#,###").format(widget.salary - (int.parse(monthlypaymentcontroller.value.text) + ((widget.worktarget - widget.totalworkedtime.inHours) * int.parse(punishmentamountcontroller.value.text))) + widget.reward - widget.punishment)} دینار'),
+                              'دڵنیایت لە پێدانی موچەی مانگی  ${widget.date.month} بە بڕی ${NumberFormat("#,###").format(widget.salary - (int.parse(monthlypaymentcontroller.value.text) + ((widget.worktarget - widget.totalworkedtime.inHours) * int.parse(punishmentamountcontroller.value.text))) + widget.reward - widget.punishment + ( widget.taskreward -
+      widget.taskpunishment))} دینار'),
                           actions: [
                             Material1.button(
                                 label: 'بەڵێ',
@@ -360,7 +381,8 @@ class _GivingsalaryState extends State<Givingsalary> {
                                         int.parse(monthlypaymentcontroller
                                             .value.text) +
                                         widget.reward -
-                                        widget.punishment)
+                                        widget.punishment+( widget.taskreward -
+      widget.taskpunishment))
                                   }).then((value) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(

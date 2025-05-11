@@ -716,7 +716,7 @@ class _TaskdetailsState extends State<Taskdetails> {
                               await FirebaseFirestore.instance
                                   .collection('user')
                                   .doc(widget.email)
-                                  .collection('rewardpunishment')
+                                  .collection('taskrewardpunishment')
                                   .doc('reward-${widget.task['name']}${DateTime.now()}')
                                   .set({
                                     'addedby': widget.email,

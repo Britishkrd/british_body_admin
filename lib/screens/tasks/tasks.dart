@@ -168,7 +168,7 @@ class _TasksState extends State<Tasks> {
                           FirebaseFirestore.instance
                               .collection('user')
                               .doc(widget.email)
-                              .collection('rewardpunishment')
+                              .collection('taskrewardpunishment')
                               .doc(
                                   'punishment-${snapshot.data!.docs[index]['name']}${DateTime.now()}')
                               .set({
