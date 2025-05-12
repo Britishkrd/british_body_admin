@@ -1,9 +1,9 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:sizer/sizer.dart';
-import 'package:intl/intl.dart';
 
 class Viewingrewardpunishment extends StatefulWidget {
   final String email;
@@ -112,6 +112,9 @@ class _ViewingrewardpunishmentState extends State<Viewingrewardpunishment> {
                       .collection('rewardpunishment')
                       .where('date', isGreaterThanOrEqualTo: start)
                       .where('date', isLessThanOrEqualTo: end)
+                      .orderBy('date',
+                          descending:
+                              true) // Add this line to sort by date in descending order
                       .get(),
                   builder: (BuildContext context,
                       AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -167,7 +170,11 @@ class _ViewingrewardpunishmentState extends State<Viewingrewardpunishment> {
                                         EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
                                     padding: EdgeInsets.all(1.h),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color:
+                                          '${snapshot.data!.docs[index]['type']}' ==
+                                                  'punishment'
+                                              ? Colors.red[100]
+                                              : Colors.green[100],
                                       borderRadius: BorderRadius.circular(5),
                                       boxShadow: const [
                                         BoxShadow(
