@@ -257,8 +257,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     value.data()?['age'] ?? '',
                                     latitude,
                                     longtitude,
-                                    value.data()?['worklat'] ?? 0.0,
-                                    value.data()?['worklong'] ?? 0.0,
+                                    // value.data()?['worklat'] ?? 0.0,
+                                    // value.data()?['worklong'] ?? 0.0,
+                                    (value.data()?['worklat'] ?? 0.0)
+                                        .toDouble(), // Convert to double
+                                    (value.data()?['worklong'] ?? 0.0)
+                                        .toDouble(), // Convert to double
                                     value.data()?['starthour'] ?? 0,
                                     value.data()?['endhour'] ?? 0,
                                     value.data()?['startmin'] ?? 0,
