@@ -628,153 +628,193 @@ class _TaskdetailsState extends State<Taskdetails> {
                       textColor: Material1.primaryColor),
                 )
               : const SizedBox.shrink(),
-          widget.task['status'] != 'done'
-              ? Container(
-                  margin: EdgeInsets.only(
-                      top: 5.h, left: 5.w, right: 5.w, bottom: 5.h),
-                  width: 90.w,
-                  height: 8.h,
-                  child: Material1.button(
-                      label: widget.task['status'] == 'pending'
-                          ? 'دەستپێکردن'
-                          : 'کۆتایی پێهێنان',
-                      function: () async {
-                        // Check if task is being started
-                        if (widget.task['status'] == 'pending') {
-                          if (widget.task['start'].toDate().isAfter(DateTime.now())) {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text('هەڵە'),
-                                    content: Text('لەکاتی دیاری کراو دەست بە کارەکە بکە'),
-                                    actions: [
-                                      Material1.button(
-                                          label: 'باشە',
-                                          buttoncolor: Material1.primaryColor,
-                                          textcolor: Colors.white,
-                                          function: () {
-                                            Navigator.pop(context);
-                                          }),
-                                    ],
-                                  );
-                                });
-                            return;
-                          }
-                        } 
-                        // Check if task is being finished
-                        else {
-                          final isOnTime = !widget.task['end'].toDate().isBefore(DateTime.now());
-                          final allStagesCompleted = widget.stages == 0 || 
-                              !widget.task['endstages'].contains(false);
+           widget.task['status'] != 'done'
+      ? Container(
+          margin: EdgeInsets.only(
+              top: 5.h, left: 5.w, right: 5.w, bottom: 5.h),
+          width: 90.w,
+          height: 8.h,
+          child: Material1.button(
+              label: widget.task['status'] == 'pending'
+                  ? 'دەستپێکردن'
+                  : 'کۆتایی پێهێنان',
+              function: () async {
+                // Check if task is being started
+                if (widget.task['status'] == 'pending') {
+                  // Check if starting before allowed time
+                  if (widget.task['start'].toDate().isAfter(DateTime.now())) {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('هەڵە'),
+                            content: Text('لەکاتی دیاری کراو دەست بە کارەکە بکە'),
+                            actions: [
+                              Material1.button(
+                                  label: 'باشە',
+                                  buttoncolor: Material1.primaryColor,
+                                  textcolor: Colors.white,
+                                  function: () {
+                                    Navigator.pop(context);
+                                  }),
+                            ],
+                          );
+                        });
+                    return;
+                  }
+                } 
+                // Task is being finished
+                else {
+                  // Check if all stages are completed (if there are stages)
+                  final allStagesCompleted = widget.stages == 0 ||
+                      !widget.task['endstages'].contains(false);
+                  
+                  if (!allStagesCompleted) {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('هەڵە'),
+                            content: Text('تکایە یەکەم هەموو بەشەکان تەواو بکە'),
+                            actions: [
+                              Material1.button(
+                                  label: 'باشە',
+                                  buttoncolor: Material1.primaryColor,
+                                  textcolor: Colors.white,
+                                  function: () {
+                                    Navigator.pop(context);
+                                  }),
+                            ],
+                          );
+                        });
+                    return;
+                  }
 
-                          if (!isOnTime) {
-                            // Late completion - apply punishment if not already applied
-                            if (widget.task['status'] != 'incomplete') {
-                              final deduction = widget.task['deductionamount']?.toString() ?? '0';
-                              if (deduction != '0') {
-                                await FirebaseFirestore.instance
-                                    .collection('user')
-                                    .doc(widget.email)
-                                    .collection('rewardpunishment')
-                                    .doc('punishment-${widget.task['name']}${DateTime.now()}')
-                                    .set({
-                                      'addedby': widget.email,
-                                      'amount': deduction,
-                                      'date': DateTime.now(),
-                                      'reason': 'for late completion of task ${widget.task['name']}',
-                                      'type': 'punishment'
-                                    });
-                              }
-                              // Mark as incomplete
-                              await widget.task.reference.update({'status': 'incomplete'});
-                            }
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text('ئاگاداری'),
-                                    content: Text('ئەم کارە لەکاتی خۆیدا تەواو نەکراوە'),
-                                    actions: [
-                                      Material1.button(
-                                          label: 'باشە',
-                                          buttoncolor: Material1.primaryColor,
-                                          textcolor: Colors.white,
-                                          function: () {
-                                            Navigator.pop(context);
-                                          }),
-                                    ],
-                                  );
-                                });
-                            return;
-                          }
+                  // Check if completing on time
+                  final isOnTime = !widget.task['end']
+                      .toDate()
+                      .isBefore(DateTime.now());
+                  
+                  // Get reward/punishment amounts
+                  final reward = widget.task['rewardamount']?.toString() ?? '0';
+                  final deduction = widget.task['deductionamount']?.toString() ?? '0';
 
-                          // On-time completion - apply reward if all stages are completed
-                          if (allStagesCompleted) {
-                            final reward = widget.task['rewardamount']?.toString() ?? '0';
-                            if (reward != '0') {
-                              await FirebaseFirestore.instance
-                                  .collection('user')
-                                  .doc(widget.email)
-                                  .collection('taskrewardpunishment')
-                                  .doc('reward-${widget.task['name']}${DateTime.now()}')
-                                  .set({
-                                    'addedby': widget.email,
-                                    'amount': reward,
-                                    'date': DateTime.now(),
-                                    'reason': 'for completing task ${widget.task['name']} on time',
-                                    'type': 'reward'
-                                  });
-                            }
-                          }
-                        }
+                  // For weekly tasks, handle recurrence
+                  if (widget.task['isweekly']) {
+                    final originalStart = widget.task['start'].toDate();
+                    final originalEnd = widget.task['end'].toDate();
+                    final duration = originalEnd.difference(originalStart);
+                    
+                    // Create new start/end times for next week
+                    final newStart = DateTime(
+                      originalStart.year,
+                      originalStart.month,
+                      originalStart.day + 7,
+                      originalStart.hour,
+                      originalStart.minute,
+                    );
+                    
+                    final newEnd = newStart.add(duration);
+                    
+                    // Copy the task to next week
+                    await widget.task.reference
+                        .collection('recurrences')
+                        .doc(newStart.toString())
+                        .set({
+                      'start': newStart,
+                      'end': newEnd,
+                      'status': 'pending',
+                      'originalTaskId': widget.task.id,
+                      'createdAt': DateTime.now(),
+                    });
+                  }
 
-                        // Record the completion
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Center(child: const CircularProgressIndicator()),
-                              );
-                            });
+                  // Apply reward or punishment based on timing
+                  if (isOnTime) {
+                    // Apply reward if completed on time
+                    if (reward != '0') {
+                      await FirebaseFirestore.instance
+                          .collection('user')
+                          .doc(widget.email)
+                          .collection('taskrewardpunishment')
+                          .doc('reward-${widget.task['name']}${DateTime.now()}')
+                          .set({
+                        'addedby': widget.email,
+                        'amount': reward,
+                        'date': DateTime.now(),
+                        'reason': 'for completing task ${widget.task['name']} on time',
+                        'type': 'reward'
+                      });
+                    }
+                  } else {
+                    // Apply punishment if late
+                    if (deduction != '0') {
+                      await FirebaseFirestore.instance
+                          .collection('user')
+                          .doc(widget.email)
+                          .collection('taskrewardpunishment')
+                          .doc('punishment-${widget.task['name']}${DateTime.now()}')
+                          .set({
+                        'addedby': widget.email,
+                        'amount': deduction,
+                        'date': DateTime.now(),
+                        'reason': 'for not completing task ${widget.task['name']} on time',
+                        'type': 'punishment'
+                      });
+                    }
+                  }
+                }
 
-                        await widget.task.reference
-                            .collection('updates')
-                            .doc(DateTime.now().toString())
-                            .set({
-                              'note': [notecontroller.text],
-                              'time': DateTime.now(),
-                              'latitude': latitude,
-                              'longtitude': longtitude,
-                              'action': widget.task['status'] == 'pending' ? 'start' : 'finish',
-                              'stage': 'main task',
-                              'link': [linkcontroller.text]
-                            });
+                // Record the completion
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Center(child: const CircularProgressIndicator()),
+                      );
+                    });
 
-                        // Update task status
-                        if (widget.task['status'] == 'pending') {
-                          await widget.task.reference.update({'status': 'active'});
-                        } else {
-                          await widget.task.reference.update({
-                            'status': 'done',
-                            'lastupdate': Timestamp.fromDate(DateTime.now())
-                          });
-                        }
+                await _getCurrentPosition();
+                
+                await widget.task.reference
+                    .collection('updates')
+                    .doc(DateTime.now().toString())
+                    .set({
+                  'note': [notecontroller.text],
+                  'time': DateTime.now(),
+                  'latitude': latitude,
+                  'longtitude': longtitude,
+                  'action': widget.task['status'] == 'pending'
+                      ? 'start'
+                      : 'finish',
+                  'stage': 'main task',
+                  'link': [linkcontroller.text]
+                });
 
-                        // Show success message and return
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(widget.task['status'] == 'pending'
-                                ? 'دەست بە کارەکە کرا'
-                                : 'کارەکە کۆتایی پێهات'),
-                          ),
-                        );
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      },
-                      textcolor: Colors.white,
-                      buttoncolor: Material1.primaryColor),
-                )
-              : const SizedBox.shrink()
+                // Update task status
+                if (widget.task['status'] == 'pending') {
+                  await widget.task.reference.update({'status': 'active'});
+                } else {
+                  await widget.task.reference.update({
+                    'status': 'done',
+                    'lastupdate': Timestamp.fromDate(DateTime.now())
+                  });
+                }
+
+                // Show success message and return
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(widget.task['status'] == 'pending'
+                        ? 'دەست بە کارەکە کرا'
+                        : 'کارەکە کۆتایی پێهات'),
+                  ),
+                );
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              textcolor: Colors.white,
+              buttoncolor: Material1.primaryColor),
+        )
+      : const SizedBox.shrink(),
         ],
       ),
     );

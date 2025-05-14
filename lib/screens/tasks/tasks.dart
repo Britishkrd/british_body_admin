@@ -23,6 +23,7 @@ List<String> options = [
   'کارە تەواو نەکراوەکان',
   'تەواو بووە'
 ];
+
 Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
   if (tag == 1) {
     return FirebaseFirestore.instance
@@ -53,7 +54,6 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
         .where('isdaily', isEqualTo: true)
         .snapshots();
   } else if (tag == 5) {
-    // Incomplete tasks - time has passed but not completed
     return FirebaseFirestore.instance
         .collection('user')
         .doc(email)
@@ -61,7 +61,6 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
         .where('status', isEqualTo: 'incomplete')
         .snapshots();
   } else if (tag == 6) {
-    // Completed tasks
     return FirebaseFirestore.instance
         .collection('user')
         .doc(email)
@@ -69,7 +68,6 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
         .where('status', isEqualTo: 'done')
         .snapshots();
   } else {
-    // All tasks
     return FirebaseFirestore.instance
         .collection('user')
         .doc(email)
@@ -128,6 +126,39 @@ class _TasksState extends State<Tasks> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
+                // Process each task for overdue weekly tasks
+                for (var doc in snapshot.data!.docs) {
+                  final taskEnd = doc['end'].toDate();
+                  final now = DateTime.now();
+                  
+                  // Check if this is a weekly task that's overdue and not completed
+                  if (doc['isweekly'] && 
+                      now.isAfter(taskEnd) && 
+                      doc['status'] != 'done' && 
+                      doc['status'] != 'incomplete') {
+                    
+                    final deduction = doc['deductionamount']?.toString() ?? '0';
+                    if (deduction != '0') {
+                      FirebaseFirestore.instance
+                          .collection('user')
+                          .doc(widget.email)
+                          .collection('taskrewardpunishment')
+                          .doc('punishment-${doc['name']}-${now.toString()}')
+                          .set({
+                            'addedby': widget.email,
+                            'amount': deduction,
+                            'date': now,
+                            'reason': 'for not completing weekly task ${doc['name']} on time',
+                            'type': 'punishment'
+                          });
+                    }
+                    
+                    // Mark as incomplete
+                    doc.reference.update({'status': 'incomplete'});
+                  }
+                }
+
                 return ListView.builder(
                     itemCount: snapshot.data?.docs.length ?? 0,
                     itemBuilder: (BuildContext context, int index) {
@@ -153,18 +184,17 @@ class _TasksState extends State<Tasks> {
                         reward = '0';
                       }
 
-                      // Only apply punishment if task is late and not already marked
-                      if (snapshot.data!.docs[index]['end']
+                      // Handle non-weekly overdue tasks
+                      if (!isweekly && 
+                          snapshot.data!.docs[index]['end']
                               .toDate()
                               .isBefore(DateTime.now()) &&
                           snapshot.data!.docs[index]['status'] != 'done' &&
-                          snapshot.data!.docs[index]['status'] !=
-                              'incomplete') {
+                          snapshot.data!.docs[index]['status'] != 'incomplete') {
                         if (deduction == '0') {
                           snapshot.data!.docs[index].reference
                               .update({'status': 'incomplete'});
-                        } 
-                        else {
+                        } else {
                           FirebaseFirestore.instance
                               .collection('user')
                               .doc(widget.email)
@@ -184,6 +214,7 @@ class _TasksState extends State<Tasks> {
                           });
                         }
                       }
+
                       return GestureDetector(
                         onTap: () {
                           if (snapshot.data!.docs[index]['end']
@@ -234,13 +265,11 @@ class _TasksState extends State<Tasks> {
                                     ? const Color.fromARGB(255, 149, 207, 239)
                                     : snapshot.data!.docs[index]['status'] ==
                                             'done'
-                                        ? Colors.green[
-                                            100] // Different color for done tasks
+                                        ? Colors.green[100]
                                         : snapshot.data!.docs[index]
                                                     ['status'] ==
                                                 'incomplete'
-                                            ? Colors.red[
-                                                100] // Different color for incomplete tasks
+                                            ? Colors.red[100]
                                             : const Color.fromRGBO(
                                                 255, 255, 255, 1),
                                 borderRadius: BorderRadius.circular(5),

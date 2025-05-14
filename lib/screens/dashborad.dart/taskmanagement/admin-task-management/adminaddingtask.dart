@@ -89,6 +89,9 @@ bool isDaily = false;
 bool isWeekly = false;
 bool isMonthly = false;
 DateTime now = DateTime.now();
+DateTime eend = DateTime.now();
+DateTime scheduled = DateTime.now();
+int numm = 0;
 String formatDate(DateTime? date) {
   final DateFormat formatter = DateFormat('dd/MM/yyyy HH:mm');
   return formatter.format(date ?? DateTime.now());
@@ -837,6 +840,7 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                   }
                   startsnotificationdates.addAll(mainstartsnotificationdates);
                   endsnotificationdates.addAll(mainendsnotificationdates);
+
                   showDialog(
                       context: context,
                       builder: (context) {
@@ -894,6 +898,37 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                     );
                                     return;
                                   }
+
+                                  // Calculate all scheduled dates for weekly tasks
+                                  List<DateTime> scheduledDates = [];
+                                  if (isWeekly) {
+                                    DateTime currentDate = start!;
+                                    while (currentDate.isBefore(end!)) {
+                                      for (int weekday in offdays) {
+                                        // Find next occurrence of this weekday
+                                        DateTime nextDate = currentDate;
+                                        while (nextDate.weekday != weekday) {
+                                          nextDate =
+                                              nextDate.add(Duration(days: 1));
+                                        }
+                                        if (nextDate.isBefore(end!)) {
+                                          scheduledDates.add(DateTime(
+                                            nextDate.year,
+                                            nextDate.month,
+                                            nextDate.day,
+                                            start!.hour,
+                                            start!.minute,
+                                          ));
+                                        }
+                                      }
+                                      currentDate =
+                                          currentDate.add(Duration(days: 7));
+                                    }
+                                  }
+
+                                  final String taskId =
+                                      '${widget.adminemail}-${DateTime.now().toString()}';
+
                                   if (widget.isbatch) {
                                     showDialog(
                                         context: context,
@@ -904,15 +939,245 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                                     const CircularProgressIndicator()),
                                           );
                                         });
+
                                     for (int i = 0;
                                         i < widget.selectedUsers.length;
                                         i++) {
-                                      FirebaseFirestore.instance
+                                      if (isWeekly) {
+                                        // Create individual tasks for each scheduled date
+                                        for (DateTime scheduledDate
+                                            in scheduledDates) {
+                                          DateTime taskEnd = DateTime(
+                                            scheduledDate.year,
+                                            scheduledDate.month,
+                                            scheduledDate.day,
+                                            end!.hour,
+                                            end!.minute,
+                                          );
+
+                                          await FirebaseFirestore.instance
+                                              .collection('user')
+                                              .doc(widget.selectedUsers[i])
+                                              .collection('tasks')
+                                              .doc(
+                                                  '$taskId-${scheduledDate.toString()}')
+                                              .set({
+                                            'description':
+                                                descriptioncontroller.text,
+                                            'time': DateTime.now(),
+                                            'start': scheduledDate,
+                                            'end': taskEnd,
+                                            'status': 'pending',
+                                            'name': namecontroller.text,
+                                            'isdaily': isDaily,
+                                            'addedby': widget.adminemail,
+                                            'deductionamount':
+                                                deductionamountcontroller.text,
+                                            'rewardamount':
+                                                rewardamountcontroller.text,
+                                            'isowntask': false,
+                                            'startstagedates': startsstagedates,
+                                            'endstagedates': endsstagedates,
+                                            'startnotificationdates':
+                                                startsnotificationdates,
+                                            'endnotificationdates':
+                                                endsnotificationdates,
+                                            'isnotificationset': false,
+                                            'startstages': startstages,
+                                            'endstages': endstages,
+                                            'lastsystemupdate': DateTime.now(),
+                                            'lastupdate': DateTime.now(),
+                                            'stagetitles': stagetitles,
+                                            'stagecontents': stagecontents,
+                                            'isweekly': isWeekly,
+                                            'ismonthly': isMonthly,
+                                            'weekdays': offdays,
+                                            'dayofthemonth':
+                                                dayofthemontcontroller.text,
+                                            'original_task_id': taskId,
+                                            'is_recurring_instance': true,
+                                            'completed_instances': 0,
+                                            'total_instances':
+                                                scheduledDates.length,
+                                          }).then((value) {
+                                            FirebaseFirestore.instance
+                                                .collection('user')
+                                                .doc(widget.selectedUsers[i])
+                                                .get()
+                                                .then((value) {
+                                              log(value.data()?['token']);
+                                              sendingnotification(
+                                                  'کار ',
+                                                  'کارێکت بۆ زیاد کرا',
+                                                  value.data()?['token'],
+                                                  dropdownValue);
+                                            });
+                                          });
+                                        }
+                                      } else {
+                                        // Regular non-recurring task
+                                        await FirebaseFirestore.instance
+                                            .collection('user')
+                                            .doc(widget.selectedUsers[i])
+                                            .collection('tasks')
+                                            .doc(taskId)
+                                            .set({
+                                          'description':
+                                              descriptioncontroller.text,
+                                          'time': DateTime.now(),
+                                          'start': start,
+                                          'end': end,
+                                          'status': 'pending',
+                                          'name': namecontroller.text,
+                                          'isdaily': isDaily,
+                                          'addedby': widget.adminemail,
+                                          'deductionamount':
+                                              deductionamountcontroller.text,
+                                          'rewardamount':
+                                              rewardamountcontroller.text,
+                                          'isowntask': false,
+                                          'startstagedates': startsstagedates,
+                                          'endstagedates': endsstagedates,
+                                          'startnotificationdates':
+                                              startsnotificationdates,
+                                          'endnotificationdates':
+                                              endsnotificationdates,
+                                          'isnotificationset': false,
+                                          'startstages': startstages,
+                                          'endstages': endstages,
+                                          'lastsystemupdate': DateTime.now(),
+                                          'lastupdate': DateTime.now(),
+                                          'stagetitles': stagetitles,
+                                          'stagecontents': stagecontents,
+                                          'isweekly': isWeekly,
+                                          'ismonthly': isMonthly,
+                                          'weekdays': offdays,
+                                          'dayofthemonth':
+                                              dayofthemontcontroller.text,
+                                          'original_task_id': taskId,
+                                          'is_recurring_instance': false,
+                                          'completed_instances': 0,
+                                          'total_instances': 1,
+                                        }).then((value) {
+                                          FirebaseFirestore.instance
+                                              .collection('user')
+                                              .doc(widget.selectedUsers[i])
+                                              .get()
+                                              .then((value) {
+                                            log(value.data()?['token']);
+                                            sendingnotification(
+                                                'کار ',
+                                                'کارێکت بۆ زیاد کرا',
+                                                value.data()?['token'],
+                                                dropdownValue);
+                                          });
+                                        });
+                                      }
+                                    }
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text('کارەکە بەسەرکەوتویی زیادکرا'),
+                                      ),
+                                    );
+                                    Navigator.popUntil(
+                                        context, (route) => route.isFirst);
+                                  } else {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Center(
+                                                child:
+                                                    const CircularProgressIndicator()),
+                                          );
+                                        });
+
+                                    if (isWeekly) {
+                                      // Create individual tasks for each scheduled date
+                                      for (DateTime scheduledDate
+                                          in scheduledDates) {
+                                        DateTime taskEnd = DateTime(
+                                          scheduledDate.year,
+                                          scheduledDate.month,
+                                          scheduledDate.day,
+                                          end!.hour,
+                                          end!.minute,
+                                        );
+
+                                        eend = taskEnd;
+                                        if (numm == 0){
+                                          scheduled = scheduledDate;
+                                        }
+                                        numm ++;
+                                        
+                                      
+                                      }
+                                      await FirebaseFirestore.instance
                                           .collection('user')
-                                          .doc(widget.selectedUsers[i])
+                                          .doc(widget.email)
                                           .collection('tasks')
                                           .doc(
-                                              '${widget.adminemail}-${DateTime.now().toString()}')
+                                              '$taskId-${scheduled.toString()}')
+                                          .set({
+                                        'description':
+                                            descriptioncontroller.text,
+                                        'time': DateTime.now(),
+                                        'start': scheduled,
+                                        'end': eend,
+                                        'status': 'pending',
+                                        'name': namecontroller.text,
+                                        'isdaily': isDaily,
+                                        'addedby': widget.adminemail,
+                                        'deductionamount':
+                                            deductionamountcontroller.text,
+                                        'rewardamount':
+                                            rewardamountcontroller.text,
+                                        'isowntask': false,
+                                        'startstagedates': startsstagedates,
+                                        'endstagedates': endsstagedates,
+                                        'startnotificationdates':
+                                            startsnotificationdates,
+                                        'endnotificationdates':
+                                            endsnotificationdates,
+                                        'isnotificationset': false,
+                                        'startstages': startstages,
+                                        'endstages': endstages,
+                                        'lastsystemupdate': DateTime.now(),
+                                        'lastupdate': DateTime.now(),
+                                        'stagetitles': stagetitles,
+                                        'stagecontents': stagecontents,
+                                        'isweekly': isWeekly,
+                                        'ismonthly': isMonthly,
+                                        'weekdays': offdays,
+                                        'dayofthemonth':
+                                            dayofthemontcontroller.text,
+                                        'original_task_id': taskId,
+                                        'is_recurring_instance': true,
+                                        'completed_instances': 0,
+                                        'total_instances':
+                                            scheduledDates.length,
+                                      }).then((value) {
+                                        FirebaseFirestore.instance
+                                            .collection('user')
+                                            .doc(widget.email)
+                                            .get()
+                                            .then((value) {
+                                          log(value.data()?['token']);
+                                          sendingnotification(
+                                              'کار ',
+                                              'کارێکت بۆ زیاد کرا',
+                                              value.data()?['token'],
+                                              dropdownValue);
+                                        });
+                                      });
+                                    } else {
+                                      // Regular non-recurring task
+                                      await FirebaseFirestore.instance
+                                          .collection('user')
+                                          .doc(widget.email)
+                                          .collection('tasks')
+                                          .doc(taskId)
                                           .set({
                                         'description':
                                             descriptioncontroller.text,
@@ -945,11 +1210,15 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                         'ismonthly': isMonthly,
                                         'weekdays': offdays,
                                         'dayofthemonth':
-                                            dayofthemontcontroller.text
+                                            dayofthemontcontroller.text,
+                                        'original_task_id': taskId,
+                                        'is_recurring_instance': false,
+                                        'completed_instances': 0,
+                                        'total_instances': 1,
                                       }).then((value) {
                                         FirebaseFirestore.instance
                                             .collection('user')
-                                            .doc(widget.selectedUsers[i])
+                                            .doc(widget.email)
                                             .get()
                                             .then((value) {
                                           log(value.data()?['token']);
@@ -959,98 +1228,27 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
                                               value.data()?['token'],
                                               dropdownValue);
                                         });
-                                      });
-                                    }
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text('کارەکە بەسەرکەوتویی زیادکرا'),
-                                      ),
-                                    );
-                                    Navigator.popUntil(
-                                        context, (route) => route.isFirst);
-                                  } else {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            title: Center(
-                                                child:
-                                                    const CircularProgressIndicator()),
+                                      }).then(
+                                        (value) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'کارەکە بەسەرکەوتویی زیادکرا'),
+                                            ),
                                           );
-                                        });
-                                    FirebaseFirestore.instance
-                                        .collection('user')
-                                        .doc(widget.email)
-                                        .collection('tasks')
-                                        .doc(
-                                            '${widget.adminemail}-${DateTime.now().toString()}')
-                                        .set({
-                                      'description': descriptioncontroller.text,
-                                      'time': DateTime.now(),
-                                      'start': start,
-                                      'end': end,
-                                      'status': 'pending',
-                                      'name': namecontroller.text,
-                                      'isdaily': isDaily,
-                                      'addedby': widget.adminemail,
-                                      'deductionamount':
-                                          deductionamountcontroller.text,
-                                      'rewardamount':
-                                          rewardamountcontroller.text,
-                                      'isowntask': false,
-                                      'startstagedates': startsstagedates,
-                                      'endstagedates': endsstagedates,
-                                      'startnotificationdates':
-                                          startsnotificationdates,
-                                      'endnotificationdates':
-                                          endsnotificationdates,
-                                      'isnotificationset': false,
-                                      'startstages': startstages,
-                                      'endstages': endstages,
-                                      'lastsystemupdate': DateTime.now(),
-                                      'lastupdate': DateTime.now(),
-                                      'stagetitles': stagetitles,
-                                      'stagecontents': stagecontents,
-                                      'isweekly': isWeekly,
-                                      'ismonthly': isMonthly,
-                                      'weekdays': offdays,
-                                      'dayofthemonth':
-                                          dayofthemontcontroller.text
-                                    }).then((value) {
-                                      FirebaseFirestore.instance
-                                          .collection('user')
-                                          .doc(widget.email)
-                                          .get()
-                                          .then((value) {
-                                        log(value.data()?['token']);
-
-                                        sendingnotification(
-                                            'کار ',
-                                            'کارێکت بۆ زیاد کرا',
-                                            value.data()?['token'],
-                                            dropdownValue);
-                                      });
-                                    }).then(
-                                      (value) {
+                                          Navigator.popUntil(context,
+                                              (route) => route.isFirst);
+                                        },
+                                      ).catchError((error) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                'کارەکە بەسەرکەوتویی زیادکرا'),
+                                          const SnackBar(
+                                            content: Text('هەڵەیەک هەیە'),
                                           ),
                                         );
-                                        Navigator.popUntil(
-                                            context, (route) => route.isFirst);
-                                      },
-                                    ).catchError((error) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text('هەڵەیەک هەیە'),
-                                        ),
-                                      );
-                                    });
+                                      });
+                                    }
                                   }
                                 },
                                 textcolor: Colors.white,
