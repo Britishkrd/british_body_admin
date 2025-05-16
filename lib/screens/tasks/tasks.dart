@@ -77,6 +77,57 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
 }
 
 class _TasksState extends State<Tasks> {
+  Future<void> _processOverdueTask(DocumentSnapshot doc) async {
+    final now = DateTime.now();
+    final deduction = doc['deductionamount']?.toString() ?? '0';
+
+    if (now.isAfter(doc['end'].toDate()) &&
+        doc['status'] != 'done' &&
+        doc['status'] != 'incomplete') {
+      if (deduction != '0') {
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(widget.email)
+            .collection('taskrewardpunishment')
+            .doc('punishment-${doc['name']}-${now.toString()}')
+            .set({
+          'addedby': widget.email,
+          'amount': deduction,
+          'date': now,
+          'reason': 'for not completing task ${doc['name']} on time',
+          'type': 'punishment'
+        });
+      }
+      await doc.reference.update({'status': 'incomplete'});
+    }
+  }
+
+  Future<void> _processOverdueWeeklyTask(DocumentSnapshot doc) async {
+    final now = DateTime.now();
+    final weeklyDeduction = doc['deductionamount']?.toString() ?? '0';
+
+    if (doc['isweekly'] &&
+        now.isAfter(doc['end'].toDate()) &&
+        doc['status'] != 'done' &&
+        doc['status'] != 'incomplete') {
+      if (weeklyDeduction != '0') {
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(widget.email)
+            .collection('taskrewardpunishment')
+            .doc('punishment-${doc['name']}-${now.toString()}')
+            .set({
+          'addedby': widget.email,
+          'amount': weeklyDeduction,
+          'date': now,
+          'reason': 'for not completing weekly task ${doc['name']} on time',
+          'type': 'punishment'
+        });
+      }
+      await doc.reference.update({'status': 'incomplete'});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -127,99 +178,20 @@ class _TasksState extends State<Tasks> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                // Process each task for overdue weekly tasks
-                for (var doc in snapshot.data!.docs) {
-                  final taskEnd = doc['end'].toDate();
-                  final now = DateTime.now();
-                  
-                  // Check if this is a weekly task that's overdue and not completed
-                  if (doc['isweekly'] && 
-                      now.isAfter(taskEnd) && 
-                      doc['status'] != 'done' && 
-                      doc['status'] != 'incomplete') {
-                    
-                    final deduction = doc['deductionamount']?.toString() ?? '0';
-                    if (deduction != '0') {
-                      FirebaseFirestore.instance
-                          .collection('user')
-                          .doc(widget.email)
-                          .collection('taskrewardpunishment')
-                          .doc('punishment-${doc['name']}-${now.toString()}')
-                          .set({
-                            'addedby': widget.email,
-                            'amount': deduction,
-                            'date': now,
-                            'reason': 'for not completing weekly task ${doc['name']} on time',
-                            'type': 'punishment'
-                          });
-                    }
-                    
-                    // Mark as incomplete
-                    doc.reference.update({'status': 'incomplete'});
-                  }
-                }
-
                 return ListView.builder(
                     itemCount: snapshot.data?.docs.length ?? 0,
                     itemBuilder: (BuildContext context, int index) {
-                      bool isweekly = false;
-                      try {
-                        isweekly = snapshot.data!.docs[index]['isweekly'];
-                      } catch (e) {
-                        isweekly = false;
-                      }
-                      String deduction = '';
-                      String reward = '';
-                      try {
-                        deduction = snapshot
-                            .data!.docs[index]['deductionamount']
-                            .toString();
-                      } catch (e) {
-                        deduction = '0';
-                      }
-                      try {
-                        reward = snapshot.data!.docs[index]['rewardamount']
-                            .toString();
-                      } catch (e) {
-                        reward = '0';
-                      }
+                      final doc = snapshot.data!.docs[index];
+                      _processOverdueTask(doc);
+                      _processOverdueWeeklyTask(doc);
 
-                      // Handle non-weekly overdue tasks
-                      if (!isweekly && 
-                          snapshot.data!.docs[index]['end']
-                              .toDate()
-                              .isBefore(DateTime.now()) &&
-                          snapshot.data!.docs[index]['status'] != 'done' &&
-                          snapshot.data!.docs[index]['status'] != 'incomplete') {
-                        if (deduction == '0') {
-                          snapshot.data!.docs[index].reference
-                              .update({'status': 'incomplete'});
-                        } else {
-                          FirebaseFirestore.instance
-                              .collection('user')
-                              .doc(widget.email)
-                              .collection('taskrewardpunishment')
-                              .doc(
-                                  'punishment-${snapshot.data!.docs[index]['name']}${DateTime.now()}')
-                              .set({
-                            'addedby': widget.email,
-                            'amount': deduction,
-                            'date': DateTime.now(),
-                            'reason':
-                                'for not completing task ${snapshot.data!.docs[index]['name']} on time',
-                            'type': 'punishment'
-                          }).then((value) {
-                            snapshot.data!.docs[index].reference
-                                .update({'status': 'incomplete'});
-                          });
-                        }
-                      }
+                      bool isweekly = doc['isweekly'] ?? false;
+                      String deduction = doc['deductionamount']?.toString() ?? '0';
+                      String reward = doc['rewardamount']?.toString() ?? '0';
 
                       return GestureDetector(
                         onTap: () {
-                          if (snapshot.data!.docs[index]['end']
-                              .toDate()
-                              .isBefore(DateTime.now())) {
+                          if (doc['end'].toDate().isBefore(DateTime.now())) {
                             showDialog(
                                 context: context,
                                 builder: (context) {
@@ -238,19 +210,13 @@ class _TasksState extends State<Tasks> {
                                 });
                             return;
                           }
-                          int stages = 0;
-                          try {
-                            stages = snapshot
-                                .data!.docs[index]['endstagedates'].length;
-                          } catch (e) {
-                            stages = 0;
-                          }
+                          int stages = (doc['endstagedates'] as List?)?.length ?? 0;
 
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
                             return Taskdetails(
                                 email: widget.email,
-                                task: snapshot.data!.docs[index],
+                                task: doc,
                                 stages: stages);
                           }));
                         },
@@ -263,12 +229,9 @@ class _TasksState extends State<Tasks> {
                               decoration: BoxDecoration(
                                 color: isweekly
                                     ? const Color.fromARGB(255, 149, 207, 239)
-                                    : snapshot.data!.docs[index]['status'] ==
-                                            'done'
+                                    : doc['status'] == 'done'
                                         ? Colors.green[100]
-                                        : snapshot.data!.docs[index]
-                                                    ['status'] ==
-                                                'incomplete'
+                                        : doc['status'] == 'incomplete'
                                             ? Colors.red[100]
                                             : const Color.fromRGBO(
                                                 255, 255, 255, 1),
@@ -286,10 +249,9 @@ class _TasksState extends State<Tasks> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                      "${snapshot.data!.docs[index]['name']} : ئەرک",
+                                      "${doc['name']} : ئەرک",
                                       style: TextStyle(
-                                          decoration: snapshot
-                                                  .data!.docs[index]['end']
+                                          decoration: doc['end']
                                                   .toDate()
                                                   .isBefore(DateTime.now())
                                               ? TextDecoration.lineThrough
@@ -309,12 +271,12 @@ class _TasksState extends State<Tasks> {
                                         MainAxisAlignment.spaceAround,
                                     children: [
                                       Text(
-                                          "${DateFormat('MMM d, h:mm a').format(snapshot.data!.docs[index]['end'].toDate())}   بۆ",
+                                          "${DateFormat('MMM d, h:mm a').format(doc['end'].toDate())}   بۆ",
                                           style: TextStyle(
                                             fontSize: 16.sp,
                                           )),
                                       Text(
-                                          "${DateFormat('MMM d, h:mm a').format(snapshot.data!.docs[index]['start'].toDate())}   لە",
+                                          "${DateFormat('MMM d, h:mm a').format(doc['start'].toDate())}   لە",
                                           style: TextStyle(
                                             fontSize: 16.sp,
                                           )),
