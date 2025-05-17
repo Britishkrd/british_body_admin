@@ -65,7 +65,8 @@ class _EdituserrState extends State<Edituserr> {
     'changing worker phone',
     'adding rules',
     'testing sounds',
-    'user status'
+    'user status',
+    'holiday management'
   ];
   List<String> selectedpermissions = [];
   final List<DayInWeek> _days = [
@@ -353,8 +354,9 @@ class _EdituserrState extends State<Edituserr> {
                       'worklong': double.parse(worklongcontroller.text),
                       'permissions': selectedpermissions,
                       'age': agecontroller.text.toString(),
-                      
-      'worktarget': int.parse(workhourtargetcontroller.text), // Fixed this line
+
+                      'worktarget': int.parse(
+                          workhourtargetcontroller.text), // Fixed this line
                       'password': passwordcontroller.text,
                       'weekdays': workdays,
                       'starthour': starthour.hour,

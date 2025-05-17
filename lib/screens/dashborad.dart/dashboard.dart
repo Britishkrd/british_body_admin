@@ -98,7 +98,7 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-// TODO: use 32 for the index of new widget
+// TODO: use 34 for the index of new widget
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -193,8 +193,10 @@ class _DashboardState extends State<Dashboard> {
                         return TasksViewingrewardpunishment(email: email);
                       }));
                     },
-                    child: controlpanelcard(Icons.card_giftcard_sharp,
-                        'بینینی پاداشت و سزای ئەرکەکان', 6),
+                    child: controlpanelcard(
+                        Icons.playlist_add_check_circle_rounded,
+                        'بینینی پاداشت و سزای ئەرکەکان',
+                        33),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -554,7 +556,7 @@ class _DashboardState extends State<Dashboard> {
                       child: controlpanelcard(
                           Icons.person_off_sharp, 'بارو دۆخی کارمەند', 30),
                     ),
-                  if (permissions.contains('user status'))
+                  if (permissions.contains('holiday management'))
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -629,7 +631,7 @@ class _DashboardState extends State<Dashboard> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Pick a color!'),
+                      title: const Text('ڕەنگێک دیاری بکە!'),
                       content: SingleChildScrollView(
                           child: ColorPicker(
                         pickerColor: pickerColor,

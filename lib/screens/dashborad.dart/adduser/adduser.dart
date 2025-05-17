@@ -43,7 +43,8 @@ class _AdduserState extends State<Adduser> {
     'changing worker phone',
     'adding rules',
     'testing sounds',
-    'user status'
+    'user status',
+    'holiday management'
   ];
   List<String> selectedpermissions = [];
   final List<DayInWeek> _days = [
@@ -327,7 +328,7 @@ class _AdduserState extends State<Adduser> {
                         'worklat': double.parse(worklatcontroller.text),
                         'worklong': double.parse(worklongcontroller.text),
                         // 'permissions': selectedpermissions,
-                        'permissions': [...selectedpermissions, 'user status'], // Guaranteed inclusion
+                        'permissions':selectedpermissions, // Guaranteed inclusion
                         'age': agecontroller.text.toString(),
                         'token': '',
                         'checkin': false,

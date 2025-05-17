@@ -27,7 +27,7 @@ class _TasksViewingrewardpunishmentState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('بینینی پاداشت و سزای تاسکەکان'),
+        title: Text('پاداشت و سزای ئەرکەکان'),
         backgroundColor: Material1.primaryColor,
         foregroundColor: Colors.white,
         centerTitle: true,
