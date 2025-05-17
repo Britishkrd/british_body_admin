@@ -71,200 +71,204 @@ class _AdduserState extends State<Adduser> {
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
       ),
-      body: ListView(
-        children: [
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'ئیمەیل',
-                textColor: Colors.black,
-                controller: emailcontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'پاسوورد',
-                textColor: Colors.black,
-                controller: passwordcontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'ناو',
-                textColor: Colors.black,
-                controller: namecontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'تەمەن',
-                inputType: TextInputType.number,
-                textColor: Colors.black,
-                controller: agecontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'تارگێتی کاتژمێری کار',
-                textColor: Colors.black,
-                inputType: TextInputType.number,
-                controller: workhourtargetcontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'ناونیشان',
-                textColor: Colors.black,
-                controller: locationcontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'ژمارەی مۆبایل',
-                textColor: Colors.black,
-                inputType: TextInputType.number,
-                controller: phonenumbercontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'مووچە',
-                textColor: Colors.black,
-                inputType: TextInputType.number,
-                controller: salarycontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'درێژایی کارکەی',
-                textColor: Colors.black,
-                inputType: TextInputType.number,
-                controller: worklatcontroller),
-          ),
-          Container(
-            width: 100.w,
-            height: 6.h,
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            child: Material1.textfield(
-                hint: 'پانایی کارکەی',
-                textColor: Colors.black,
-                inputType: TextInputType.number,
-                controller: worklongcontroller),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                showPicker(
-                  context: context,
-                  value: starthour,
-                  sunrise: TimeOfDay(hour: 6, minute: 0),
-                  sunset: TimeOfDay(hour: 18, minute: 0),
-                  duskSpanInMinutes: 120,
-                  onChange: (value) {
-                    setState(() {
-                      starthour = value;
-                    });
-                  },
-                ),
-              );
-            },
-            child: Text(
-              "هەڵبژاردنی کاتی دەستپێکردن",
-              style: TextStyle(color: Colors.black),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'ئیمەیل',
+                  textColor: Colors.black,
+                  controller: emailcontroller),
             ),
-          ),
-          SizedBox(
-            width: 100.w,
-            height: 8.h,
-            child: Center(
-              child: Text(
-                'کاتی دەستپێکردن: ${starthour.hour}:${starthour.minute}',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold),
-              ),
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'پاسوورد',
+                  textColor: Colors.black,
+                  controller: passwordcontroller),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                showPicker(
-                  context: context,
-                  value: endhour,
-                  sunrise: TimeOfDay(hour: 6, minute: 0),
-                  sunset: TimeOfDay(hour: 18, minute: 0),
-                  duskSpanInMinutes: 120,
-                  onChange: (value) {
-                    setState(() {
-                      endhour = value;
-                    });
-                  },
-                ),
-              );
-            },
-            child: Text(
-              "هەڵبژاردنی کاتی کۆتایی",
-              style: TextStyle(color: Colors.black),
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'ناو',
+                  textColor: Colors.black,
+                  controller: namecontroller),
             ),
-          ),
-          SizedBox(
-            width: 100.w,
-            height: 8.h,
-            child: Center(
-              child: Text(
-                'کاتی کۆتایی: ${endhour.hour}:${endhour.minute}',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold),
-              ),
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'تەمەن',
+                  inputType: TextInputType.number,
+                  textColor: Colors.black,
+                  controller: agecontroller),
             ),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 2.h, right: 5.w, left: 5.w),
-            child: SelectWeekDays(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              days: _days,
-              border: false,
-              width: 90.w,
-              boxDecoration: BoxDecoration(
-                color: Material1.primaryColor,
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              onSelect: (values) {
-                List daysoff = values;
-                workdays = [];
-                for (int i = 0; i < values.length; i++) {
-                  workdays.add(int.parse(daysoff[i]));
-                }
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'تارگێتی کاتژمێری کار',
+                  textColor: Colors.black,
+                  inputType: TextInputType.number,
+                  controller: workhourtargetcontroller),
+            ),
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'ناونیشان',
+                  textColor: Colors.black,
+                  controller: locationcontroller),
+            ),
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'ژمارەی مۆبایل',
+                  textColor: Colors.black,
+                  inputType: TextInputType.number,
+                  controller: phonenumbercontroller),
+            ),
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'مووچە',
+                  textColor: Colors.black,
+                  inputType: TextInputType.number,
+                  controller: salarycontroller),
+            ),
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'درێژایی کارکەی',
+                  textColor: Colors.black,
+                  inputType: TextInputType.number,
+                  controller: worklatcontroller),
+            ),
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: Material1.textfield(
+                  hint: 'پانایی کارکەی',
+                  textColor: Colors.black,
+                  inputType: TextInputType.number,
+                  controller: worklongcontroller),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  showPicker(
+                    context: context,
+                    value: starthour,
+                    sunrise: TimeOfDay(hour: 6, minute: 0),
+                    sunset: TimeOfDay(hour: 18, minute: 0),
+                    duskSpanInMinutes: 120,
+                    onChange: (value) {
+                      setState(() {
+                        starthour = value;
+                      });
+                    },
+                  ),
+                );
               },
+              child: Text(
+                "هەڵبژاردنی کاتی دەستپێکردن",
+                style: TextStyle(color: Colors.black),
+              ),
             ),
-          ),
-          Container(
-            margin: EdgeInsets.fromLTRB(0.w, 1.h, 0.w, 1.h),
-            height: 120.h,
-            child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
+            SizedBox(
+              width: 100.w,
+              height: 8.h,
+              child: Center(
+                child: Text(
+                  'کاتی دەستپێکردن: ${starthour.hour}:${starthour.minute}',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  showPicker(
+                    context: context,
+                    value: endhour,
+                    sunrise: TimeOfDay(hour: 6, minute: 0),
+                    sunset: TimeOfDay(hour: 18, minute: 0),
+                    duskSpanInMinutes: 120,
+                    onChange: (value) {
+                      setState(() {
+                        endhour = value;
+                      });
+                    },
+                  ),
+                );
+              },
+              child: Text(
+                "هەڵبژاردنی کاتی کۆتایی",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            SizedBox(
+              width: 100.w,
+              height: 8.h,
+              child: Center(
+                child: Text(
+                  'کاتی کۆتایی: ${endhour.hour}:${endhour.minute}',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 2.h, right: 5.w, left: 5.w),
+              child: SelectWeekDays(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                days: _days,
+                border: false,
+                width: 90.w,
+                boxDecoration: BoxDecoration(
+                  color: Material1.primaryColor,
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                onSelect: (values) {
+                  List daysoff = values;
+                  workdays = [];
+                  for (int i = 0; i < values.length; i++) {
+                    workdays.add(int.parse(daysoff[i]));
+                  }
+                },
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(0.w, 1.h, 0.w, 1.h),
+              constraints: BoxConstraints(
+                maxHeight: 40.h, // Set a reasonable max height
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
                 itemCount: permissions.length,
                 itemBuilder: (context, index) {
                   return CheckboxListTile(
@@ -279,81 +283,81 @@ class _AdduserState extends State<Adduser> {
                       setState(() {});
                     },
                   );
-                }),
-          ),
-          Container(
-            margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            height: 8.h,
-            width: 100.w,
-            child: Material1.button(
-                label: 'دروستکردنی بەکار هێنەر',
-                buttoncolor: Material1.primaryColor,
-                textcolor: Colors.white,
-                function: () {
-                  if (emailcontroller.text.isEmpty ||
-                      namecontroller.text.isEmpty ||
-                      locationcontroller.text.isEmpty ||
-                      phonenumbercontroller.text.isEmpty ||
-                      salarycontroller.text.isEmpty ||
-                      worklatcontroller.text.isEmpty ||
-                      worklongcontroller.text.isEmpty ||
-                      agecontroller.text.isEmpty ||
-                      workhourtargetcontroller.text.isEmpty ||
-                      passwordcontroller.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('تکایە هەموو خانەکان پڕبکەوە')));
-                  } else {
-                    FirebaseAuth.instance
-                        .createUserWithEmailAndPassword(
-                      email: emailcontroller.text,
-                      password: passwordcontroller
-                          .text, // You should replace this with a secure password or a user input
-                    )
-                        .then((userCredential) {
-                      // User created successfully
-                    }).catchError((error) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Error: ${error.message}'),
-                      ));
-                    }).then((value) {
-                      FirebaseFirestore.instance
-                          .collection('user')
-                          .doc(emailcontroller.text)
-                          .set({
-                        'email': emailcontroller.text,
-                        'name': namecontroller.text,
-                        'location': locationcontroller.text,
-                        'phonenumber': phonenumbercontroller.text.toString(),
-                        'salary': int.parse(salarycontroller.text),
-                        'worklat': double.parse(worklatcontroller.text),
-                        'worklong': double.parse(worklongcontroller.text),
-                        // 'permissions': selectedpermissions,
-                        'permissions':selectedpermissions, // Guaranteed inclusion
-                        'age': agecontroller.text.toString(),
-                        'token': '',
-                        'checkin': false,
-                        'deviceid': '',
-                        'lat': 0,
-                        'long': 0,
-                        'loanstatus': 'no',
-                        'worktarget': int.parse(workhourtargetcontroller.text),
-                        'password': passwordcontroller.text,
-                        'weekdays': workdays,
-                        'starthour': starthour.hour,
-                        'endhour': endhour.hour,
-                        'startmin': starthour.minute,
-                        'endmin': endhour.minute,
+                },
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              height: 8.h,
+              width: 100.w,
+              child: Material1.button(
+                  label: 'دروستکردنی بەکار هێنەر',
+                  buttoncolor: Material1.primaryColor,
+                  textcolor: Colors.white,
+                  function: () {
+                    if (emailcontroller.text.isEmpty ||
+                        namecontroller.text.isEmpty ||
+                        locationcontroller.text.isEmpty ||
+                        phonenumbercontroller.text.isEmpty ||
+                        salarycontroller.text.isEmpty ||
+                        worklatcontroller.text.isEmpty ||
+                        worklongcontroller.text.isEmpty ||
+                        agecontroller.text.isEmpty ||
+                        workhourtargetcontroller.text.isEmpty ||
+                        passwordcontroller.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('تکایە هەموو خانەکان پڕبکەوە')));
+                    } else {
+                      FirebaseAuth.instance
+                          .createUserWithEmailAndPassword(
+                        email: emailcontroller.text,
+                        password: passwordcontroller.text,
+                      )
+                          .then((userCredential) {
+                        // User created successfully
+                      }).catchError((error) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Error: ${error.message}'),
+                        ));
                       }).then((value) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('بە سەرکەوتویی زیادکرا')));
-                        Navigator.pop(context);
+                        FirebaseFirestore.instance
+                            .collection('user')
+                            .doc(emailcontroller.text)
+                            .set({
+                          'email': emailcontroller.text,
+                          'name': namecontroller.text,
+                          'location': locationcontroller.text,
+                          'phonenumber': phonenumbercontroller.text.toString(),
+                          'salary': int.parse(salarycontroller.text),
+                          'worklat': double.parse(worklatcontroller.text),
+                          'worklong': double.parse(worklongcontroller.text),
+                          'permissions': selectedpermissions,
+                          'age': agecontroller.text.toString(),
+                          'token': '',
+                          'checkin': false,
+                          'deviceid': '',
+                          'lat': 0,
+                          'long': 0,
+                          'loanstatus': 'no',
+                          'worktarget': int.parse(workhourtargetcontroller.text),
+                          'password': passwordcontroller.text,
+                          'weekdays': workdays,
+                          'starthour': starthour.hour,
+                          'endhour': endhour.hour,
+                          'startmin': starthour.minute,
+                          'endmin': endhour.minute,
+                        }).then((value) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('بە سەرکەوتویی زیادکرا')));
+                          Navigator.pop(context);
+                        });
                       });
-                    });
-                  }
-                }),
-          )
-        ],
+                    }
+                  }),
+            )
+          ],
+        ),
       ),
     );
   }

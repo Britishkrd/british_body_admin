@@ -471,7 +471,7 @@ class _DashboardState extends State<Dashboard> {
                         }));
                       },
                       child: controlpanelcard(
-                          Icons.group_add, 'زیاد کردنی بەکار هێنەر', 25),
+                          Icons.group_add, 'بەکارهـێنەرەکان', 25),
                     ),
                   if (permissions.contains('changing worker phone'))
                     GestureDetector(
