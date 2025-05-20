@@ -630,275 +630,186 @@ class _TaskdetailsState extends State<Taskdetails> {
               : const SizedBox.shrink(),
           // In the Taskdetails widget, update the button function as follows:
 
-          widget.task['status'] != 'done'
-              ? Container(
-                  margin: EdgeInsets.only(
-                      top: 5.h, left: 5.w, right: 5.w, bottom: 5.h),
-                  width: 90.w,
-                  height: 8.h,
-                  child: Material1.button(
-                      label: widget.task['status'] == 'pending'
-                          ? 'دەستپێکردن'
-                          : 'کۆتایی پێهێنان',
-                      function: () async {
-                        // Check if task is being started
-                        if (widget.task['status'] == 'pending') {
-                          // Check if starting before allowed time
-                          if (widget.task['start']
-                              .toDate()
-                              .isAfter(DateTime.now())) {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text('هەڵە'),
-                                    content: Text(
-                                        'لەکاتی دیاری کراو دەست بە کارەکە بکە'),
-                                    actions: [
-                                      Material1.button(
-                                          label: 'باشە',
-                                          buttoncolor: Material1.primaryColor,
-                                          textcolor: Colors.white,
-                                          function: () {
-                                            Navigator.pop(context);
-                                          }),
-                                    ],
-                                  );
-                                });
-                            return;
-                          }
-                        }
-                        // Task is being finished
-                        else {
-                          // Check if all stages are completed (if there are stages)
-                          final allStagesCompleted = widget.stages == 0 ||
-                              !widget.task['endstages'].contains(false);
-
-                          if (!allStagesCompleted) {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text('هەڵە'),
-                                    content: Text(
-                                        'تکایە یەکەم هەموو بەشەکان تەواو بکە'),
-                                    actions: [
-                                      Material1.button(
-                                          label: 'باشە',
-                                          buttoncolor: Material1.primaryColor,
-                                          textcolor: Colors.white,
-                                          function: () {
-                                            Navigator.pop(context);
-                                          }),
-                                    ],
-                                  );
-                                });
-                            return;
-                          }
-
-                          final now = DateTime.now();
-                          final taskEndTime = widget.task['end'].toDate();
-                          final taskStartTime = widget.task['start'].toDate();
-
-                          // For weekly tasks, check if completed within the specified time window
-                          if (widget.task['isweekly']) {
-                            // Get the time portion of the task's start and end times
-                            final taskStartTimeOfDay =
-                                TimeOfDay.fromDateTime(taskStartTime);
-                            final taskEndTimeOfDay =
-                                TimeOfDay.fromDateTime(taskEndTime);
-                            final currentTimeOfDay =
-                                TimeOfDay.fromDateTime(now);
-
-                            // Convert to minutes for comparison
-                            final startMinutes = taskStartTimeOfDay.hour * 60 +
-                                taskStartTimeOfDay.minute;
-                            final endMinutes = taskEndTimeOfDay.hour * 60 +
-                                taskEndTimeOfDay.minute;
-                            final currentMinutes = currentTimeOfDay.hour * 60 +
-                                currentTimeOfDay.minute;
-
-                            // Check if completed within the allowed time window
-                            final completedOnTime =
-                                currentMinutes >= startMinutes &&
-                                    currentMinutes <= endMinutes;
-
-                            // Get reward/punishment amounts
-                            final reward =
-                                widget.task['rewardamount']?.toString() ?? '0';
-                            final deduction =
-                                widget.task['deductionamount']?.toString() ??
-                                    '0';
-
-                            // Apply reward or punishment based on timing
-                            if (completedOnTime) {
-                              // Apply reward if completed within time window
-                              if (reward != '0') {
-                                await FirebaseFirestore.instance
-                                    .collection('user')
-                                    .doc(widget.email)
-                                    .collection('taskrewardpunishment')
-                                    .doc('reward-${widget.task['name']}$now')
-                                    .set({
-                                  'addedby': widget.email,
-                                  'amount': reward,
-                                  'date': now,
-                                  'reason':
-                                      'for completing weekly task ${widget.task['name']} within specified time',
-                                  'type': 'reward'
-                                });
-                              }
-                            } else {
-                              // Apply punishment if outside time window
-                              if (deduction != '0') {
-                                await FirebaseFirestore.instance
-                                    .collection('user')
-                                    .doc(widget.email)
-                                    .collection('taskrewardpunishment')
-                                    .doc(
-                                        'punishment-${widget.task['name']}$now')
-                                    .set({
-                                  'addedby': widget.email,
-                                  'amount': deduction,
-                                  'date': now,
-                                  'reason': currentMinutes < startMinutes
-                                      ? 'for completing weekly task ${widget.task['name']} too early'
-                                      : 'for completing weekly task ${widget.task['name']} too late',
-                                  'type': 'punishment'
-                                });
-                              }
-                            }
-
-                            // Schedule the next occurrence for weekly tasks
-                            final originalStart = widget.task['start'].toDate();
-                            final originalEnd = widget.task['end'].toDate();
-                            final duration =
-                                originalEnd.difference(originalStart);
-
-                            // Create new start/end times for next week (same time, next week)
-                            final newStart = DateTime(
-                              originalStart.year,
-                              originalStart.month,
-                              originalStart.day + 7,
-                              originalStart.hour,
-                              originalStart.minute,
-                            );
-
-                            final newEnd = newStart.add(duration);
-
-                            // Copy the task to next week
-                            await widget.task.reference
-                                .collection('recurrences')
-                                .doc(newStart.toString())
-                                .set({
-                              'start': newStart,
-                              'end': newEnd,
-                              'status': 'pending',
-                              'originalTaskId': widget.task.id,
-                              'createdAt': DateTime.now(),
-                            });
-                          } else {
-                            // For non-weekly tasks, use the original logic
-                            final isOnTime = !now.isAfter(taskEndTime);
-
-                            // Get reward/punishment amounts
-                            final reward =
-                                widget.task['rewardamount']?.toString() ?? '0';
-                            final deduction =
-                                widget.task['deductionamount']?.toString() ??
-                                    '0';
-
-                            if (isOnTime) {
-                              // Apply reward if completed on time
-                              if (reward != '0') {
-                                await FirebaseFirestore.instance
-                                    .collection('user')
-                                    .doc(widget.email)
-                                    .collection('taskrewardpunishment')
-                                    .doc('reward-${widget.task['name']}$now')
-                                    .set({
-                                  'addedby': widget.email,
-                                  'amount': reward,
-                                  'date': now,
-                                  'reason':
-                                      'for completing task ${widget.task['name']} on time',
-                                  'type': 'reward'
-                                });
-                              }
-                            } else {
-                              // Apply punishment if late
-                              if (deduction != '0') {
-                                await FirebaseFirestore.instance
-                                    .collection('user')
-                                    .doc(widget.email)
-                                    .collection('taskrewardpunishment')
-                                    .doc(
-                                        'punishment-${widget.task['name']}$now')
-                                    .set({
-                                  'addedby': widget.email,
-                                  'amount': deduction,
-                                  'date': now,
-                                  'reason':
-                                      'for not completing task ${widget.task['name']} on time',
-                                  'type': 'punishment'
-                                });
-                              }
-                            }
-                          }
-                        }
-
-                        // Record the completion
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Center(
-                                    child: const CircularProgressIndicator()),
-                              );
-                            });
-
-                        await _getCurrentPosition();
-
-                        await widget.task.reference
-                            .collection('updates')
-                            .doc(DateTime.now().toString())
-                            .set({
-                          'note': [notecontroller.text],
-                          'time': DateTime.now(),
-                          'latitude': latitude,
-                          'longtitude': longtitude,
-                          'action': widget.task['status'] == 'pending'
-                              ? 'start'
-                              : 'finish',
-                          'stage': 'main task',
-                          'link': [linkcontroller.text]
-                        });
-
-                        // Update task status
-                        if (widget.task['status'] == 'pending') {
-                          await widget.task.reference
-                              .update({'status': 'active'});
-                        } else {
-                          await widget.task.reference.update({
-                            'status': 'done',
-                            'lastupdate': Timestamp.fromDate(DateTime.now())
-                          });
-                        }
-
-                        // Show success message and return
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(widget.task['status'] == 'pending'
-                                ? 'دەست بە کارەکە کرا'
-                                : 'کارەکە کۆتایی پێهات'),
-                          ),
+       widget.task['status'] != 'done'
+    ? Container(
+        margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w, bottom: 5.h),
+        width: 90.w,
+        height: 8.h,
+        child: Material1.button(
+            label: widget.task['status'] == 'pending'
+                ? 'دەستپێکردن'
+                : 'کۆتایی پێهێنان',
+            function: () async {
+              // Check if task is being started
+              if (widget.task['status'] == 'pending') {
+                if (widget.task['start'].toDate().isAfter(DateTime.now())) {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('هەڵە'),
+                          content: Text('لەکاتی دیاری کراو دەست بە کارەکە بکە'),
+                          actions: [
+                            Material1.button(
+                                label: 'باشە',
+                                buttoncolor: Material1.primaryColor,
+                                textcolor: Colors.white,
+                                function: () {
+                                  Navigator.pop(context);
+                                }),
+                          ],
                         );
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      },
-                      textcolor: Colors.white,
-                      buttoncolor: Material1.primaryColor),
-                )
-              : const SizedBox.shrink(),
+                      });
+                  return;
+                }
+              }
+              // Task is being finished
+              else {
+                // Check if all stages are completed (if there are stages)
+                final allStagesCompleted = widget.stages == 0 ||
+                    !widget.task['endstages'].contains(false);
+
+                if (!allStagesCompleted) {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('هەڵە'),
+                          content: Text('تکایە یەکەم هەموو بەشەکان تەواو بکە'),
+                          actions: [
+                            Material1.button(
+                                label: 'باشە',
+                                buttoncolor: Material1.primaryColor,
+                                textcolor: Colors.white,
+                                function: () {
+                                  Navigator.pop(context);
+                                }),
+                          ],
+                        );
+                      });
+                  return;
+                }
+              }
+
+              final now = DateTime.now();
+              final reward = widget.task['rewardamount']?.toString() ?? '0';
+              bool completedOnTime = false;
+
+              // For weekly tasks, check if completed within the time window
+              if (widget.task['isweekly']) {
+                final scheduledDates = (widget.task['scheduled_dates'] as List<dynamic>?)?.map((d) => (d as Timestamp).toDate()).toList() ?? [];
+                final currentOccurrence = widget.task['current_occurrence'] ?? 0;
+
+                if (currentOccurrence < scheduledDates.length) {
+                  final currentScheduledDate = scheduledDates[currentOccurrence];
+                  final taskStartTime = DateTime(
+                    currentScheduledDate.year,
+                    currentScheduledDate.month,
+                    currentScheduledDate.day,
+                    widget.task['start'].toDate().hour,
+                    widget.task['start'].toDate().minute,
+                  );
+                  final taskEndTime = DateTime(
+                    currentScheduledDate.year,
+                    currentScheduledDate.month,
+                    currentScheduledDate.day,
+                    widget.task['end'].toDate().hour,
+                    widget.task['end'].toDate().minute,
+                  );
+
+                  // Check if completed within the allowed time window
+                  completedOnTime = now.isAfter(taskStartTime) && now.isBefore(taskEndTime);
+                }
+              } else {
+                // For non-weekly tasks
+                completedOnTime = !now.isAfter(widget.task['end'].toDate());
+              }
+
+              // Show loading dialog
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Center(child: const CircularProgressIndicator()),
+                    );
+                  });
+
+              await _getCurrentPosition();
+
+              // Record the update
+              await widget.task.reference
+                  .collection('updates')
+                  .doc(DateTime.now().toString())
+                  .set({
+                'note': [notecontroller.text],
+                'time': DateTime.now(),
+                'latitude': latitude,
+                'longtitude': longtitude,
+                'action': widget.task['status'] == 'pending' ? 'start' : 'finish',
+                'stage': 'main task',
+                'link': [linkcontroller.text]
+              });
+
+              // Apply reward if completed on time
+              if (widget.task['status'] == 'active' && completedOnTime && reward != '0') {
+                await FirebaseFirestore.instance
+                    .collection('user')
+                    .doc(widget.email)
+                    .collection('taskrewardpunishment')
+                    .doc('reward-${widget.task['name']}-${now.toString()}')
+                    .set({
+                  'addedby': widget.email,
+                  'amount': reward,
+                  'date': now,
+                  'reason': widget.task['isweekly']
+                      ? 'for completing weekly task ${widget.task['name']} on occurrence ${widget.task['current_occurrence'] + 1}'
+                      : 'for completing task ${widget.task['name']} on time',
+                  'type': 'reward'
+                });
+              }
+
+              // Update task status
+              if (widget.task['status'] == 'pending') {
+                await widget.task.reference.update({'status': 'active'});
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('دەست بە کارەکە کرا')),
+                );
+              } else {
+                if (widget.task['isweekly']) {
+                  final currentOccurrence = widget.task['current_occurrence'] ?? 0;
+                  final totalOccurrences = widget.task['total_occurrences'] ?? 1;
+
+                  if (currentOccurrence < totalOccurrences - 1) {
+                    // Move to next occurrence
+                    await widget.task.reference.update({
+                      'current_occurrence': currentOccurrence + 1,
+                      'status': 'pending', // Reset to pending for next occurrence
+                    });
+                  } else {
+                    // Mark task as done if all occurrences are completed
+                    await widget.task.reference.update({
+                      'status': 'done',
+                      'lastupdate': Timestamp.fromDate(DateTime.now())
+                    });
+                  }
+                } else {
+                  // Mark non-weekly task as done
+                  await widget.task.reference.update({
+                    'status': 'done',
+                    'lastupdate': Timestamp.fromDate(DateTime.now())
+                  });
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('کارەکە کۆتایی پێهات')),
+                );
+              }
+
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            textcolor: Colors.white,
+            buttoncolor: Material1.primaryColor),
+      )
+    : const SizedBox.shrink(),
         ],
       ),
     );

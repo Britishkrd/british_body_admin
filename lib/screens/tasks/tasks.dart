@@ -77,14 +77,72 @@ Stream<QuerySnapshot<Map<String, dynamic>>> streams(String email) {
 }
 
 class _TasksState extends State<Tasks> {
-  Future<void> _processOverdueTask(DocumentSnapshot doc) async {
-    final now = DateTime.now();
-    final deduction = doc['deductionamount']?.toString() ?? '0';
+ Future<void> _processOverdueTasks(DocumentSnapshot doc) async {
+  final now = DateTime.now();
+  final deduction = doc['deductionamount']?.toString() ?? '0';
+  final isWeekly = doc['isweekly'] ?? false;
 
-    if (now.isAfter(doc['end'].toDate()) &&
-        doc['status'] != 'done' &&
-        doc['status'] != 'incomplete') {
-      if (deduction != '0') {
+  if (isWeekly && deduction != '0' && doc['status'] != 'done' && doc['status'] != 'incomplete') {
+    final scheduledDates = (doc['scheduled_dates'] as List<dynamic>?)?.map((d) => (d as Timestamp).toDate()).toList() ?? [];
+    final currentOccurrence = doc['current_occurrence'] ?? 0;
+
+    if (currentOccurrence < scheduledDates.length) {
+      final currentScheduledDate = scheduledDates[currentOccurrence];
+      final taskEndTime = DateTime(
+        currentScheduledDate.year,
+        currentScheduledDate.month,
+        currentScheduledDate.day,
+        doc['end'].toDate().hour,
+        doc['end'].toDate().minute,
+      );
+
+      // Check if the current occurrence is overdue
+      if (now.isAfter(taskEndTime)) {
+        // Check if punishment has already been applied for this occurrence
+        final punishmentDoc = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(widget.email)
+            .collection('taskrewardpunishment')
+            .doc('punishment-${doc['name']}-${currentOccurrence}')
+            .get();
+
+        if (!punishmentDoc.exists) {
+          // Apply punishment for missing this occurrence
+          await FirebaseFirestore.instance
+              .collection('user')
+              .doc(widget.email)
+              .collection('taskrewardpunishment')
+              .doc('punishment-${doc['name']}-${currentOccurrence}')
+              .set({
+            'addedby': widget.email,
+            'amount': deduction,
+            'date': now,
+            'reason': 'for not completing weekly task ${doc['name']} on occurrence ${currentOccurrence + 1}',
+            'type': 'punishment',
+            'occurrence': currentOccurrence,
+          });
+
+          // Update task status to incomplete if all occurrences are missed
+          if (currentOccurrence == doc['total_occurrences'] - 1) {
+            await doc.reference.update({'status': 'incomplete'});
+          } else {
+            // Move to next occurrence
+            await doc.reference.update({
+              'current_occurrence': currentOccurrence + 1,
+            });
+          }
+        }
+      }
+    } else if (now.isAfter(doc['end'].toDate()) && doc['status'] != 'done') {
+      // For non-weekly tasks or when all occurrences are processed
+      final punishmentDoc = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(widget.email)
+          .collection('taskrewardpunishment')
+          .doc('punishment-${doc['name']}-${now.toString()}')
+          .get();
+
+      if (!punishmentDoc.exists) {
         await FirebaseFirestore.instance
             .collection('user')
             .doc(widget.email)
@@ -95,13 +153,13 @@ class _TasksState extends State<Tasks> {
           'amount': deduction,
           'date': now,
           'reason': 'for not completing task ${doc['name']} on time',
-          'type': 'punishment'
+          'type': 'punishment',
         });
+        await doc.reference.update({'status': 'incomplete'});
       }
-      await doc.reference.update({'status': 'incomplete'});
     }
   }
-
+}
   Future<void> _processOverdueWeeklyTask(DocumentSnapshot doc) async {
     final now = DateTime.now();
     final weeklyDeduction = doc['deductionamount']?.toString() ?? '0';
@@ -182,7 +240,7 @@ class _TasksState extends State<Tasks> {
                     itemCount: snapshot.data?.docs.length ?? 0,
                     itemBuilder: (BuildContext context, int index) {
                       final doc = snapshot.data!.docs[index];
-                      _processOverdueTask(doc);
+                      _processOverdueTasks(doc);
                       _processOverdueWeeklyTask(doc);
 
                       bool isweekly = doc['isweekly'] ?? false;
