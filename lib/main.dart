@@ -6,6 +6,7 @@ import 'dart:io' show Platform;
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/auth/login_screen.dart';
+import 'package:british_body_admin/screens/dashborad.dart/changingworkerphone/changingworkerphone.dart';
 import 'package:british_body_admin/screens/navigator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
@@ -779,12 +780,14 @@ class _MyAppState extends State<MyApp> {
               useMaterial3: true,
             ),
             initialRoute: '/',
-            routes: {
-              '/': (context) {
-                islogeding();
-                return logedin ? Navigation(email: email) : const LoginScreen();
-              }
-            },
+             routes: {
+        '/': (context) => logedin
+            ? UserSessionManager(
+                email: email,
+                child: Navigation(email: email),
+              )
+            : const LoginScreen(),
+      },
           ),
         );
       },

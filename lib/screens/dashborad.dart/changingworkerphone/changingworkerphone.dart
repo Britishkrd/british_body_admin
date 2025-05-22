@@ -1,6 +1,9 @@
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/screens/auth/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class Changingworkerphone extends StatefulWidget {
@@ -39,22 +42,25 @@ class _ChangingworkerphoneState extends State<Changingworkerphone> {
                                 'دەتەوێت مۆبایلی کارمەندەکە بگۆڕیت؟'),
                             actions: [
                               TextButton(
-                                  onPressed: () {
-                                    FirebaseFirestore.instance
-                                        .collection('user')
-                                        .doc(snapshot.data!.docs[index].id)
-                                        .update({
-                                      'deviceid': '',
-                                    }).then((value) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                              content: Text(
-                                                  'ئێستا کارمەندەکە بە مۆبایلە نوێکە چوونەژوورەوە بکات')));
-                                      Navigator.popUntil(
-                                          context, (route) => route.isFirst);
-                                    });
-                                  },
-                                  child: const Text('بەڵێ')),
+  onPressed: () {
+    FirebaseFirestore.instance
+        .collection('user')
+        .doc(snapshot.data!.docs[index].id)
+        .update({
+          'deviceid': '',
+          'lat': '',
+          'long': '',
+        }).then((value) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                  'ئێستا کارمەندەکە بە مۆبایلە نوێکە چوونەژوورەوە بکات')));
+          Navigator.pop(context); // Close dialog
+        }).catchError((error) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Failed to reset device: $error')));
+        });
+  },
+  child: const Text('بەڵێ')),
                               TextButton(
                                   onPressed: () {
                                     Navigator.pop(context);
@@ -110,5 +116,71 @@ class _ChangingworkerphoneState extends State<Changingworkerphone> {
         },
       ),
     );
+  }
+}
+
+
+class UserSessionManager extends StatefulWidget {
+  const UserSessionManager({super.key, required this.child, required this.email});
+
+  final Widget child;
+  final String email;
+
+  @override
+  State<UserSessionManager> createState() => _UserSessionManagerState();
+}
+
+class _UserSessionManagerState extends State<UserSessionManager> {
+  @override
+  void initState() {
+    super.initState();
+    _monitorUserSession();
+  }
+
+  void _monitorUserSession() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && widget.email.isNotEmpty) {
+      FirebaseFirestore.instance
+          .collection('user')
+          .doc(widget.email) // Use email as document ID
+          .snapshots()
+          .listen((snapshot) {
+        if (snapshot.exists) {
+          final data = snapshot.data()!;
+          if (data['deviceid'] == '' &&
+              data['lat'] == '' &&
+              data['long'] == '') {
+            // Device reset detected, sign out the user
+            _signOut();
+          }
+        }
+      }, onError: (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error monitoring session: $error')));
+      });
+    }
+  }
+
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+    // Clear shared preferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Adjust based on your SharedPreferences usage
+    // Update global login state
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('logedin', false); // Update your logedin flag
+    });
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
