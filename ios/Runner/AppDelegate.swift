@@ -17,7 +17,7 @@ import flutter_local_notifications
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
-
+    GMSServices.provideAPIKey("AIzaSyCLb0h5eWIJjNA2wyAE6yBRbE5Xw_MDelQ")
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

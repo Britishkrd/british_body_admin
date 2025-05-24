@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/auth/login_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
@@ -27,6 +28,7 @@ import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingo
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
 import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus.dart';
+import 'package:british_body_admin/screens/dashborad.dart/usermapscreen/user_map_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
 import 'package:british_body_admin/screens/tasks/tasksviewrewardpunishment.dart';
@@ -37,6 +39,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+
 import 'adduser/choosinguserforusermanagement.dart';
 import 'alert/choosinguserforalerts.dart';
 import 'emplyeetracking/emplyeetacking.dart';
@@ -116,9 +119,8 @@ class _DashboardState extends State<Dashboard> {
                 buttoncolor: Material1.primaryColor,
                 textcolor: Colors.white,
                 function: () {
-                  Sharedpreference.setuser(
-                      '', '', '', 'aa', 0, 'aa', 0, 0, 0, 0, 0, 0, 0, 0, false,
-                      '', false, [], []);
+                  Sharedpreference.setuser('', '', '', 'aa', 0, 'aa', 0, 0, 0,
+                      0, 0, 0, 0, 0, false, '', false, [], []);
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) {
                     return const LoginScreen();
@@ -164,7 +166,8 @@ class _DashboardState extends State<Dashboard> {
                 SizedBox(
                   height: 80.h,
                   child: GridView(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 4 / 3,
                       crossAxisSpacing: 0,
@@ -207,10 +210,8 @@ class _DashboardState extends State<Dashboard> {
                             return Choosingtaskforaddingnotes(email: email);
                           }));
                         },
-                        child: controlpanelcard(
-                            Icons.note_add,
-                            'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم',
-                            3),
+                        child: controlpanelcard(Icons.note_add,
+                            'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم', 3),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -368,7 +369,8 @@ class _DashboardState extends State<Dashboard> {
                                 builder: (context) {
                                   return AlertDialog(
                                     title: const Text('هەڵە'),
-                                    content: const Text('تکایە چوونەدەرەووە بکە'),
+                                    content:
+                                        const Text('تکایە چوونەدەرەووە بکە'),
                                     actions: [
                                       Material1.button(
                                           label: 'باشە',
@@ -382,9 +384,8 @@ class _DashboardState extends State<Dashboard> {
                                 });
                             return;
                           }
-                          Sharedpreference.setuser(
-                              '', '', '', 'aa', 0, 'aa', 0, 0, 0, 0, 0, 0, 0, 0,
-                              false, '', false, [], []);
+                          Sharedpreference.setuser('', '', '', 'aa', 0, 'aa', 0,
+                              0, 0, 0, 0, 0, 0, 0, false, '', false, [], []);
                           Navigator.pushReplacement(context,
                               MaterialPageRoute(builder: (context) {
                             return const LoginScreen();
@@ -467,8 +468,10 @@ class _DashboardState extends State<Dashboard> {
                               return const AcceptingLoan();
                             }));
                           },
-                          child: controlpanelcard(Icons.monetization_on_outlined,
-                              'قبۆڵکردنی سولفە', 20),
+                          child: controlpanelcard(
+                              Icons.monetization_on_outlined,
+                              'قبۆڵکردنی سولفە',
+                              20),
                         ),
                       if (permissions.contains('giving salary'))
                         GestureDetector(
@@ -587,7 +590,8 @@ class _DashboardState extends State<Dashboard> {
                                               .toDate()
                                               .day ==
                                           DateTime.now().day) {
-                                        haslogedintoday[element['email']] = true;
+                                        haslogedintoday[element['email']] =
+                                            true;
                                       } else {
                                         haslogedintoday[element['email']] =
                                             false;
@@ -609,8 +613,8 @@ class _DashboardState extends State<Dashboard> {
                               }));
                             });
                           },
-                          child: controlpanelcard(Icons.person_off_sharp,
-                              'بارو دۆخی کارمەند', 30),
+                          child: controlpanelcard(
+                              Icons.person_off_sharp, 'بارو دۆخی کارمەند', 30),
                         ),
                       if (permissions.contains('holiday management'))
                         GestureDetector(
@@ -626,6 +630,21 @@ class _DashboardState extends State<Dashboard> {
                           },
                           child: controlpanelcard(
                               Icons.beach_access, 'پشووە فەڕمییەکان', 32),
+                        ),
+                      if (permissions.contains('holiday management'))
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const UsersMapView();
+                                },
+                              ),
+                            );
+                          },
+                          child: controlpanelcard(Icons.location_on_outlined,
+                              'شوێنی کارمەندەکان', 33),
                         ),
                     ],
                   ),

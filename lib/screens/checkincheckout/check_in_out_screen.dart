@@ -373,9 +373,9 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
           .doc(CheckInState.userEmail)
           .update({'checkin': true});
 
-      if (isNewDay) {
-        await _handleLateCheckIn(now);
-      }
+      // if (isNewDay) {
+      //   await _handleLateCheckIn(now);
+      // }
 
       await Sharedpreference.checkin(
         now.toString(),

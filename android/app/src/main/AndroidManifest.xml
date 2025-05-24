@@ -39,12 +39,17 @@
 <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE" />
 <uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS" />
 <uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS" />
+
+
     <application
         android:label="british body admin"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <meta-data  android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/notification_icon" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCLb0h5eWIJjNA2wyAE6yBRbE5Xw_MDelQ"/>
 
         <service
         android:name=".MyMediaPlaybackService"

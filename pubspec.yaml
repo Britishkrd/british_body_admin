@@ -72,6 +72,9 @@ dependencies:
   path_provider: ^2.0.11
   open_file: ^3.5.10
   google_fonts: ^6.2.1
+  google_maps_flutter: any
+  location: ^8.0.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
