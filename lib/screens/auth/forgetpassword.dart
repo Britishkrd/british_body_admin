@@ -73,7 +73,7 @@ class _ForgetpasswordState extends State<Forgetpassword> {
                         SizedBox(height: 4.h),
                         ElevatedButton(
                           onPressed: () async {
-                            String email = _emailcontroller.text;
+                            String email = _emailcontroller.text.toLowerCase();
                             try {
                               await FirebaseAuth.instance
                                   .sendPasswordResetEmail(email: email)

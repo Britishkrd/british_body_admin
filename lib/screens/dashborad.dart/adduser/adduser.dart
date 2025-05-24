@@ -44,7 +44,8 @@ class _AdduserState extends State<Adduser> {
     'adding rules',
     'testing sounds',
     'user status',
-    'holiday management'
+    'holiday management',
+    'view user location'
   ];
   List<String> selectedpermissions = [];
   final List<DayInWeek> _days = [
@@ -322,9 +323,9 @@ class _AdduserState extends State<Adduser> {
                       }).then((value) {
                         FirebaseFirestore.instance
                             .collection('user')
-                            .doc(emailcontroller.text)
+                            .doc(emailcontroller.text.toLowerCase())
                             .set({
-                          'email': emailcontroller.text,
+                          'email': emailcontroller.text.toLowerCase(),
                           'name': namecontroller.text,
                           'location': locationcontroller.text,
                           'phonenumber': phonenumbercontroller.text.toString(),
@@ -336,8 +337,8 @@ class _AdduserState extends State<Adduser> {
                           'token': '',
                           'checkin': false,
                           'deviceid': '',
-                          'lat': 0,
-                          'long': 0,
+                          'lat': 0.0,
+                          'long': 0.0,
                           'loanstatus': 'no',
                           'worktarget': int.parse(workhourtargetcontroller.text),
                           'password': passwordcontroller.text,

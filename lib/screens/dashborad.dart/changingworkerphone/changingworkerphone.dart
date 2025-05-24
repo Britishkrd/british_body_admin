@@ -48,8 +48,8 @@ class _ChangingworkerphoneState extends State<Changingworkerphone> {
         .doc(snapshot.data!.docs[index].id)
         .update({
           'deviceid': '',
-          'lat': '',
-          'long': '',
+          'lat': 0.0,
+          'long': 0.0,
         }).then((value) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text(
@@ -148,8 +148,8 @@ class _UserSessionManagerState extends State<UserSessionManager> {
         if (snapshot.exists) {
           final data = snapshot.data()!;
           if (data['deviceid'] == '' &&
-              data['lat'] == '' &&
-              data['long'] == '') {
+              data['lat'] == 0.0 &&
+              data['long'] == 0.0) {
             // Device reset detected, sign out the user
             _signOut();
           }

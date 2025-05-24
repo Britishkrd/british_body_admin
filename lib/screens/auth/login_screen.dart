@@ -167,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ElevatedButton(
                           onPressed: () async {
                             // Login logic remains the same
-                            String? email = emailcontroller.text;
+                            String? email = emailcontroller.text.toLowerCase();
                             String? password = passwordcontroller.text;
                             UserCredential? userCredential;
                             try {
@@ -276,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     MaterialPageRoute(
                                   builder: (context) {
                                     return Navigation(
-                                      email: email,
+                                      email: email
                                     );
                                   },
                                 ));

@@ -631,7 +631,7 @@ class _DashboardState extends State<Dashboard> {
                           child: controlpanelcard(
                               Icons.beach_access, 'پشووە فەڕمییەکان', 32),
                         ),
-                      if (permissions.contains('holiday management'))
+                      if (permissions.contains('view user location'))
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -644,7 +644,7 @@ class _DashboardState extends State<Dashboard> {
                             );
                           },
                           child: controlpanelcard(Icons.location_on_outlined,
-                              'شوێنی کارمەندەکان', 33),
+                              'شوێنی کارمەندەکان', 34),
                         ),
                     ],
                   ),

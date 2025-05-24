@@ -66,7 +66,8 @@ class _EdituserrState extends State<Edituserr> {
     'adding rules',
     'testing sounds',
     'user status',
-    'holiday management'
+    'holiday management',
+    'view user location'
   ];
   List<String> selectedpermissions = [];
   final List<DayInWeek> _days = [
@@ -348,9 +349,9 @@ class _EdituserrState extends State<Edituserr> {
                     } else {
                       FirebaseFirestore.instance
                           .collection('user')
-                          .doc(emailcontroller.text)
+                          .doc(emailcontroller.text.toLowerCase())
                           .update({
-                        'email': emailcontroller.text,
+                        'email': emailcontroller.text.toLowerCase(),
                         'name': namecontroller.text,
                         'location': locationcontroller.text,
                         'phonenumber': phonenumbercontroller.text.toString(),
