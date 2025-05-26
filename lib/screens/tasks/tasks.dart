@@ -160,31 +160,31 @@ class _TasksState extends State<Tasks> {
     }
   }
 }
-  Future<void> _processOverdueWeeklyTask(DocumentSnapshot doc) async {
-    final now = DateTime.now();
-    final weeklyDeduction = doc['deductionamount']?.toString() ?? '0';
+  // Future<void> _processOverdueWeeklyTask(DocumentSnapshot doc) async {
+  //   final now = DateTime.now();
+  //   final weeklyDeduction = doc['deductionamount']?.toString() ?? '0';
 
-    if (doc['isweekly'] &&
-        now.isAfter(doc['end'].toDate()) &&
-        doc['status'] != 'done' &&
-        doc['status'] != 'incomplete') {
-      if (weeklyDeduction != '0') {
-        await FirebaseFirestore.instance
-            .collection('user')
-            .doc(widget.email)
-            .collection('taskrewardpunishment')
-            .doc('punishment-${doc['name']}-${now.toString()}')
-            .set({
-          'addedby': widget.email,
-          'amount': weeklyDeduction,
-          'date': now,
-          'reason': 'for not completing weekly task ${doc['name']} on time',
-          'type': 'punishment'
-        });
-      }
-      await doc.reference.update({'status': 'incomplete'});
-    }
-  }
+  //   if (doc['isweekly'] &&
+  //       now.isAfter(doc['end'].toDate()) &&
+  //       doc['status'] != 'done' &&
+  //       doc['status'] != 'incomplete') {
+  //     if (weeklyDeduction != '0') {
+  //       await FirebaseFirestore.instance
+  //           .collection('user')
+  //           .doc(widget.email)
+  //           .collection('taskrewardpunishment')
+  //           .doc('punishment-${doc['name']}-${now.toString()}')
+  //           .set({
+  //         'addedby': widget.email,
+  //         'amount': weeklyDeduction,
+  //         'date': now,
+  //         'reason': 'for not completing weekly task ${doc['name']} on time',
+  //         'type': 'punishment'
+  //       });
+  //     }
+  //     await doc.reference.update({'status': 'incomplete'});
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +241,7 @@ class _TasksState extends State<Tasks> {
                     itemBuilder: (BuildContext context, int index) {
                       final doc = snapshot.data!.docs[index];
                       _processOverdueTasks(doc);
-                      _processOverdueWeeklyTask(doc);
+                      // _processOverdueWeeklyTask(doc);
 
                       bool isweekly = doc['isweekly'] ?? false;
                       String deduction = doc['deductionamount']?.toString() ?? '0';

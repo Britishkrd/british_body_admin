@@ -152,35 +152,96 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
     setState(() {});
   }
 
+  // Future<void> _loadUserInfo() async {
+  //   final prefs = await SharedPreferences.getInstance();
+
+  //   setState(() {
+  //     CheckInState.userEmail = prefs.getString('email') ?? '';
+  //     CheckInState.isCheckedIn = prefs.getBool('checkin') ?? false;
+  //     CheckInState.userPermissions = prefs.getStringList('permissions') ?? [];
+  //     CheckInState.workplaceLatitude = prefs.getDouble('worklat') ?? 0.0;
+  //     CheckInState.workplaceLongitude = prefs.getDouble('worklong') ?? 0.0;
+  //     CheckInState.workingDays =
+  //         prefs.getStringList('weekdays')?.map((e) => int.parse(e)).toList() ??
+  //             [];
+  //     CheckInState.workStartHour = prefs.getInt('starthour') ?? 0;
+  //     CheckInState.workEndHour = prefs.getInt('endhour') ?? 0;
+  //     CheckInState.workStartMinute = prefs.getInt('startmin') ?? 0;
+  //     CheckInState.workEndMinute = prefs.getInt('endmin') ?? 0;
+  //     // Add these two lines:
+  //     name = prefs.getString('name') ?? '';
+  //     email = prefs.getString('email') ?? '';
+  //   });
+  // }
   Future<void> _loadUserInfo() async {
-    final prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
+  
+  // First load from SharedPreferences
+  setState(() {
+    CheckInState.userEmail = prefs.getString('email') ?? '';
+    CheckInState.isCheckedIn = prefs.getBool('checkin') ?? false;
+    CheckInState.userPermissions = prefs.getStringList('permissions') ?? [];
+    CheckInState.workplaceLatitude = prefs.getDouble('worklat') ?? 0.0;
+    CheckInState.workplaceLongitude = prefs.getDouble('worklong') ?? 0.0;
+    CheckInState.workingDays = prefs.getStringList('weekdays')?.map((e) => int.parse(e)).toList() ?? [];
+    CheckInState.workStartHour = prefs.getInt('starthour') ?? 0;
+    CheckInState.workEndHour = prefs.getInt('endhour') ?? 0;
+    CheckInState.workStartMinute = prefs.getInt('startmin') ?? 0;
+    CheckInState.workEndMinute = prefs.getInt('endmin') ?? 0;
+    name = prefs.getString('name') ?? '';
+    email = prefs.getString('email') ?? '';
+  });
 
-    setState(() {
-      CheckInState.userEmail = prefs.getString('email') ?? '';
-      CheckInState.isCheckedIn = prefs.getBool('checkin') ?? false;
-      CheckInState.userPermissions = prefs.getStringList('permissions') ?? [];
-      CheckInState.workplaceLatitude = prefs.getDouble('worklat') ?? 0.0;
-      CheckInState.workplaceLongitude = prefs.getDouble('worklong') ?? 0.0;
-      CheckInState.workingDays =
-          prefs.getStringList('weekdays')?.map((e) => int.parse(e)).toList() ??
-              [];
-      CheckInState.workStartHour = prefs.getInt('starthour') ?? 0;
-      CheckInState.workEndHour = prefs.getInt('endhour') ?? 0;
-      CheckInState.workStartMinute = prefs.getInt('startmin') ?? 0;
-      CheckInState.workEndMinute = prefs.getInt('endmin') ?? 0;
-      // Add these two lines:
-      name = prefs.getString('name') ?? '';
-      email = prefs.getString('email') ?? '';
-    });
+  // If workplace coordinates aren't set in prefs, get them from Firestore
+  if (CheckInState.workplaceLatitude == 0.0 || CheckInState.workplaceLongitude == 0.0) {
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(CheckInState.userEmail)
+          .get();
+      
+      if (userDoc.exists) {
+        final worklat = userDoc.data()?['worklat'] as double? ?? 0.0;
+        final worklong = userDoc.data()?['worklong'] as double? ?? 0.0;
+        
+        await prefs.setDouble('worklat', worklat);
+        await prefs.setDouble('worklong', worklong);
+        
+        setState(() {
+          CheckInState.workplaceLatitude = worklat;
+          CheckInState.workplaceLongitude = worklong;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error loading workplace location: $e');
+    }
   }
+}
 
-  Future<void> _getCurrentPosition() async {
+  // Future<void> _getCurrentPosition() async {
+  //   final position = await _geolocator.getCurrentPosition();
+  //   setState(() {
+  //     CheckInState.currentLatitude = position.latitude;
+  //     CheckInState.currentLongitude = position.longitude;
+  //   });
+  // }
+
+
+Future<void> _getCurrentPosition() async {
+  try {
     final position = await _geolocator.getCurrentPosition();
+    if (kDebugMode) {
+      print('Fetched position: ${position.latitude}, ${position.longitude}');
+    }
     setState(() {
       CheckInState.currentLatitude = position.latitude;
       CheckInState.currentLongitude = position.longitude;
     });
+  } catch (e) {
+    if (kDebugMode) print('Error getting position: $e');
+    rethrow;
   }
+}
 
   Widget _buildCheckInButtonSection() {
     return Column(
@@ -206,7 +267,7 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
           if (CheckInState.userPermissions.contains('workoutside'))
             _buildModernActionButton(
               icon: Icons.pin_drop_outlined,
-              label: 'لە دەروەی شوێنی ئیشکردن',
+              label: 'لە دەرەوەی شوێنی ئیشکردن',
               color: Material1.primaryColor,
               onPressed: () => _handleCheckIn(true),
               isFullWidth: true,
@@ -297,40 +358,93 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
     );
   }
 
+  // Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
+  //   try {
+  //     await _getCurrentPosition();
+  //     await _loadUserInfo();
+
+  //     if (!isOutsideWorkplace) {
+  //       final distance = Geolocator.distanceBetween(
+  //         CheckInState.workplaceLatitude,
+  //         CheckInState.workplaceLongitude,
+  //         CheckInState.currentLatitude,
+  //         CheckInState.currentLongitude,
+  //       );
+
+  //       if (distance > 100) {
+  //         _showErrorDialog(
+  //           'هەڵە',
+  //           'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە',
+  //         );
+  //         return;
+  //       }
+  //     }
+
+  //     if (CheckInState.isCheckedIn) {
+  //       _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
+  //       return;
+  //     }
+
+  //     final isNewDay = await _isNewDayCheckIn();
+  //     _showLoadingDialog('تکایە چاوەڕێکەوە');
+  //     _processCheckIn(isNewDay);
+  //   } catch (e) {
+  //     _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+  //   }
+  // }
   Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
-    try {
-      await _getCurrentPosition();
-      await _loadUserInfo();
+  try {
+    // First load user info to get workplace coordinates
+    await _loadUserInfo();
+    
+    // Then get current position
+    await _getCurrentPosition();
 
-      if (!isOutsideWorkplace) {
-        final distance = Geolocator.distanceBetween(
-          CheckInState.workplaceLatitude,
-          CheckInState.workplaceLongitude,
-          CheckInState.currentLatitude,
-          CheckInState.currentLongitude,
-        );
+    if (kDebugMode) {
+      print('Workplace Location: ${CheckInState.workplaceLatitude}, ${CheckInState.workplaceLongitude}');
+      print('Current Location: ${CheckInState.currentLatitude}, ${CheckInState.currentLongitude}');
+    }
 
-        if (distance > 100) {
-          _showErrorDialog(
-            'هەڵە',
-            'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە',
-          );
-          return;
-        }
-      }
-
-      if (CheckInState.isCheckedIn) {
-        _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
+    if (!isOutsideWorkplace) {
+      // Verify we have valid coordinates
+      if (CheckInState.workplaceLatitude == 0.0 || CheckInState.workplaceLongitude == 0.0) {
+        _showErrorDialog('هەڵە', 'شوێنی کار بەرێکراو نیە');
         return;
       }
 
-      final isNewDay = await _isNewDayCheckIn();
-      _showLoadingDialog('تکایە چاوەڕێکەوە');
-      _processCheckIn(isNewDay);
-    } catch (e) {
-      _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+      final distance = Geolocator.distanceBetween(
+        CheckInState.workplaceLatitude,
+        CheckInState.workplaceLongitude,
+        CheckInState.currentLatitude,
+        CheckInState.currentLongitude,
+      );
+
+      if (kDebugMode) {
+        print('Distance from workplace: $distance meters');
+      }
+
+      if (distance > 100) {
+        _showErrorDialog(
+          'هەڵە',
+          'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە. دووری لە شوێنی کار: ${distance.toStringAsFixed(0)} مەتر',
+        );
+        return;
+      }
     }
+
+    if (CheckInState.isCheckedIn) {
+      _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
+      return;
+    }
+
+    final isNewDay = await _isNewDayCheckIn();
+    _showLoadingDialog('تکایە چاوەڵێکەوە');
+    await _processCheckIn(isNewDay);
+  } catch (e) {
+    if (kDebugMode) print('Error in _handleCheckIn: $e');
+    _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
   }
+}
 
   Future<bool> _isNewDayCheckIn() async {
     final snapshot = await FirebaseFirestore.instance
