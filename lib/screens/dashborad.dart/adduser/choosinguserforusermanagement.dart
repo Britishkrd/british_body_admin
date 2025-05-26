@@ -86,7 +86,15 @@ class _ChoosinguserforusermanagementState
                                                     .docs[index]['worklong']
                                                     .toString(),
                                                 password: password,
-                                                permissions: List<String>.from(snapshot.data!.docs[index]['permissions']));
+                                                permissions: List<String>.from(snapshot.data!.docs[index]['permissions']
+                                                
+                                                ), starthour: snapshot.data!.docs[index]['starthour'],
+                                                endhour: snapshot.data!.docs[index]['endhour'],
+                                                startmin: snapshot.data!.docs[index]['startmin'],
+                                                endmin: snapshot.data!.docs[index]['endmin'],
+                                                weekdays: snapshot.data!.docs[index]['weekdays'],
+                                                
+                                                );
                                           }));
                                         },
                                         child: const Text('دەستکاری کردن')),

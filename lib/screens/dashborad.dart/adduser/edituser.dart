@@ -18,6 +18,12 @@ class Edituserr extends StatefulWidget {
   final String worklong;
   final String password;
   final List<String> permissions;
+  final int starthour;
+  final int endhour;
+  final int startmin;
+  final int endmin;
+  final List<dynamic> weekdays; // Changed to dynamic to handle Firestore data
+
   const Edituserr(
       {super.key,
       required this.email,
@@ -30,7 +36,12 @@ class Edituserr extends StatefulWidget {
       required this.worklat,
       required this.worklong,
       required this.password,
-      required this.permissions});
+      required this.permissions,
+        required this.starthour,
+    required this.endhour,
+    required this.startmin,
+    required this.endmin,
+    required this.weekdays,});
 
   @override
   State<Edituserr> createState() => _EdituserrState();
@@ -86,20 +97,37 @@ class _EdituserrState extends State<Edituserr> {
   Time endhour = Time(hour: DateTime.now().hour, minute: DateTime.now().minute);
 
   @override
-  void initState() {
-    emailcontroller.text = widget.email;
-    namecontroller.text = widget.name;
-    locationcontroller.text = widget.location;
-    phonenumbercontroller.text = widget.phonenumber;
-    salarycontroller.text = widget.salary.toString();
-    agecontroller.text = widget.age;
-    workhourtargetcontroller.text = widget.workhourtarget;
-    worklatcontroller.text = widget.worklat;
-    worklongcontroller.text = widget.worklong;
-    passwordcontroller.text = widget.password;
-    selectedpermissions = widget.permissions;
-    super.initState();
-  }
+void initState() {
+  emailcontroller.text = widget.email;
+  namecontroller.text = widget.name;
+  locationcontroller.text = widget.location;
+  phonenumbercontroller.text = widget.phonenumber;
+  salarycontroller.text = widget.salary.toString();
+  agecontroller.text = widget.age;
+  workhourtargetcontroller.text = widget.workhourtarget;
+  worklatcontroller.text = widget.worklat;
+  worklongcontroller.text = widget.worklong;
+  passwordcontroller.text = widget.password;
+  selectedpermissions = widget.permissions;
+  
+  // Initialize time fields
+  starthour = Time(hour: widget.starthour, minute: widget.startmin);
+  endhour = Time(hour: widget.endhour, minute: widget.endmin);
+  
+  // Initialize workdays
+  workdays = widget.weekdays.map((day) => day as int).toList();
+  
+  // Initialize the selected days in the week picker
+  // You might need to modify this based on how SelectWeekDays works
+  // This is just a general approach
+  _days.forEach((day) {
+    if (workdays.contains(int.parse(day.dayKey))) {
+      day.isSelected = true;
+    }
+  });
+
+  super.initState();
+}
 
   @override
   Widget build(BuildContext context) {
