@@ -1,3 +1,4 @@
+import 'package:british_body_admin/map_picker.dart';
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
@@ -25,6 +26,36 @@ class _AdduserState extends State<Adduser> {
   TextEditingController worklatcontroller = TextEditingController();
   TextEditingController worklongcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
+
+    String? selectedPlaceId;
+  List<Map<String, dynamic>> places = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    @override
+  void initState() {
+    super.initState();
+    _fetchPlaces();
+  }
+
+  Future<void> _fetchPlaces() async {
+    try {
+      final querySnapshot = await _firestore.collection('places').get();
+      setState(() {
+        places = querySnapshot.docs
+            .map((doc) => {
+                  'id': doc.id,
+                  'name': doc['name'],
+                  'lat': doc['lat'],
+                  'long': doc['long'],
+                })
+            .toList();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading places: $e')),
+      );
+    }
+  }
 
   List<String> permissions = [
     'workoutside',
@@ -71,6 +102,17 @@ class _AdduserState extends State<Adduser> {
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
+                actions: [
+          IconButton(
+            icon: const Icon(Icons.map),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PlacePickerScreen()),
+              ).then((_) => _fetchPlaces());
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -151,26 +193,52 @@ class _AdduserState extends State<Adduser> {
                   inputType: TextInputType.number,
                   controller: salarycontroller),
             ),
-            Container(
+              Container(
               width: 100.w,
               height: 6.h,
               margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-              child: Material1.textfield(
-                  hint: 'درێژایی کارکەی',
-                  textColor: Colors.black,
-                  inputType: TextInputType.number,
-                  controller: worklatcontroller),
+              child: DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 4.w),
+                ),
+                hint: const Text('Select Work Place'),
+                value: selectedPlaceId,
+                items: places.map((place) {
+                  return DropdownMenuItem<String>(
+                    value: place['id'],
+                    child: Text(place['name']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedPlaceId = value;
+                  });
+                },
+              ),
             ),
-            Container(
-              width: 100.w,
-              height: 6.h,
-              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-              child: Material1.textfield(
-                  hint: 'پانایی کارکەی',
-                  textColor: Colors.black,
-                  inputType: TextInputType.number,
-                  controller: worklongcontroller),
-            ),
+            // Container(
+            //   width: 100.w,
+            //   height: 6.h,
+            //   margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+            //   child: Material1.textfield(
+            //       hint: 'درێژایی کارکەی',
+            //       textColor: Colors.black,
+            //       inputType: TextInputType.number,
+            //       controller: worklatcontroller),
+            // ),
+            // Container(
+            //   width: 100.w,
+            //   height: 6.h,
+            //   margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+            //   child: Material1.textfield(
+            //       hint: 'پانایی کارکەی',
+            //       textColor: Colors.black,
+            //       inputType: TextInputType.number,
+            //       controller: worklongcontroller),
+            // ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).push(
@@ -301,14 +369,16 @@ class _AdduserState extends State<Adduser> {
                         locationcontroller.text.isEmpty ||
                         phonenumbercontroller.text.isEmpty ||
                         salarycontroller.text.isEmpty ||
-                        worklatcontroller.text.isEmpty ||
-                        worklongcontroller.text.isEmpty ||
+                        // worklatcontroller.text.isEmpty ||
+                        // worklongcontroller.text.isEmpty ||
                         agecontroller.text.isEmpty ||
                         workhourtargetcontroller.text.isEmpty ||
-                        passwordcontroller.text.isEmpty) {
+                        passwordcontroller.text.isEmpty|| selectedPlaceId == null) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('تکایە هەموو خانەکان پڕبکەوە')));
                     } else {
+                        final selectedPlace = places.firstWhere((place) => place['id'] == selectedPlaceId);
+
                       FirebaseAuth.instance
                           .createUserWithEmailAndPassword(
                         email: emailcontroller.text,
@@ -330,8 +400,9 @@ class _AdduserState extends State<Adduser> {
                           'location': locationcontroller.text,
                           'phonenumber': phonenumbercontroller.text.toString(),
                           'salary': int.parse(salarycontroller.text),
-                          'worklat': double.parse(worklatcontroller.text),
-                          'worklong': double.parse(worklongcontroller.text),
+                           'worklat': selectedPlace['lat'],
+                      'worklong': selectedPlace['long'],
+                      'placeId': selectedPlaceId,
                           'permissions': selectedpermissions,
                           'age': agecontroller.text.toString(),
                           'token': '',
