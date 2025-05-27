@@ -34,7 +34,7 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
           Marker(
             markerId: MarkerId(doc.id),
             position: LatLng(doc['lat'], doc['long']),
-            infoWindow: InfoWindow(title: doc['name']),
+            infoWindow: InfoWindow(title: doc['workPlaceName']),
           ),
         );
       }
@@ -58,7 +58,7 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
         Marker(
           markerId: const MarkerId('selected'),
           position: position,
-          infoWindow: const InfoWindow(title: 'Selected Location'),
+          infoWindow: const InfoWindow(title: 'شوێنی دیاریکراو'),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         ),
       );
@@ -68,14 +68,16 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
   void _savePlace() async {
     if (_placeNameController.text.isEmpty || _selectedPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a location and enter a name')),
+        const SnackBar(
+            backgroundColor: Colors.black,
+            content: Text('تکایە لۆکەیشن دیاری بکە پاشان ناوەکەی بنووسە')),
       );
       return;
     }
 
     try {
       await _firestore.collection('places').add({
-        'name': _placeNameController.text,
+        'workPlaceName': _placeNameController.text,
         'lat': _selectedPosition!.latitude,
         'long': _selectedPosition!.longitude,
       });
@@ -84,7 +86,9 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
       _markers.removeWhere((marker) => marker.markerId.value == 'selected');
       await _fetchPlaces();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Place saved successfully')),
+        const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('شوێنەکە بە سەرکەوتوویی پاشەکەوت کرا')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -97,7 +101,7 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Places'),
+        title: const Text('British Body لقەکانی'),
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
@@ -111,7 +115,7 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
                   height: 6.h,
                   margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
                   child: Material1.textfield(
-                    hint: 'Place Name',
+                    hint: 'ناونیشان',
                     controller: _placeNameController,
                     textColor: Colors.black,
                   ),
@@ -121,7 +125,7 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
                   height: 6.h,
                   margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
                   child: Material1.button(
-                    label: 'Save Place',
+                    label: 'پاشەکەوت کردن',
                     buttoncolor: Material1.primaryColor,
                     textcolor: Colors.white,
                     function: _savePlace,

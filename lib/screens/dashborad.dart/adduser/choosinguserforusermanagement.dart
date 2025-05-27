@@ -64,37 +64,44 @@ class _ChoosinguserforusermanagementState
                                               MaterialPageRoute(
                                                   builder: (context) {
                                             return Edituserr(
-                                                email: snapshot.data!.docs[index]
-                                                    ['email'],
-                                                name: snapshot.data!.docs[index]
-                                                    ['name'],
-                                                location: snapshot.data!.docs[index]
-                                                    ['location'],
-                                                phonenumber: snapshot.data!.docs[index]
-                                                    ['phonenumber'],
-                                                salary: snapshot.data!.docs[index]
-                                                    ['salary'],
-                                                age: snapshot.data!.docs[index]
-                                                    ['age'],
-                                                workhourtarget: snapshot.data!
-                                                    .docs[index]['worktarget']
-                                                    .toString(),
-                                                worklat: snapshot.data!
-                                                    .docs[index]['worklat']
-                                                    .toString(),
-                                                worklong: snapshot.data!
-                                                    .docs[index]['worklong']
-                                                    .toString(),
-                                                password: password,
-                                                permissions: List<String>.from(snapshot.data!.docs[index]['permissions']
-                                                
-                                                ), starthour: snapshot.data!.docs[index]['starthour'],
-                                                endhour: snapshot.data!.docs[index]['endhour'],
-                                                startmin: snapshot.data!.docs[index]['startmin'],
-                                                endmin: snapshot.data!.docs[index]['endmin'],
-                                                weekdays: snapshot.data!.docs[index]['weekdays'],
-                                                
-                                                );
+                                              email: snapshot.data!.docs[index]
+                                                  ['email'],
+                                              name: snapshot.data!.docs[index]
+                                                  ['name'],
+                                              location: snapshot.data!
+                                                  .docs[index]['location'],
+                                              phonenumber: snapshot.data!
+                                                  .docs[index]['phonenumber'],
+                                              salary: snapshot.data!.docs[index]
+                                                  ['salary'],
+                                              age: snapshot.data!.docs[index]
+                                                  ['age'],
+                                              workhourtarget: snapshot.data!
+                                                  .docs[index]['worktarget']
+                                                  .toString(),
+                                              worklat: snapshot
+                                                  .data!.docs[index]['worklat']
+                                                  .toString(),
+                                              worklong: snapshot
+                                                  .data!.docs[index]['worklong']
+                                                  .toString(),
+                                              password: password,
+                                              permissions: List<String>.from(
+                                                  snapshot.data!.docs[index]
+                                                      ['permissions']),
+                                              starthour: snapshot.data!
+                                                  .docs[index]['starthour'],
+                                              endhour: snapshot
+                                                  .data!.docs[index]['endhour'],
+                                              startmin: snapshot.data!
+                                                  .docs[index]['startmin'],
+                                              endmin: snapshot.data!.docs[index]
+                                                  ['endmin'],
+                                              weekdays: snapshot.data!
+                                                  .docs[index]['weekdays'],
+                                              workPlaceName: snapshot
+                                                  .data!.docs[index]['workPlaceName'],
+                                            );
                                           }));
                                         },
                                         child: const Text('دەستکاری کردن')),

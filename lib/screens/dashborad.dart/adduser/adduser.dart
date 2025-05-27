@@ -1,5 +1,5 @@
-import 'package:british_body_admin/map_picker.dart';
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/screens/dashborad.dart/map/map_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:day_night_time_picker/lib/state/time.dart';
@@ -27,11 +27,11 @@ class _AdduserState extends State<Adduser> {
   TextEditingController worklongcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
 
-    String? selectedPlaceId;
+  String? selectedPlaceId;
   List<Map<String, dynamic>> places = [];
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-    @override
+  @override
   void initState() {
     super.initState();
     _fetchPlaces();
@@ -44,7 +44,7 @@ class _AdduserState extends State<Adduser> {
         places = querySnapshot.docs
             .map((doc) => {
                   'id': doc.id,
-                  'name': doc['name'],
+                  'workPlaceName': doc['workPlaceName'],
                   'lat': doc['lat'],
                   'long': doc['long'],
                 })
@@ -102,13 +102,14 @@ class _AdduserState extends State<Adduser> {
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
-                actions: [
+        actions: [
           IconButton(
-            icon: const Icon(Icons.map),
+            icon: const Icon(Icons.location_on_outlined),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PlacePickerScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const PlacePickerScreen()),
               ).then((_) => _fetchPlaces());
             },
           ),
@@ -193,7 +194,7 @@ class _AdduserState extends State<Adduser> {
                   inputType: TextInputType.number,
                   controller: salarycontroller),
             ),
-              Container(
+            Container(
               width: 100.w,
               height: 6.h,
               margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
@@ -209,7 +210,7 @@ class _AdduserState extends State<Adduser> {
                 items: places.map((place) {
                   return DropdownMenuItem<String>(
                     value: place['id'],
-                    child: Text(place['name']),
+                    child: Text(place['workPlaceName']),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -219,26 +220,7 @@ class _AdduserState extends State<Adduser> {
                 },
               ),
             ),
-            // Container(
-            //   width: 100.w,
-            //   height: 6.h,
-            //   margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            //   child: Material1.textfield(
-            //       hint: 'درێژایی کارکەی',
-            //       textColor: Colors.black,
-            //       inputType: TextInputType.number,
-            //       controller: worklatcontroller),
-            // ),
-            // Container(
-            //   width: 100.w,
-            //   height: 6.h,
-            //   margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
-            //   child: Material1.textfield(
-            //       hint: 'پانایی کارکەی',
-            //       textColor: Colors.black,
-            //       inputType: TextInputType.number,
-            //       controller: worklongcontroller),
-            // ),
+
             TextButton(
               onPressed: () {
                 Navigator.of(context).push(
@@ -373,11 +355,13 @@ class _AdduserState extends State<Adduser> {
                         // worklongcontroller.text.isEmpty ||
                         agecontroller.text.isEmpty ||
                         workhourtargetcontroller.text.isEmpty ||
-                        passwordcontroller.text.isEmpty|| selectedPlaceId == null) {
+                        passwordcontroller.text.isEmpty ||
+                        selectedPlaceId == null) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('تکایە هەموو خانەکان پڕبکەوە')));
                     } else {
-                        final selectedPlace = places.firstWhere((place) => place['id'] == selectedPlaceId);
+                      final selectedPlace = places.firstWhere(
+                          (place) => place['id'] == selectedPlaceId);
 
                       FirebaseAuth.instance
                           .createUserWithEmailAndPassword(
@@ -400,9 +384,9 @@ class _AdduserState extends State<Adduser> {
                           'location': locationcontroller.text,
                           'phonenumber': phonenumbercontroller.text.toString(),
                           'salary': int.parse(salarycontroller.text),
-                           'worklat': selectedPlace['lat'],
-                      'worklong': selectedPlace['long'],
-                      'placeId': selectedPlaceId,
+                          'worklat': selectedPlace['lat'],
+                          'worklong': selectedPlace['long'],
+                          'workPlaceName': selectedPlace['workPlaceName'],
                           'permissions': selectedpermissions,
                           'age': agecontroller.text.toString(),
                           'token': '',
@@ -411,7 +395,8 @@ class _AdduserState extends State<Adduser> {
                           'lat': 0.0,
                           'long': 0.0,
                           'loanstatus': 'no',
-                          'worktarget': int.parse(workhourtargetcontroller.text),
+                          'worktarget':
+                              int.parse(workhourtargetcontroller.text),
                           'password': passwordcontroller.text,
                           'weekdays': workdays,
                           'starthour': starthour.hour,

@@ -23,25 +23,27 @@ class Edituserr extends StatefulWidget {
   final int startmin;
   final int endmin;
   final List<dynamic> weekdays; // Changed to dynamic to handle Firestore data
-
-  const Edituserr(
-      {super.key,
-      required this.email,
-      required this.name,
-      required this.location,
-      required this.phonenumber,
-      required this.salary,
-      required this.age,
-      required this.workhourtarget,
-      required this.worklat,
-      required this.worklong,
-      required this.password,
-      required this.permissions,
-        required this.starthour,
+  final String workPlaceName; // Add this parameter
+  const Edituserr({
+    super.key,
+    required this.email,
+    required this.name,
+    required this.location,
+    required this.phonenumber,
+    required this.salary,
+    required this.age,
+    required this.workhourtarget,
+    required this.worklat,
+    required this.worklong,
+    required this.password,
+    required this.permissions,
+    required this.starthour,
     required this.endhour,
     required this.startmin,
     required this.endmin,
-    required this.weekdays,});
+    required this.weekdays,
+    required this.workPlaceName,
+  });
 
   @override
   State<Edituserr> createState() => _EdituserrState();
@@ -96,38 +98,73 @@ class _EdituserrState extends State<Edituserr> {
       Time(hour: DateTime.now().hour, minute: DateTime.now().minute);
   Time endhour = Time(hour: DateTime.now().hour, minute: DateTime.now().minute);
 
-  @override
-void initState() {
-  emailcontroller.text = widget.email;
-  namecontroller.text = widget.name;
-  locationcontroller.text = widget.location;
-  phonenumbercontroller.text = widget.phonenumber;
-  salarycontroller.text = widget.salary.toString();
-  agecontroller.text = widget.age;
-  workhourtargetcontroller.text = widget.workhourtarget;
-  worklatcontroller.text = widget.worklat;
-  worklongcontroller.text = widget.worklong;
-  passwordcontroller.text = widget.password;
-  selectedpermissions = widget.permissions;
-  
-  // Initialize time fields
-  starthour = Time(hour: widget.starthour, minute: widget.startmin);
-  endhour = Time(hour: widget.endhour, minute: widget.endmin);
-  
-  // Initialize workdays
-  workdays = widget.weekdays.map((day) => day as int).toList();
-  
-  // Initialize the selected days in the week picker
-  // You might need to modify this based on how SelectWeekDays works
-  // This is just a general approach
-  _days.forEach((day) {
-    if (workdays.contains(int.parse(day.dayKey))) {
-      day.isSelected = true;
-    }
-  });
+    // Add these new variables
+  String? selectedPlaceId;
+  List<Map<String, dynamic>> places = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  super.initState();
-}
+  @override
+  void initState() {
+    emailcontroller.text = widget.email;
+    namecontroller.text = widget.name;
+    locationcontroller.text = widget.location;
+    phonenumbercontroller.text = widget.phonenumber;
+    salarycontroller.text = widget.salary.toString();
+    agecontroller.text = widget.age;
+    workhourtargetcontroller.text = widget.workhourtarget;
+    worklatcontroller.text = widget.worklat;
+    worklongcontroller.text = widget.worklong;
+    passwordcontroller.text = widget.password;
+    selectedpermissions = widget.permissions;
+
+    // Initialize time fields
+    starthour = Time(hour: widget.starthour, minute: widget.startmin);
+    endhour = Time(hour: widget.endhour, minute: widget.endmin);
+
+    // Initialize workdays
+    workdays = widget.weekdays.map((day) => day as int).toList();
+
+    // Initialize the selected days in the week picker
+    // You might need to modify this based on how SelectWeekDays works
+    // This is just a general approach
+    _days.forEach((day) {
+      if (workdays.contains(int.parse(day.dayKey))) {
+        day.isSelected = true;
+      }
+    });
+        // Fetch places
+    _fetchPlaces();
+
+    super.initState();
+  }
+
+  Future<void> _fetchPlaces() async {
+    try {
+      final querySnapshot = await _firestore.collection('places').get();
+      setState(() {
+        places = querySnapshot.docs
+            .map((doc) => {
+                  'id': doc.id,
+                  'workPlaceName': doc['workPlaceName'],
+                  'lat': doc['lat'],
+                  'long': doc['long'],
+                })
+            .toList();
+        
+        // Find and set the current place of the user
+        final currentPlace = places.firstWhere(
+          (place) => place['workPlaceName'] == widget.workPlaceName,
+          orElse: () => {'id': null},
+        );
+        selectedPlaceId = currentPlace['id'];
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading places: $e')),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +274,40 @@ void initState() {
                   inputType: TextInputType.number,
                   controller: worklongcontroller),
             ),
+              // Replace the worklat and worklong text fields with the place dropdown
+            Container(
+              width: 100.w,
+              height: 6.h,
+              margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
+              child: DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 4.w),
+                ),
+                hint: const Text('Select Work Place'),
+                value: selectedPlaceId,
+                items: places.map((place) {
+                  return DropdownMenuItem<String>(
+                    value: place['id'],
+                    child: Text(place['workPlaceName']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedPlaceId = value;
+                    // Update the lat and long controllers when place changes
+                    final selectedPlace = places.firstWhere(
+                      (place) => place['id'] == value);
+                    worklatcontroller.text = selectedPlace['lat'].toString();
+                    worklongcontroller.text = selectedPlace['long'].toString();
+                  });
+                },
+              ),
+            ),
+            
+
             TextButton(
               onPressed: () {
                 Navigator.of(context).push(
@@ -371,10 +442,15 @@ void initState() {
                         worklongcontroller.text.isEmpty ||
                         agecontroller.text.isEmpty ||
                         workhourtargetcontroller.text.isEmpty ||
-                        passwordcontroller.text.isEmpty) {
+                        passwordcontroller.text.isEmpty
+                        || selectedPlaceId == null
+                        ) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('تکایە هەموو خانەکان پڕبکەوە')));
                     } else {
+                       final selectedPlace = places.firstWhere(
+                          (place) => place['id'] == selectedPlaceId);
+                          
                       FirebaseFirestore.instance
                           .collection('user')
                           .doc(emailcontroller.text.toLowerCase())
@@ -386,6 +462,7 @@ void initState() {
                         'salary': int.parse(salarycontroller.text),
                         'worklat': double.parse(worklatcontroller.text),
                         'worklong': double.parse(worklongcontroller.text),
+                        'workPlaceName': selectedPlace['workPlaceName'], // Add this
                         'permissions': selectedpermissions,
                         'age': agecontroller.text.toString(),
                         'worktarget': int.parse(workhourtargetcontroller.text),
@@ -396,8 +473,9 @@ void initState() {
                         'startmin': starthour.minute,
                         'endmin': endhour.minute,
                       }).then((value) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('بە سەرکەوتویی نوێکرایەوە')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('بە سەرکەوتویی نوێکرایەوە')));
                         Navigator.pop(context);
                       });
                     }

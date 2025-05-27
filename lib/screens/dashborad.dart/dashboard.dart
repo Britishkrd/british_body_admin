@@ -13,6 +13,8 @@ import 'package:british_body_admin/screens/dashborad.dart/holiday/holiday_manage
 import 'package:british_body_admin/screens/dashborad.dart/loan/acceptingloan/acceptingloan.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/choosinguseroforloginlogout.dart';
 import 'package:british_body_admin/screens/dashborad.dart/loginlogout/self-login/viewingselfloginlogout.dart';
+import 'package:british_body_admin/screens/dashborad.dart/map/map_picker.dart';
+import 'package:british_body_admin/screens/dashborad.dart/map/user_map_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/choosinguser.dart';
 import 'package:british_body_admin/screens/dashborad.dart/reward-punishment-management/viewingrewardpunishment.dart';
 import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/adminrules.dart';
@@ -28,7 +30,6 @@ import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingo
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
 import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus.dart';
-import 'package:british_body_admin/screens/dashborad.dart/usermapscreen/user_map_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
 import 'package:british_body_admin/screens/tasks/tasksviewrewardpunishment.dart';
@@ -531,7 +532,7 @@ class _DashboardState extends State<Dashboard> {
                             }));
                           },
                           child: controlpanelcard(
-                              Icons.group_add, 'بەکارهـێنەرەکان', 25),
+                              Icons.group_add, 'کارمەندەکان', 25),
                         ),
                       if (permissions.contains('changing worker phone'))
                         GestureDetector(
@@ -645,6 +646,21 @@ class _DashboardState extends State<Dashboard> {
                           },
                           child: controlpanelcard(Icons.location_on_outlined,
                               'شوێنی کارمەندەکان', 34),
+                        ),
+                      if (permissions.contains('view user location'))
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const PlacePickerScreen();
+                                },
+                              ),
+                            );
+                          },
+                          child: controlpanelcard(Icons.add_location_outlined,
+                              'British Body لقەکانی', 35),
                         ),
                     ],
                   ),
