@@ -23,8 +23,6 @@ class _AdduserState extends State<Adduser> {
   TextEditingController salarycontroller = TextEditingController();
   TextEditingController agecontroller = TextEditingController();
   TextEditingController workhourtargetcontroller = TextEditingController();
-  TextEditingController worklatcontroller = TextEditingController();
-  TextEditingController worklongcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
 
   String? selectedPlaceId;
