@@ -1,7 +1,7 @@
 package com.example.british_body_admin
 
 import androidx.annotation.NonNull
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.app.NotificationManager
@@ -12,7 +12,7 @@ import android.content.ContentResolver
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "hama.com/channel_test" // The channel name you set in your main.dart file
 
     // List of sounds
