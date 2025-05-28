@@ -4,6 +4,7 @@ import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:day_night_time_picker/lib/state/time.dart';
 import 'package:day_picker/day_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class Edituserr extends StatefulWidget {
@@ -472,12 +473,14 @@ class _EdituserrState extends State<Edituserr> {
                         'endhour': endhour.hour,
                         'startmin': starthour.minute,
                         'endmin': endhour.minute,
-                      }).then((value) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('بە سەرکەوتویی نوێکرایەوە')));
-                        Navigator.pop(context);
-                      });
+                      }).then((value) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setDouble('worklat', double.parse(worklatcontroller.text));
+  await prefs.setDouble('worklong', double.parse(worklongcontroller.text));
+  ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('بە سەرکەوتویی نوێکرایەوە')));
+  Navigator.pop(context);
+});
                     }
                   }),
             )

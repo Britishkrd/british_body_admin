@@ -64,15 +64,21 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
   DateTime? _lastCheckInTime;
   DateTime? _lastCheckOutTime;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addObserver(this);
+  _loadUserInfo();
+  _startLiveTimer();
+  _loadCachedStats();
+  _checkForNewDay().then((_) => _calculateDailyStats());
+
+  // Periodic sync every 5 minutes
+  Timer.periodic(Duration(seconds: 5), (timer) {
     _loadUserInfo();
-    _startLiveTimer();
-    _loadCachedStats(); // Add this
-    _checkForNewDay().then((_) => _calculateDailyStats());
-  }
+  });
+}
+
 
   Future<void> _loadCachedStats() async {
     final prefs = await SharedPreferences.getInstance();
@@ -218,30 +224,69 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
   }
 }
 
-  // Future<void> _getCurrentPosition() async {
-  //   final position = await _geolocator.getCurrentPosition();
-  //   setState(() {
-  //     CheckInState.currentLatitude = position.latitude;
-  //     CheckInState.currentLongitude = position.longitude;
-  //   });
-  // }
-
-
-Future<void> _getCurrentPosition() async {
-  try {
+  Future<void> _getCurrentPosition() async {
     final position = await _geolocator.getCurrentPosition();
-    if (kDebugMode) {
-      print('Fetched position: ${position.latitude}, ${position.longitude}');
-    }
     setState(() {
       CheckInState.currentLatitude = position.latitude;
       CheckInState.currentLongitude = position.longitude;
     });
-  } catch (e) {
-    if (kDebugMode) print('Error getting position: $e');
-    rethrow;
   }
-}
+
+
+// Future<void> _getCurrentPosition() async {
+//   try {
+//     final position = await _geolocator.getCurrentPosition();
+//     if (kDebugMode) {
+//       print('Fetched position: ${position.latitude}, ${position.longitude}');
+//     }
+//     setState(() {
+//       CheckInState.currentLatitude = position.latitude;
+//       CheckInState.currentLongitude = position.longitude;
+//     });
+//   } catch (e) {
+//     if (kDebugMode) print('Error getting position: $e');
+//     rethrow;
+//   }
+// }
+
+// Future<void> _getCurrentPosition() async {
+//   try {
+//     bool serviceEnabled = await _geolocator.isLocationServiceEnabled();
+//     if (!serviceEnabled) {
+//       throw Exception('Location services are disabled');
+//     }
+
+//     LocationPermission permission = await _geolocator.checkPermission();
+//     if (permission == LocationPermission.denied) {
+//       permission = await _geolocator.requestPermission();
+//       if (permission == LocationPermission.denied) {
+//         throw Exception('Location permissions are denied');
+//       }
+//     }
+
+//     if (permission == LocationPermission.deniedForever) {
+//       throw Exception('Location permissions are permanently denied');
+//     }
+
+//     final position = await _geolocator.getCurrentPosition(
+//       locationSettings: LocationSettings(
+//         accuracy: LocationAccuracy.high,
+//         distanceFilter: 0, // Set to 0 to get updates for any movement
+//       ),
+//     );
+
+//     if (kDebugMode) {
+//       print('Fetched position: ${position.latitude}, ${position.longitude}');
+//     }
+//     setState(() {
+//       CheckInState.currentLatitude = position.latitude;
+//       CheckInState.currentLongitude = position.longitude;
+//     });
+//   } catch (e) {
+//     if (kDebugMode) print('Error getting position: $e');
+//     rethrow;
+//   }
+// }
 
   Widget _buildCheckInButtonSection() {
     return Column(
