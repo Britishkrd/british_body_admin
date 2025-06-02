@@ -64,17 +64,26 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
   DateTime? _lastCheckInTime;
   DateTime? _lastCheckOutTime;
 
+bool _isWeb = kIsWeb;
+
 @override
 void initState() {
   super.initState();
   WidgetsBinding.instance.addObserver(this);
   _loadUserInfo();
-  _startLiveTimer();
+  if (!_isWeb) { // Only start timer for mobile
+    _startLiveTimer();
+  }
   _loadCachedStats();
   _checkForNewDay().then((_) => _calculateDailyStats());
-
-  // Periodic sync every 5 minutes
-  Timer.periodic(Duration(seconds: 5), (timer) {
+  
+  // For web, use a different approach for periodic updates
+  if (_isWeb) {
+    _setupWebUpdates();
+  }
+}void _setupWebUpdates() {
+  // Use a different approach for web, like listening to visibility changes
+  WidgetsBinding.instance.addPostFrameCallback((_) {
     _loadUserInfo();
   });
 }
