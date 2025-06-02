@@ -198,6 +198,8 @@ class _AddingOwnTaskState extends State<AddingOwnTask> {
                                     'status': 'pending',
                                     'name': namecontroller.text,
                                     'isdaily': false,
+                                    'isweekly': false,
+                                    'ismonthly': false,
                                     'isowntask': true,
                                     'addedby': widget.email,
                                     'deductionamount': '0',
