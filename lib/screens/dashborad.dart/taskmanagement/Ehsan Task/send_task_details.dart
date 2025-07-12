@@ -32,6 +32,8 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
   String? _submissionTitle;
   String? _submissionLink;
   Timestamp? _submissionDate;
+  double? _rewardAmount; // Add state variable for rewardAmount
+  double? _deductionAmount; // Add state variable for deductionAmount
 
   @override
   void initState() {
@@ -59,6 +61,10 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
           _submissionTitle = data?['submissionTitle'];
           _submissionLink = data?['submissionLink'];
           _submissionDate = data?['submissionDate'];
+          _rewardAmount =
+              data?['rewardAmount']?.toDouble() ?? 0.0; // Store rewardAmount
+          _deductionAmount = data?['deductionAmount']?.toDouble() ??
+              0.0; // Store deductionAmount
         });
       }
     }
@@ -69,7 +75,7 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = 'https://$url';
     }
-    
+
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -95,6 +101,7 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
     }
   }
 
+  // In SendTaskDetails - _submitTaskDetails method
   Future<void> _submitTaskDetails() async {
     if (_titleController.text.isEmpty || _linkController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -149,7 +156,8 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
       'status': newStatus,
     });
 
-    if (newStatus == 'completed') {
+    // Only add reward if amount is greater than 0
+    if (newStatus == 'completed' && rewardAmount > 0) {
       await FirebaseFirestore.instance
           .collection('user')
           .doc(widget.email)
@@ -369,9 +377,9 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
                   ),
                 ),
                 if (widget.status == 'pending' && !isDue) ...[
-                  SizedBox(height: 1.h),
+                  SizedBox(height: 4.h),
                   Text(
-                    'تەنها لە وادەی دیاریکراو یان دوای وادەی دیاریکراو دەتوانیت پێشکەشی بکەیت',
+                    'تەنها لە وادەی دیاریکراو یان دوای وادەی دیاریکراو دەتوانیت ناردن بکەیت',
                     style: TextStyle(
                       fontSize: 16.sp,
                       color: Colors.deepOrangeAccent,
@@ -418,6 +426,18 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
                             ? intl.DateFormat('dd/MM/yyyy, hh:mm a')
                                 .format(_submissionDate!.toDate())
                             : 'Not available',
+                      ),
+                      SizedBox(height: 2.h),
+                      _buildDetailItem(
+                        Icons.monetization_on,
+                        'بڕی پاداشت',
+                        _rewardAmount != null ? '$_rewardAmount' : '0.0',
+                      ),
+                      SizedBox(height: 2.h),
+                      _buildDetailItem(
+                        Icons.monetization_on,
+                        'بڕی سزا',
+                        _deductionAmount != null ? '$_deductionAmount' : '0.0',
                       ),
                     ],
                   ),

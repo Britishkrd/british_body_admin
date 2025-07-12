@@ -16,6 +16,33 @@ class TaskViewDetail extends StatefulWidget {
 }
 
 class _TaskViewDetailState extends State<TaskViewDetail> {
+  // Future<void> _updateTaskStatus(String taskId, String newStatus,
+  //     {double? deductionAmount, String? taskName}) async {
+  //   await FirebaseFirestore.instance
+  //       .collection('user')
+  //       .doc(widget.email)
+  //       .collection('tasks')
+  //       .doc(taskId)
+  //       .update({'status': newStatus});
+
+  //   if (newStatus == 'unfinished' &&
+  //       deductionAmount != null &&
+  //       taskName != null) {
+  //     await FirebaseFirestore.instance
+  //         .collection('user')
+  //         .doc(widget.email)
+  //         .collection('taskrewardpunishment')
+  //         .add({
+  //       'addedby': widget.email,
+  //       'amount': deductionAmount,
+  //       'date': Timestamp.now(),
+  //       'reason': 'for not completing task $taskName on time',
+  //       'type': 'punishment',
+  //     });
+  //   }
+  // }
+
+  // In TaskViewDetail - _updateTaskStatus method
   Future<void> _updateTaskStatus(String taskId, String newStatus,
       {double? deductionAmount, String? taskName}) async {
     await FirebaseFirestore.instance
@@ -25,8 +52,10 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
         .doc(taskId)
         .update({'status': newStatus});
 
+    // Only add punishment if amount is greater than 0
     if (newStatus == 'unfinished' &&
         deductionAmount != null &&
+        deductionAmount > 0 &&
         taskName != null) {
       await FirebaseFirestore.instance
           .collection('user')
