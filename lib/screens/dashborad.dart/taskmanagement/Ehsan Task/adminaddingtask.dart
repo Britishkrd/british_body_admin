@@ -94,94 +94,110 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
   }
 
   Future<void> _addTasks() async {
-    // Validate inputs
-    if (_taskNameController.text.isEmpty ||
-        _startDate == null ||
-        _endDate == null ||
-        _taskTime == null ||
-        !_selectedDays.contains(true) ||
-        _rewardAmountController.text.isEmpty ||
-        _deductionAmountController.text.isEmpty) {
+  // Validate inputs
+  if (_taskNameController.text.isEmpty ||
+      _startDate == null ||
+      _endDate == null ||
+      _taskTime == null ||
+      !_selectedDays.contains(true) ||
+      _rewardAmountController.text.isEmpty ||
+      _deductionAmountController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+          content: Text(
+              'Please fill all fields, select at least one day, and provide reward and deduction amounts')),
+    );
+    return;
+  }
+
+  // Validate reward and deduction amounts are valid numbers
+  final rewardAmount = double.tryParse(_rewardAmountController.text);
+  final deductionAmount = double.tryParse(_deductionAmountController.text);
+  if (rewardAmount == null || deductionAmount == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please enter valid amounts for reward and deduction')),
+    );
+    return;
+  }
+
+  final users = widget.isbatch ? widget.selectedUsers : [widget.email];
+
+  for (String userEmail in users) {
+    // Get user's working days
+    final List<int> workdays = userWorkdays[userEmail] ?? [];
+    if (workdays.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                'Please fill all fields, select at least one day, and provide reward and deduction amounts')),
+        SnackBar(content: Text('No workdays defined for $userEmail')),
       );
-      return;
+      continue;
     }
 
-    // Validate reward and deduction amounts are valid numbers
-    final rewardAmount = double.tryParse(_rewardAmountController.text);
-    final deductionAmount = double.tryParse(_deductionAmountController.text);
-    if (rewardAmount == null || deductionAmount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter valid amounts for reward and deduction')),
-      );
-      return;
-    }
+    // Track dates for which tasks have been created to avoid duplicates
+    Set<String> processedDates = {};
 
-    final users = widget.isbatch ? widget.selectedUsers : [widget.email];
+    DateTime currentDate = _startDate!;
+    while (currentDate.isBefore(_endDate!.add(const Duration(days: 1)))) {
+      // Format date as a string for comparison (e.g., "2025-07-12")
+      String dateKey = DateFormat('yyyy-MM-dd').format(currentDate);
 
-    for (String userEmail in users) {
-      // Get user's working days
-      final List<int> workdays = userWorkdays[userEmail] ?? [];
-      if (workdays.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No workdays defined for $userEmail')),
-        );
+      // Skip if a task was already created for this date
+      if (processedDates.contains(dateKey)) {
+        currentDate = currentDate.add(const Duration(days: 1));
         continue;
       }
 
-      DateTime currentDate = _startDate!;
-      while (currentDate.isBefore(_endDate!.add(const Duration(days: 1)))) {
-        int dayIndex = currentDate.weekday % 7; // Sunday=0, Monday=1, ..., Saturday=6
-        // Convert dayIndex to match your dayKey (1=Mon, 2=Tue, ..., 7=Sun)
-        int firestoreDayIndex = dayIndex == 0 ? 7 : dayIndex;
-        // Check if the selected day is a workday for the user and is selected for the task
-        if (_selectedDays[dayIndex] && workdays.contains(firestoreDayIndex)) {
-          final taskId = FirebaseFirestore.instance
-              .collection('user')
-              .doc(userEmail)
-              .collection('tasks')
-              .doc()
-              .id;
+      int dayIndex = currentDate.weekday % 7; // Sunday=0, Monday=1, ..., Saturday=6
+      // Convert dayIndex to match your dayKey (1=Mon, 2=Tue, ..., 7=Sun)
+      int firestoreDayIndex = dayIndex == 0 ? 7 : dayIndex;
 
-          final deadline = DateTime(
-            currentDate.year,
-            currentDate.month,
-            currentDate.day,
-            _taskTime!.hour,
-            _taskTime!.minute,
-          );
+      // Check if the selected day is a workday for the user and is selected for the task
+      if (_selectedDays[dayIndex] && workdays.contains(firestoreDayIndex)) {
+        final taskId = FirebaseFirestore.instance
+            .collection('user')
+            .doc(userEmail)
+            .collection('tasks')
+            .doc()
+            .id;
 
-          final taskData = {
-            'taskId': taskId,
-            'taskName': _taskNameController.text,
-            'adminEmail': widget.adminemail,
-            'userEmail': userEmail,
-            'deadline': Timestamp.fromDate(deadline),
-            'status': 'pending', // pending, completed, unfinished
-            'createdAt': Timestamp.now(),
-            'rewardAmount': rewardAmount,
-            'deductionAmount': deductionAmount,
-          };
+        final deadline = DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day,
+          _taskTime!.hour,
+          _taskTime!.minute,
+        );
 
-          await FirebaseFirestore.instance
-              .collection('user')
-              .doc(userEmail)
-              .collection('tasks')
-              .doc(taskId)
-              .set(taskData);
-        }
-        currentDate = currentDate.add(const Duration(days: 1));
+        final taskData = {
+          'taskId': taskId,
+          'taskName': _taskNameController.text,
+          'adminEmail': widget.adminemail,
+          'userEmail': userEmail,
+          'deadline': Timestamp.fromDate(deadline),
+          'status': 'pending', // pending, completed, unfinished
+          'createdAt': Timestamp.now(),
+          'rewardAmount': rewardAmount,
+          'deductionAmount': deductionAmount,
+        };
+
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(userEmail)
+            .collection('tasks')
+            .doc(taskId)
+            .set(taskData);
+
+        // Mark this date as processed
+        processedDates.add(dateKey);
       }
+      currentDate = currentDate.add(const Duration(days: 1));
     }
-
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tasks added successfully')),
-    );
   }
+
+  Navigator.pop(context);
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Tasks added successfully')),
+  );
+}
 
   @override
   Widget build(BuildContext context) {

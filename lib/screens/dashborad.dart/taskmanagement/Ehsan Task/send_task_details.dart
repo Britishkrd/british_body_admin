@@ -35,7 +35,6 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
   @override
   void initState() {
     super.initState();
-    // Check if task is already completed or unfinished with submission and load submission details
     if (widget.status == 'completed' || widget.status == 'unfinished') {
       _loadSubmissionDetails();
     }
@@ -51,7 +50,6 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
 
     if (doc.exists) {
       final data = doc.data();
-      // Check if submission details exist
       if (data?['submissionTitle'] != null && data?['submissionLink'] != null) {
         setState(() {
           _isSubmitted = true;
@@ -71,7 +69,7 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
       return;
     }
 
-    // Fetch task data to get rewardAmount and deductionAmount
+    // Fetch task data to get rewardAmount
     final taskDoc = await FirebaseFirestore.instance
         .collection('user')
         .doc(widget.email)
@@ -88,12 +86,9 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
 
     final taskData = taskDoc.data()!;
     final rewardAmount = taskData['rewardAmount']?.toDouble() ?? 0.0;
-    final deductionAmount = taskData['deductionAmount']?.toDouble() ?? 0.0;
 
-    // Determine new status and amount based on current status
+    // Determine new status based on current status
     String newStatus = widget.status == 'pending' ? 'completed' : 'unfinished';
-    double amount = newStatus == 'completed' ? rewardAmount : deductionAmount;
-    String type = newStatus == 'completed' ? 'reward' : 'punishment';
 
     // Update task with submission details and new status
     await FirebaseFirestore.instance
@@ -108,22 +103,20 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
       'status': newStatus,
     });
 
-    // Insert into taskrewardpunishment collection
-    await FirebaseFirestore.instance
-        .collection('user')
-        .doc(widget.email)
-        .collection('taskrewardpunishment')
-        .doc('Type:-${type}')
-        // .doc('amount-${widget.taskName}-${DateTime.now().toString()}')
-        .set({
-      'addedby': widget.email,
-      'amount': amount,
-      'date': Timestamp.now(),
-      'reason': newStatus == 'completed'
-          ? 'for completing task ${widget.taskName} on time'
-          : 'for not completing task ${widget.taskName} on time',
-      'type': type,
-    });
+    // Only insert reward for completed tasks
+    if (newStatus == 'completed') {
+      await FirebaseFirestore.instance
+          .collection('user')
+          .doc(widget.email)
+          .collection('taskrewardpunishment')
+          .add({
+        'addedby': widget.email,
+        'amount': rewardAmount,
+        'date': Timestamp.now(),
+        'reason': 'for completing task ${widget.taskName} on time',
+        'type': 'reward',
+      });
+    }
 
     setState(() {
       _isSubmitted = true;
@@ -177,12 +170,10 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
             ),
             SizedBox(height: 2.h),
             Text(
-              'Deadline: ${DateFormat('dd/MM/yyyy HH:mm').format(widget.deadline.toDate())}',
+              'Deadline: ${DateFormat('dd/MM/yyyy HH:mm a').format(widget.deadline.toDate())}',
               style: const TextStyle(fontSize: 15),
             ),
             SizedBox(height: 1.h),
-
-            // Display task status with color
             if (widget.status == 'unfinished')
               Text(
                 'UNFINISHED TASK',
@@ -192,9 +183,7 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
                   color: Colors.red,
                 ),
               ),
-
             SizedBox(height: 4.h),
-
             if (!_isSubmitted) ...[
               TextField(
                 controller: _titleController,
@@ -212,8 +201,6 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
                 ),
               ),
               SizedBox(height: 4.h),
-
-              // Show submit button for different statuses
               if (widget.status == 'pending') ...[
                 Center(
                   child: ElevatedButton(
@@ -238,7 +225,6 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
                 ),
               ],
             ] else ...[
-              // Show submission details if task has been submitted
               const Text(
                 'Submission Details:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -250,11 +236,9 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
               SizedBox(height: 1.h),
               if (_submissionDate != null)
                 Text(
-                  'Submitted on: ${DateFormat('dd/MM/yyyy HH:mm').format(_submissionDate!.toDate())}',
+                  'Submitted on: ${DateFormat('dd/MM/yyyy HH:mm a').format(_submissionDate!.toDate())}',
                 ),
               SizedBox(height: 2.h),
-
-              // Show current status
               Text(
                 'Status: ${widget.status}',
                 style: TextStyle(
