@@ -133,6 +133,7 @@
 // }
 
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/send_task_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -208,6 +209,8 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                 return const Center(child: Text('No tasks found'));
               }
 
+              // ... (previous imports and code remain the same until the ListView.builder)
+
               return ListView.builder(
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
@@ -216,58 +219,57 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                   final status = task['status'];
                   final isDue = _isTaskDue(deadline);
 
-                  return Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
-                    padding: EdgeInsets.all(2.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.grey, blurRadius: 5),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Task: ${task['taskName']}',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          'Deadline: ${DateFormat('dd/MM/yyyy HH:mm').format(deadline)}',
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                        Text(
-                          'Status: $status',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: status == 'completed'
-                                ? Colors.green
-                                : status == 'unfinished'
-                                    ? Colors.red
-                                    : Colors.orange,
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SendTaskDetails(
+                            email: widget.email,
+                            taskId: task['taskId'],
+                            taskName: task['taskName'],
+                            deadline: task['deadline'],
+                            status: task['status'], // Pass the status
                           ),
                         ),
-                        if (status == 'pending')
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                onPressed: isDue
-                                    ? () => _updateTaskStatus(
-                                        task['taskId'], 'completed')
-                                    : null, // Disable button if not due
-                                child: Text(
-                                  isDue
-                                      ? 'Mark as Completed'
-                                      : 'Not available until ${DateFormat('dd/MM/yyyy').format(deadline)}',
-                                ),
-                              ),
-                            ],
+                      );
+                    },
+                    child: Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                      padding: EdgeInsets.all(2.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(5),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.grey, blurRadius: 5),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Task: ${task['taskName']}',
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                      ],
+                          Text(
+                            'Deadline: ${DateFormat('dd/MM/yyyy HH:mm').format(deadline)}',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          Text(
+                            'Status: $status',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: status == 'completed'
+                                  ? Colors.green
+                                  : status == 'unfinished'
+                                      ? Colors.red
+                                      : Colors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },

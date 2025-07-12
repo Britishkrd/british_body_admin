@@ -28,7 +28,7 @@ import 'package:british_body_admin/screens/dashborad.dart/target/admintarget/cho
 import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/selftargetview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/task_view_detail.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/task_view_detail.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
 import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
