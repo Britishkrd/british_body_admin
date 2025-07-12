@@ -24,6 +24,8 @@ class AdminAddingTask extends StatefulWidget {
 
 class _AdminAddingTaskState extends State<AdminAddingTask> {
   final TextEditingController _taskNameController = TextEditingController();
+  final TextEditingController _rewardAmountController = TextEditingController();
+  final TextEditingController _deductionAmountController = TextEditingController();
   DateTime? _startDate;
   DateTime? _endDate;
   TimeOfDay? _taskTime;
@@ -92,14 +94,28 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
   }
 
   Future<void> _addTasks() async {
+    // Validate inputs
     if (_taskNameController.text.isEmpty ||
         _startDate == null ||
         _endDate == null ||
         _taskTime == null ||
-        !_selectedDays.contains(true)) {
+        !_selectedDays.contains(true) ||
+        _rewardAmountController.text.isEmpty ||
+        _deductionAmountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please fill all fields and select at least one day')),
+            content: Text(
+                'Please fill all fields, select at least one day, and provide reward and deduction amounts')),
+      );
+      return;
+    }
+
+    // Validate reward and deduction amounts are valid numbers
+    final rewardAmount = double.tryParse(_rewardAmountController.text);
+    final deductionAmount = double.tryParse(_deductionAmountController.text);
+    if (rewardAmount == null || deductionAmount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter valid amounts for reward and deduction')),
       );
       return;
     }
@@ -146,6 +162,8 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
             'deadline': Timestamp.fromDate(deadline),
             'status': 'pending', // pending, completed, unfinished
             'createdAt': Timestamp.now(),
+            'rewardAmount': rewardAmount,
+            'deductionAmount': deductionAmount,
           };
 
           await FirebaseFirestore.instance
@@ -176,76 +194,90 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
       ),
       body: Padding(
         padding: EdgeInsets.all(5.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _taskNameController,
-              decoration: const InputDecoration(labelText: 'Task Name'),
-            ),
-            SizedBox(height: 2.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(_startDate == null
-                    ? 'Select Start Date'
-                    : DateFormat('dd/MM/yyyy').format(_startDate!)),
-                ElevatedButton(
-                  onPressed: () => _selectDate(context, true),
-                  child: const Text('Pick Start Date'),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(_endDate == null
-                    ? 'Select End Date'
-                    : DateFormat('dd/MM/yyyy').format(_endDate!)),
-                ElevatedButton(
-                  onPressed: () => _selectDate(context, false),
-                  child: const Text('Pick End Date'),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(_taskTime == null
-                    ? 'Select Time'
-                    : _taskTime!.format(context)),
-                ElevatedButton(
-                  onPressed: () => _selectTime(context),
-                  child: const Text('Pick Time'),
-                ),
-              ],
-            ),
-            SizedBox(height: 2.h),
-            const Text('Select Days of the Week:'),
-            Wrap(
-              spacing: 2.w,
-              children: List.generate(7, (index) {
-                return ChoiceChip(
-                  label: Text(_daysOfWeek[index]),
-                  selected: _selectedDays[index],
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedDays[index] = selected;
-                    });
-                  },
-                );
-              }),
-            ),
-            SizedBox(height: 2.h),
-            Center(
-              child: Material1.button(
-                label: 'Add Task',
-                buttoncolor: Material1.primaryColor,
-                textcolor: Colors.white,
-                function: _addTasks,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _taskNameController,
+                decoration: const InputDecoration(labelText: 'Task Name'),
               ),
-            ),
-          ],
+              SizedBox(height: 2.h),
+              TextField(
+                controller: _rewardAmountController,
+                decoration: const InputDecoration(labelText: 'Reward Amount'),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 2.h),
+              TextField(
+                controller: _deductionAmountController,
+                decoration: const InputDecoration(labelText: 'Deduction Amount'),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 2.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(_startDate == null
+                      ? 'Select Start Date'
+                      : DateFormat('dd/MM/yyyy').format(_startDate!)),
+                  ElevatedButton(
+                    onPressed: () => _selectDate(context, true),
+                    child: const Text('Pick Start Date'),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(_endDate == null
+                      ? 'Select End Date'
+                      : DateFormat('dd/MM/yyyy').format(_endDate!)),
+                  ElevatedButton(
+                    onPressed: () => _selectDate(context, false),
+                    child: const Text('Pick End Date'),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(_taskTime == null
+                      ? 'Select Time'
+                      : _taskTime!.format(context)),
+                  ElevatedButton(
+                    onPressed: () => _selectTime(context),
+                    child: const Text('Pick Time'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 2.h),
+              const Text('Select Days of the Week:'),
+              Wrap(
+                spacing: 2.w,
+                children: List.generate(7, (index) {
+                  return ChoiceChip(
+                    label: Text(_daysOfWeek[index]),
+                    selected: _selectedDays[index],
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedDays[index] = selected;
+                      });
+                    },
+                  );
+                }),
+              ),
+              SizedBox(height: 2.h),
+              Center(
+                child: Material1.button(
+                  label: 'Add Task',
+                  buttoncolor: Material1.primaryColor,
+                  textcolor: Colors.white,
+                  function: _addTasks,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

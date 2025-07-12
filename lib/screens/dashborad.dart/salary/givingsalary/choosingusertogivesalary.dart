@@ -317,16 +317,18 @@ class _ChoosingUserForGivingSalaryState
             isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
         .get();
 
-    for (var doc in rewardPunishment.docs) {
-      final type = doc['type'] as String?;
-      final amount = num.tryParse(doc['amount'] as String? ?? '0') ?? 0;
+  for (var doc in rewardPunishment.docs) {
+    final type = doc['type'] as String?;
+    final amount = doc['amount'] is String 
+        ? num.tryParse(doc['amount'] as String? ?? '0') ?? 0
+        : (doc['amount'] as num? ?? 0);
 
-      if (type == 'punishment') {
-        punishment += amount;
-      } else {
-        reward += amount;
-      }
+    if (type == 'punishment') {
+      punishment += amount;
+    } else {
+      reward += amount;
     }
+  }
 
     return (reward, punishment);
   }
@@ -346,9 +348,11 @@ Future<(num, num)> _calculateTaskRewardAndPunishment(String email, DateTime date
           isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
       .get();
 
-  for (var doc in taskRewardPunishment.docs) {
+    for (var doc in taskRewardPunishment.docs) {
     final type = doc['type'] as String?;
-    final amount = num.tryParse(doc['amount'] as String? ?? '0') ?? 0;
+    final amount = doc['amount'] is String
+        ? num.tryParse(doc['amount'] as String? ?? '0') ?? 0
+        : (doc['amount'] as num? ?? 0);
 
     if (type == 'punishment') {
       taskPunishment += amount;

@@ -71,10 +71,31 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
       return;
     }
 
-    // For pending tasks, update status to completed
-    // For unfinished tasks, keep status as unfinished
-    String newStatus = widget.status == 'pending' ? 'completed' : 'unfinished';
+    // Fetch task data to get rewardAmount and deductionAmount
+    final taskDoc = await FirebaseFirestore.instance
+        .collection('user')
+        .doc(widget.email)
+        .collection('tasks')
+        .doc(widget.taskId)
+        .get();
 
+    if (!taskDoc.exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Task not found')),
+      );
+      return;
+    }
+
+    final taskData = taskDoc.data()!;
+    final rewardAmount = taskData['rewardAmount']?.toDouble() ?? 0.0;
+    final deductionAmount = taskData['deductionAmount']?.toDouble() ?? 0.0;
+
+    // Determine new status and amount based on current status
+    String newStatus = widget.status == 'pending' ? 'completed' : 'unfinished';
+    double amount = newStatus == 'completed' ? rewardAmount : deductionAmount;
+    String type = newStatus == 'completed' ? 'reward' : 'punishment';
+
+    // Update task with submission details and new status
     await FirebaseFirestore.instance
         .collection('user')
         .doc(widget.email)
@@ -87,6 +108,23 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
       'status': newStatus,
     });
 
+    // Insert into taskrewardpunishment collection
+    await FirebaseFirestore.instance
+        .collection('user')
+        .doc(widget.email)
+        .collection('taskrewardpunishment')
+        .doc('Type:-${type}')
+        // .doc('amount-${widget.taskName}-${DateTime.now().toString()}')
+        .set({
+      'addedby': widget.email,
+      'amount': amount,
+      'date': Timestamp.now(),
+      'reason': newStatus == 'completed'
+          ? 'for completing task ${widget.taskName} on time'
+          : 'for not completing task ${widget.taskName} on time',
+      'type': type,
+    });
+
     setState(() {
       _isSubmitted = true;
       _submissionTitle = _titleController.text;
@@ -96,7 +134,7 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(widget.status == 'pending'
+        content: Text(newStatus == 'completed'
             ? 'Task details submitted successfully'
             : 'Unfinished task details submitted successfully'),
       ),
@@ -184,11 +222,7 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
                       backgroundColor: Material1.primaryColor,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text('Submit'
-                        // isDue
-                        //     ? 'Mark as Completed'
-                        //     : 'Not available until ${DateFormat('dd/MM/yyyy').format(widget.deadline.toDate())}',
-                        ),
+                    child: Text('Submit'),
                   ),
                 ),
               ] else if (widget.status == 'unfinished') ...[
