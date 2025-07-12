@@ -75,6 +75,34 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
         now.day >= deadline.day;
   }
 
+  String _getStatusDisplayText(String status) {
+    switch (status) {
+      case 'pending':
+        return 'Pending';
+      case 'completed':
+        return 'Completed';
+      case 'unfinished':
+        return 'Unfinished';
+      case 'complete after unfinished':
+        return 'Complete After Unfinished';
+      default:
+        return status;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'completed':
+        return Colors.green;
+      case 'unfinished':
+        return Colors.red;
+      case 'complete after unfinished':
+        return Colors.blue;
+      default:
+        return Colors.orange;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,14 +179,10 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                'Status: $status',
+                                'Status: ${_getStatusDisplayText(status)}',
                                 style: TextStyle(
                                   fontSize: 15,
-                                  color: status == 'completed'
-                                      ? Colors.green
-                                      : status == 'unfinished'
-                                          ? Colors.red
-                                          : Colors.orange,
+                                  color: _getStatusColor(status),
                                 ),
                               ),
                             ],
@@ -175,7 +199,6 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                             'Deduction Amount: $deductionAmount',
                             style: const TextStyle(fontSize: 15),
                           ),
-                         
                         ],
                       ),
                     ),

@@ -35,7 +35,9 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
   @override
   void initState() {
     super.initState();
-    if (widget.status == 'completed' || widget.status == 'unfinished') {
+    if (widget.status == 'completed' || 
+        widget.status == 'unfinished' || 
+        widget.status == 'complete after unfinished') {
       _loadSubmissionDetails();
     }
   }
@@ -88,7 +90,14 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
     final rewardAmount = taskData['rewardAmount']?.toDouble() ?? 0.0;
 
     // Determine new status based on current status
-    String newStatus = widget.status == 'pending' ? 'completed' : 'unfinished';
+    String newStatus;
+    if (widget.status == 'pending') {
+      newStatus = 'completed';
+    } else if (widget.status == 'unfinished') {
+      newStatus = 'complete after unfinished';
+    } else {
+      newStatus = widget.status; // Keep current status for other cases
+    }
 
     // Update task with submission details and new status
     await FirebaseFirestore.instance
@@ -103,7 +112,7 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
       'status': newStatus,
     });
 
-    // Only insert reward for completed tasks
+    // Only insert reward for completed tasks (not for complete after unfinished)
     if (newStatus == 'completed') {
       await FirebaseFirestore.instance
           .collection('user')
@@ -125,12 +134,17 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
       _submissionDate = Timestamp.now();
     });
 
+    String successMessage;
+    if (newStatus == 'completed') {
+      successMessage = 'Task details submitted successfully';
+    } else if (newStatus == 'complete after unfinished') {
+      successMessage = 'Unfinished task completed successfully';
+    } else {
+      successMessage = 'Task details submitted successfully';
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(newStatus == 'completed'
-            ? 'Task details submitted successfully'
-            : 'Unfinished task details submitted successfully'),
-      ),
+      SnackBar(content: Text(successMessage)),
     );
   }
 
@@ -139,6 +153,34 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
     return now.year >= deadline.year &&
         now.month >= deadline.month &&
         now.day >= deadline.day;
+  }
+
+  String _getStatusDisplayText(String status) {
+    switch (status) {
+      case 'pending':
+        return 'Pending';
+      case 'completed':
+        return 'Completed';
+      case 'unfinished':
+        return 'Unfinished';
+      case 'complete after unfinished':
+        return 'Complete After Unfinished';
+      default:
+        return status;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'completed':
+        return Colors.green;
+      case 'unfinished':
+        return Colors.red;
+      case 'complete after unfinished':
+        return Colors.blue;
+      default:
+        return Colors.orange;
+    }
   }
 
   @override
@@ -220,7 +262,7 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Submit Unfinished Task'),
+                    child: const Text('Complete Unfinished Task'),
                   ),
                 ),
               ],
@@ -240,15 +282,11 @@ class _SendTaskDetailsState extends State<SendTaskDetails> {
                 ),
               SizedBox(height: 2.h),
               Text(
-                'Status: ${widget.status}',
+                'Status: ${_getStatusDisplayText(widget.status)}',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: widget.status == 'completed'
-                      ? Colors.green
-                      : widget.status == 'unfinished'
-                          ? Colors.red
-                          : Colors.orange,
+                  color: _getStatusColor(widget.status),
                 ),
               ),
             ],
