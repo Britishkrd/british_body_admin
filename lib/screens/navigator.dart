@@ -2,9 +2,9 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/checkincheckout/check_in_out_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/dashboard.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/task_view_detail.dart';
 import 'package:british_body_admin/screens/email/email.dart';
 import 'package:british_body_admin/screens/notifications/notifications.dart';
-import 'package:british_body_admin/screens/tasks/tasks.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -83,9 +83,10 @@ class _NavigationState extends State<Navigation> {
             : _bottomNavIndex == 2
                 ? CheckInOutScreen()
                 : _bottomNavIndex == 1
-                    ? Tasks(
-                        email: widget.email,
-                      )
+                    ? TaskViewDetail(email: email)
+                    // Tasks(
+                    //     email: widget.email,
+                    //   )
                     : Email(
                         email: widget.email,
                       ));

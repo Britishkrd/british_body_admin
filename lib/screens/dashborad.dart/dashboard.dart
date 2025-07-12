@@ -664,23 +664,6 @@ class _DashboardState extends State<Dashboard> {
                               'British Body لقەکانی', 35),
                         ),
 
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return TaskViewDetail(
-                                    email: email,
-
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                          child: controlpanelcard(Icons.looks_3_outlined,
-                              'Binini Task', 36),
-                        ),
                     ],
                   ),
                 ),

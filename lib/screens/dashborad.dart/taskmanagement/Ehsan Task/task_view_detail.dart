@@ -1,224 +1,10 @@
-// import 'package:british_body_admin/material/materials.dart';
-// import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/send_task_details.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-// import 'package:sizer/sizer.dart';
-
-// class TaskViewDetail extends StatefulWidget {
-//   final String email;
-
-//   const TaskViewDetail({super.key, required this.email});
-
-//   @override
-//   State<TaskViewDetail> createState() => _TaskViewDetailState();
-// }
-
-// class _TaskViewDetailState extends State<TaskViewDetail> {
-//   Future<void> _updateTaskStatus(String taskId, String newStatus,
-//       {double? deductionAmount, String? taskName}) async {
-//     // Update task status
-//     await FirebaseFirestore.instance
-//         .collection('user')
-//         .doc(widget.email)
-//         .collection('tasks')
-//         .doc(taskId)
-//         .update({'status': newStatus});
-
-//     // If status is 'unfinished', add punishment to taskrewardpunishment
-//     if (newStatus == 'unfinished' &&
-//         deductionAmount != null &&
-//         taskName != null) {
-//       await FirebaseFirestore.instance
-//           .collection('user')
-//           .doc(widget.email)
-//           .collection('taskrewardpunishment')
-//           .add({
-//         'addedby': widget.email,
-//         'amount': deductionAmount,
-//         'date': Timestamp.now(),
-//         'reason': 'for not completing task $taskName on time',
-//         'type': 'punishment',
-//       });
-//     }
-//   }
-
-//   Future<void> _checkAndUpdateUnfinishedTasks() async {
-//     final tasksSnapshot = await FirebaseFirestore.instance
-//         .collection('user')
-//         .doc(widget.email)
-//         .collection('tasks')
-//         .where('status', isEqualTo: 'pending')
-//         .get();
-
-//     for (var doc in tasksSnapshot.docs) {
-//       final deadline = (doc['deadline'] as Timestamp).toDate();
-//       final taskData = doc.data();
-//       final deductionAmount = taskData['deductionAmount']?.toDouble() ?? 0.0;
-//       final taskName = taskData['taskName'] ?? 'Unknown Task';
-
-//       if (deadline.isBefore(DateTime.now()) && doc['status'] == 'pending') {
-//         await _updateTaskStatus(
-//           doc['taskId'],
-//           'unfinished',
-//           deductionAmount: deductionAmount,
-//           taskName: taskName,
-//         );
-//       }
-//     }
-//   }
-
-//   bool _isTaskDue(DateTime deadline) {
-//     final now = DateTime.now();
-//     return now.year >= deadline.year &&
-//         now.month >= deadline.month &&
-//         now.day >= deadline.day;
-//   }
-
-//   String _getStatusDisplayText(String status) {
-//     switch (status) {
-//       case 'pending':
-//         return 'چاوەڕوانی';
-//       case 'completed':
-//         return 'تەواو بووە';
-//       case 'unfinished':
-//         return 'تەواو نەبووە';
-//       case 'complete after unfinished':
-//         return 'تەواو بووە لە کاتی دیاری نەکراو';
-//       default:
-//         return status;
-//     }
-//   }
-
-//   Color _getStatusColor(String status) {
-//     switch (status) {
-//       case 'completed':
-//         return Colors.green;
-//       case 'unfinished':
-//         return Colors.red;
-//       case 'complete after unfinished':
-//         return Colors.blue;
-//       default:
-//         return Colors.orange;
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Task Details'),
-//         foregroundColor: Colors.white,
-//         backgroundColor: Material1.primaryColor,
-//         centerTitle: true,
-//       ),
-//       body: FutureBuilder(
-//         future: _checkAndUpdateUnfinishedTasks(),
-//         builder: (context, snapshot) {
-//           return StreamBuilder(
-//             stream: FirebaseFirestore.instance
-//                 .collection('user')
-//                 .doc(widget.email)
-//                 .collection('tasks')
-//                 .orderBy('deadline', descending: false)
-//                 .snapshots(),
-//             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-//               if (snapshot.connectionState == ConnectionState.waiting) {
-//                 return const Center(child: CircularProgressIndicator());
-//               }
-//               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-//                 return const Center(child: Text('No tasks found'));
-//               }
-
-//               return ListView.builder(
-//                 itemCount: snapshot.data!.docs.length,
-//                 itemBuilder: (context, index) {
-//                   final task = snapshot.data!.docs[index];
-//                   final deadline = (task['deadline'] as Timestamp).toDate();
-//                   final status = task['status'];
-//                   final isDue = _isTaskDue(deadline);
-//                   final rewardAmount = task['rewardAmount']?.toDouble() ?? 0.0;
-//                   final deductionAmount =
-//                       task['deductionAmount']?.toDouble() ?? 0.0;
-
-//                   return GestureDetector(
-//                     onTap: () {
-//                       Navigator.push(
-//                         context,
-//                         MaterialPageRoute(
-//                           builder: (context) => SendTaskDetails(
-//                             email: widget.email,
-//                             taskId: task['taskId'],
-//                             taskName: task['taskName'],
-//                             deadline: task['deadline'],
-//                             status: task['status'],
-//                           ),
-//                         ),
-//                       );
-//                     },
-//                     child: Container(
-//                       margin:
-//                           EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
-//                       padding: EdgeInsets.all(2.h),
-//                       decoration: BoxDecoration(
-//                         color: Colors.white,
-//                         borderRadius: BorderRadius.circular(5),
-//                         boxShadow: const [
-//                           BoxShadow(color: Colors.grey, blurRadius: 5),
-//                         ],
-//                       ),
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           Row(
-//                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                             children: [
-//                               Text(
-//                                 'Task: ${task['taskName']}',
-//                                 style: const TextStyle(
-//                                     fontSize: 18, fontWeight: FontWeight.bold),
-//                               ),
-//                               Text(
-//                                 _getStatusDisplayText(status),
-//                                 style: TextStyle(
-//                                   fontSize: 15,
-//                                   color: _getStatusColor(status),
-//                                 ),
-//                               ),
-//                             ],
-//                           ),
-//                           Text(
-//                             'Deadline: ${DateFormat('dd/MM/yyyy HH:mm a').format(deadline)}',
-//                             style: const TextStyle(fontSize: 15),
-//                           ),
-//                           Text(
-//                             'Reward Amount: $rewardAmount',
-//                             style: const TextStyle(fontSize: 15),
-//                           ),
-//                           Text(
-//                             'Deduction Amount: $deductionAmount',
-//                             style: const TextStyle(fontSize: 15),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   );
-//                 },
-//               );
-//             },
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
-
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/send_task_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TaskViewDetail extends StatefulWidget {
   final String email;
@@ -281,6 +67,28 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
     }
   }
 
+  Future<void> _launchURL(String url) async {
+    // Ensure URL has a scheme
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://$url';
+    }
+
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('نەتوانرا لینکەکە بکرێتەوە'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   bool _isTaskDue(DateTime deadline) {
     final now = DateTime.now();
     return now.year >= deadline.year &&
@@ -337,20 +145,6 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Task Details',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          foregroundColor: Colors.white,
-          backgroundColor: Material1.primaryColor,
-          centerTitle: true,
-          elevation: 0,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(15),
-            ),
-          ),
-        ),
         body: FutureBuilder(
           future: _checkAndUpdateUnfinishedTasks(),
           builder: (context, snapshot) {
