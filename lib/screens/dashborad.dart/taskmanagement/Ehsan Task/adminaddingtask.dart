@@ -1,4 +1,5 @@
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/sendingnotification.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
@@ -215,6 +216,18 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
               .collection('tasks')
               .doc(taskId)
               .set(taskData);
+                final userDoc = await FirebaseFirestore.instance.collection('user').doc(userEmail).get();
+  if (userDoc.exists) {
+    sendingnotification(
+      'ئەکرد',
+      'ئەرکێکت بۆ زیاد کرا',
+      userDoc.data()?['token'],
+      'default1',
+    );
+  }
+
+
+              
 
           processedDates.add(dateKey);
         }
