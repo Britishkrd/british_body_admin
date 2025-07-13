@@ -123,127 +123,259 @@ class _AdminAddingTaskState extends State<AdminAddingTask> {
     }
   }
 
-  Future<void> _addTasks() async {
-    if (_taskNameController.text.isEmpty ||
-        _startDate == null ||
-        _endDate == null ||
-        _taskTime == null ||
-        !_selectedDays.contains(true) ||
-        _rewardAmountController.text.isEmpty ||
-        _deductionAmountController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+  // Future<void> _addTasks() async {
+  //   if (_taskNameController.text.isEmpty ||
+  //       _startDate == null ||
+  //       _endDate == null ||
+  //       _taskTime == null ||
+  //       !_selectedDays.contains(true) ||
+  //       _rewardAmountController.text.isEmpty ||
+  //       _deductionAmountController.text.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Please fill all required fields'),
+  //         behavior: SnackBarBehavior.floating,
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return;
+  //   }
 
-    final rewardAmount = double.tryParse(_rewardAmountController.text);
-    final deductionAmount = double.tryParse(_deductionAmountController.text);
-    if (rewardAmount == null || deductionAmount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter valid amounts'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+  //   final rewardAmount = double.tryParse(_rewardAmountController.text);
+  //   final deductionAmount = double.tryParse(_deductionAmountController.text);
+  //   if (rewardAmount == null || deductionAmount == null) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Please enter valid amounts'),
+  //         behavior: SnackBarBehavior.floating,
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return;
+  //   }
 
-    final users = widget.isbatch ? widget.selectedUsers : [widget.email];
+  //   final users = widget.isbatch ? widget.selectedUsers : [widget.email];
 
-    for (String userEmail in users) {
-      final List<int> workdays = userWorkdays[userEmail] ?? [];
-      if (workdays.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('No workdays defined for $userEmail'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.red,
-          ),
-        );
-        continue;
-      }
+  //   for (String userEmail in users) {
+  //     final List<int> workdays = userWorkdays[userEmail] ?? [];
+  //     if (workdays.isEmpty) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('No workdays defined for $userEmail'),
+  //           behavior: SnackBarBehavior.floating,
+  //           backgroundColor: Colors.red,
+  //         ),
+  //       );
+  //       continue;
+  //     }
 
-      Set<String> processedDates = {};
-      DateTime currentDate = _startDate!;
+  //     Set<String> processedDates = {};
+  //     DateTime currentDate = _startDate!;
 
-      while (currentDate.isBefore(_endDate!.add(const Duration(days: 1)))) {
-        String dateKey = intl.DateFormat('yyyy-MM-dd').format(currentDate);
-        if (processedDates.contains(dateKey)) {
-          currentDate = currentDate.add(const Duration(days: 1));
-          continue;
-        }
+  //     while (currentDate.isBefore(_endDate!.add(const Duration(days: 1)))) {
+  //       String dateKey = intl.DateFormat('yyyy-MM-dd').format(currentDate);
+  //       if (processedDates.contains(dateKey)) {
+  //         currentDate = currentDate.add(const Duration(days: 1));
+  //         continue;
+  //       }
 
-        int dayIndex = currentDate.weekday % 7;
-        int firestoreDayIndex = dayIndex == 0 ? 7 : dayIndex;
+  //       int dayIndex = currentDate.weekday % 7;
+  //       int firestoreDayIndex = dayIndex == 0 ? 7 : dayIndex;
 
-        if (_selectedDays[dayIndex] && workdays.contains(firestoreDayIndex)) {
-          final taskId = FirebaseFirestore.instance
-              .collection('user')
-              .doc(userEmail)
-              .collection('tasks')
-              .doc()
-              .id;
+  //       if (_selectedDays[dayIndex] && workdays.contains(firestoreDayIndex)) {
+  //         final taskId = FirebaseFirestore.instance
+  //             .collection('user')
+  //             .doc(userEmail)
+  //             .collection('tasks')
+  //             .doc()
+  //             .id;
 
-          final deadline = DateTime(
-            currentDate.year,
-            currentDate.month,
-            currentDate.day,
-            _taskTime!.hour,
-            _taskTime!.minute,
-          );
+  //         final deadline = DateTime(
+  //           currentDate.year,
+  //           currentDate.month,
+  //           currentDate.day,
+  //           _taskTime!.hour,
+  //           _taskTime!.minute,
+  //         );
 
-          final taskData = {
-            'taskId': taskId,
-            'taskName': _taskNameController.text,
-            'adminEmail': widget.adminemail,
-            'userEmail': userEmail,
-            'deadline': Timestamp.fromDate(deadline),
-            'status': 'pending',
-            'createdAt': Timestamp.now(),
-            'rewardAmount': rewardAmount,
-            'deductionAmount': deductionAmount,
-          };
+  //         final taskData = {
+  //           'taskId': taskId,
+  //           'taskName': _taskNameController.text,
+  //           'adminEmail': widget.adminemail,
+  //           'userEmail': userEmail,
+  //           'deadline': Timestamp.fromDate(deadline),
+  //           'status': 'pending',
+  //           'createdAt': Timestamp.now(),
+  //           'rewardAmount': rewardAmount,
+  //           'deductionAmount': deductionAmount,
+  //         };
 
-          await FirebaseFirestore.instance
-              .collection('user')
-              .doc(userEmail)
-              .collection('tasks')
-              .doc(taskId)
-              .set(taskData);
-                final userDoc = await FirebaseFirestore.instance.collection('user').doc(userEmail).get();
-  if (userDoc.exists) {
-    sendingnotification(
-      'ئەکرد',
-      'ئەرکێکت بۆ زیاد کرا',
-      userDoc.data()?['token'],
-      'default1',
-    );
-  }
+  //         await FirebaseFirestore.instance
+  //             .collection('user')
+  //             .doc(userEmail)
+  //             .collection('tasks')
+  //             .doc(taskId)
+  //             .set(taskData);
+                
+                
+  // //               final userDoc = await FirebaseFirestore.instance.collection('user').doc(userEmail).get();
+  // // if (userDoc.exists) {
+  // //   sendingnotification(
+  // //     'ئەکرد',
+  // //     'ئەرکێکت بۆ زیاد کرا',
+  // //     userDoc.data()?['token'],
+  // //     'default1',
+  // //   );
+  // // }
 
 
               
 
-          processedDates.add(dateKey);
-        }
-        currentDate = currentDate.add(const Duration(days: 1));
-      }
-    }
+  //         processedDates.add(dateKey);
+  //       }
+  //       currentDate = currentDate.add(const Duration(days: 1));
+  //     }
+  //   }
 
-    Navigator.pop(context);
+  //   Navigator.pop(context);
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     const SnackBar(
+  //       content: Text('بەسەرکەوتویی ئەرکەکە زیادکرا'),
+  //       behavior: SnackBarBehavior.floating,
+  //       backgroundColor: Colors.green,
+  //     ),
+  //   );
+  // }
+
+  Future<void> _addTasks() async {
+  if (_taskNameController.text.isEmpty ||
+      _startDate == null ||
+      _endDate == null ||
+      _taskTime == null ||
+      !_selectedDays.contains(true) ||
+      _rewardAmountController.text.isEmpty ||
+      _deductionAmountController.text.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('بەسەرکەوتویی ئەرکەکە زیادکرا'),
+        content: Text('Please fill all required fields'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
       ),
     );
+    return;
   }
+
+  final rewardAmount = double.tryParse(_rewardAmountController.text);
+  final deductionAmount = double.tryParse(_deductionAmountController.text);
+  if (rewardAmount == null || deductionAmount == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please enter valid amounts'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  final users = widget.isbatch ? widget.selectedUsers : [widget.email];
+  bool anyTasksAdded = false;
+
+  for (String userEmail in users) {
+    final List<int> workdays = userWorkdays[userEmail] ?? [];
+    if (workdays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No workdays defined for $userEmail'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+        ),
+      );
+      continue;
+    }
+
+    Set<String> processedDates = {};
+    DateTime currentDate = _startDate!;
+
+    while (currentDate.isBefore(_endDate!.add(const Duration(days: 1)))) {
+      String dateKey = intl.DateFormat('yyyy-MM-dd').format(currentDate);
+      if (processedDates.contains(dateKey)) {
+        currentDate = currentDate.add(const Duration(days: 1));
+        continue;
+      }
+
+      int dayIndex = currentDate.weekday % 7;
+      int firestoreDayIndex = dayIndex == 0 ? 7 : dayIndex;
+
+      if (_selectedDays[dayIndex] && workdays.contains(firestoreDayIndex)) {
+        final taskId = FirebaseFirestore.instance
+            .collection('user')
+            .doc(userEmail)
+            .collection('tasks')
+            .doc()
+            .id;
+
+        final deadline = DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day,
+          _taskTime!.hour,
+          _taskTime!.minute,
+        );
+
+        final taskData = {
+          'taskId': taskId,
+          'taskName': _taskNameController.text,
+          'adminEmail': widget.adminemail,
+          'userEmail': userEmail,
+          'deadline': Timestamp.fromDate(deadline),
+          'status': 'pending',
+          'createdAt': Timestamp.now(),
+          'rewardAmount': rewardAmount,
+          'deductionAmount': deductionAmount,
+        };
+
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(userEmail)
+            .collection('tasks')
+            .doc(taskId)
+            .set(taskData);
+
+        anyTasksAdded = true;
+        processedDates.add(dateKey);
+      }
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+  }
+
+  // Send notification only once after all tasks are added
+  if (anyTasksAdded) {
+    for (String userEmail in users) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userEmail)
+          .get();
+      if (userDoc.exists) {
+        sendingnotification(
+          'ئەکرد',
+          'ئەرکێکت بۆ زیاد کرا',
+          userDoc.data()?['token'],
+          'default1',
+        );
+      }
+    }
+  }
+
+  Navigator.pop(context);
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('بەسەرکەوتویی ئەرکەکە زیادکرا'),
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.green,
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
