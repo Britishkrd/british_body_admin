@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -49,9 +40,19 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyB_ic561lFl7k5i27nBAe6kammJrm6HHHA',
+    appId: '1:528586385117:web:512b9dd642a8426ce99d34',
+    messagingSenderId: '528586385117',
+    projectId: 'british-body-admin',
+    authDomain: 'british-body-admin.firebaseapp.com',
+    storageBucket: 'british-body-admin.firebasestorage.app',
+    measurementId: 'G-6E5QEW92RD',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyC3pBwvcdFu_0KJBWb6UYRRVcwM1n6nQ_E',
-    appId: '1:528586385117:android:44223907118575cae99d34',
+    appId: '1:528586385117:android:319b547ffed11fafe99d34',
     messagingSenderId: '528586385117',
     projectId: 'british-body-admin',
     storageBucket: 'british-body-admin.firebasestorage.app',
@@ -59,10 +60,29 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCDIG95HEhD_Q6ULp9qUWjrkPN1RXvTbjY',
-    appId: '1:528586385117:ios:e8606a37d07f3e3ce99d34',
+    appId: '1:528586385117:ios:03cdd3dfaba4d6c3e99d34',
     messagingSenderId: '528586385117',
     projectId: 'british-body-admin',
     storageBucket: 'british-body-admin.firebasestorage.app',
-    iosBundleId: 'com.example.britishBodyAdmin',
+    iosBundleId: 'com.britishbody.adminapp',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCDIG95HEhD_Q6ULp9qUWjrkPN1RXvTbjY',
+    appId: '1:528586385117:ios:03cdd3dfaba4d6c3e99d34',
+    messagingSenderId: '528586385117',
+    projectId: 'british-body-admin',
+    storageBucket: 'british-body-admin.firebasestorage.app',
+    iosBundleId: 'com.britishbody.adminapp',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyB_ic561lFl7k5i27nBAe6kammJrm6HHHA',
+    appId: '1:528586385117:web:12e0de4ed36a2b2fe99d34',
+    messagingSenderId: '528586385117',
+    projectId: 'british-body-admin',
+    authDomain: 'british-body-admin.firebaseapp.com',
+    storageBucket: 'british-body-admin.firebasestorage.app',
+    measurementId: 'G-TF3ZY056E4',
   );
 }

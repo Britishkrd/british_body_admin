@@ -1,4 +1,4 @@
-package com.example.british_body_admin
+package com.britishbody.adminapp
 
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterFragmentActivity

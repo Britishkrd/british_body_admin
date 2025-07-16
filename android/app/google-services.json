@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:528586385117:android:44223907118575cae99d34",
+        "mobilesdk_app_id": "1:528586385117:android:319b547ffed11fafe99d34",
         "android_client_info": {
-          "package_name": "com.example.british_body_admin"
+          "package_name": "com.britishbody.adminapp"
         }
       },
       "oauth_client": [],
