@@ -19,22 +19,22 @@ class Givingsalary extends StatefulWidget {
   final num punishment;
   final num taskreward;
   final num taskpunishment;
-  const Givingsalary(
-      {super.key,
-      required this.email,
-      required this.date,
-      required this.adminemail,
-      required this.name,
-      required this.totalworkedtime,
-      required this.worktarget,
-      required this.salary,
-      required this.loan,
-      required this.monthlypayback,
-      required this.reward,
-      required this.punishment,
-      required this.taskreward,
-      required this.taskpunishment,
-      });
+  const Givingsalary({
+    super.key,
+    required this.email,
+    required this.date,
+    required this.adminemail,
+    required this.name,
+    required this.totalworkedtime,
+    required this.worktarget,
+    required this.salary,
+    required this.loan,
+    required this.monthlypayback,
+    required this.reward,
+    required this.punishment,
+    required this.taskreward,
+    required this.taskpunishment,
+  });
 
   @override
   State<Givingsalary> createState() => _GivingsalaryState();
@@ -48,6 +48,25 @@ class _GivingsalaryState extends State<Givingsalary> {
   int calculateMonthlyTarget(int dailyHours, DateTime date) {
     final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
     return dailyHours * daysInMonth;
+  }
+
+  String _formatRemainingTime(int workTargetHours, Duration totalWorkedTime) {
+    // Convert work target (in hours) to minutes
+    final targetMinutes = workTargetHours * 60;
+    // Get total worked time in minutes
+    final workedMinutes = totalWorkedTime.inMinutes;
+    // Calculate remaining minutes
+    final remainingMinutes = targetMinutes - workedMinutes;
+
+    if (remainingMinutes <= 0) {
+      return '0 کاتژمێر و 0 خولەک';
+    }
+
+    // Convert remaining minutes to hours and minutes
+    final hours = remainingMinutes ~/ 60;
+    final minutes = remainingMinutes % 60;
+
+    return '$hours کاتژمێر و $minutes خولەک';
   }
 
   @override
@@ -83,7 +102,7 @@ class _GivingsalaryState extends State<Givingsalary> {
                   fontWeight: FontWeight.bold),
             ),
           ),
-         
+
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -147,6 +166,20 @@ class _GivingsalaryState extends State<Givingsalary> {
                   fontSize: 16.sp,
                   color: Colors.black,
                   fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            width: 100.w,
+            alignment: Alignment.centerRight,
+            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
+            child: Text(
+              'کاتی کارکردنی ماوە : ${_formatRemainingTime(widget.worktarget, widget.totalworkedtime)}',
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 // In Givingsalary widget, update the target display
@@ -307,8 +340,7 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 5.h),
             child: Text(
-              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - _calculatePunishment() - int.parse(monthlypaymentcontroller.value.text) + widget.reward - widget.punishment + ( widget.taskreward -
-      widget.taskpunishment))} دینار',
+              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - _calculatePunishment() - int.parse(monthlypaymentcontroller.value.text) + widget.reward - widget.punishment + (widget.taskreward - widget.taskpunishment))} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize: 18.sp,
@@ -334,8 +366,7 @@ class _GivingsalaryState extends State<Givingsalary> {
                         return AlertDialog(
                           title: Text('پێدانی موچە'),
                           content: Text(
-                              'دڵنیایت لە پێدانی موچەی مانگی  ${widget.date.month} بە بڕی ${NumberFormat("#,###").format(widget.salary - (int.parse(monthlypaymentcontroller.value.text) + ((widget.worktarget - widget.totalworkedtime.inHours) * int.parse(punishmentamountcontroller.value.text))) + widget.reward - widget.punishment + ( widget.taskreward -
-      widget.taskpunishment))} دینار'),
+                              'دڵنیایت لە پێدانی موچەی مانگی  ${widget.date.month} بە بڕی ${NumberFormat("#,###").format(widget.salary - (int.parse(monthlypaymentcontroller.value.text) + ((widget.worktarget - widget.totalworkedtime.inHours) * int.parse(punishmentamountcontroller.value.text))) + widget.reward - widget.punishment + (widget.taskreward - widget.taskpunishment))} دینار'),
                           actions: [
                             Material1.button(
                                 label: 'بەڵێ',
@@ -381,8 +412,9 @@ class _GivingsalaryState extends State<Givingsalary> {
                                         int.parse(monthlypaymentcontroller
                                             .value.text) +
                                         widget.reward -
-                                        widget.punishment+( widget.taskreward -
-      widget.taskpunishment))
+                                        widget.punishment +
+                                        (widget.taskreward -
+                                            widget.taskpunishment))
                                   }).then((value) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
