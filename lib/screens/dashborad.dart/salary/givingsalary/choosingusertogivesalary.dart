@@ -84,95 +84,134 @@ class _ChoosingUserForGivingSalaryState
 
 // In your ChoosingUserForGivingSalary widget
   Future<void> _proceedWithSalary(
-    BuildContext context,
-    String name,
-    String email,
-    int salary,
-    String loan,
-    num monthlyPayback,
-  ) async {
-    final userDoc =
-        await FirebaseFirestore.instance.collection('user').doc(email).get();
+  BuildContext context,
+  String name,
+  String email,
+  int salary,
+  String loan,
+  num monthlyPayback,
+) async {
+  final userDoc =
+      await FirebaseFirestore.instance.collection('user').doc(email).get();
 
-    final dailyWorkHours = userDoc['worktarget'] as int? ?? 8;
+  final dailyWorkHours = userDoc['worktarget'] as int? ?? 8;
 
-    // Get the user's selected work days
-    List<int> workDays = [];
-    final dynamicWeekdays = userDoc['weekdays'];
+  // Get the user's selected work days
+  List<int> workDays = [];
+  final dynamicWeekdays = userDoc['weekdays'];
 
-    if (dynamicWeekdays is List) {
-      workDays = dynamicWeekdays
-          .whereType<int>()
-          .where((day) => day >= 1 && day <= 7)
-          .toList();
-    }
+  if (dynamicWeekdays is List) {
+    workDays = dynamicWeekdays
+        .whereType<int>()
+        .where((day) => day >= 1 && day <= 7)
+        .toList();
+  }
 
-    if (workDays.isEmpty) {
-      workDays = [6, 7, 1, 2, 3, 4]; // Sat, Sun, Mon, Tue, Wed, Thu
-    }
+  if (workDays.isEmpty) {
+    workDays = [6, 7, 1, 2, 3, 4]; // Sat, Sun, Mon, Tue, Wed, Thu
+  }
 
-    final dates = await showMonthRangePicker(
-      context: context,
-      firstDate: DateTime(DateTime.now().year - 1, 1),
-      rangeList: false,
-    );
+  final dates = await showMonthRangePicker(
+    context: context,
+    firstDate: DateTime(DateTime.now().year - 1, 1),
+    rangeList: false,
+  );
 
-    if (dates == null || dates.isEmpty) return;
+  if (dates == null || dates.isEmpty) return;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        title: Column(
-          children: [
-            Center(child: CircularProgressIndicator()),
-            Text('تکایە چاوەڕێکە...'),
-          ],
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => const AlertDialog(
+      title: Column(
+        children: [
+          Center(child: CircularProgressIndicator()),
+          Text('تکایە چاوەڕێکە...'),
+        ],
+      ),
+    ),
+  );
+
+  try {
+    final totalWorkedTime = await _calculateTotalWorkedTime(email, dates[0]);
+    final workingDays = await calculateWorkingDays(dates[0], workDays);
+
+    // Calculate absence days for the selected month
+    final absenceDays = await _calculateAbsenceDays(email, dates[0]);
+
+    // Calculate monthly target excluding absence days
+    final monthlyTarget = dailyWorkHours * (workingDays - absenceDays);
+
+    final (reward, punishment) =
+        await _calculateRewardAndPunishment(email, dates[0]);
+    final (taskReward, taskPunishment) =
+        await _calculateTaskRewardAndPunishment(email, dates[0]);
+
+    if (!mounted) return;
+    Navigator.pop(context);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Givingsalary(
+          name: name,
+          adminemail: widget.email,
+          email: email,
+          date: dates[0],
+          totalworkedtime: totalWorkedTime,
+          worktarget: monthlyTarget,
+          salary: salary,
+          loan: loan,
+          monthlypayback: monthlyPayback,
+          reward: reward,
+          punishment: punishment,
+          taskreward: taskReward,
+          taskpunishment: taskPunishment,
+          absenceDays: absenceDays, // Pass absence days
+          dailyWorkHours: dailyWorkHours, // Pass daily work hours
         ),
       ),
     );
-
-    try {
-      final totalWorkedTime = await _calculateTotalWorkedTime(email, dates[0]);
-      final workingDays = await calculateWorkingDays(dates[0], workDays);
-      final monthlyTarget = dailyWorkHours * workingDays;
-      final (reward, punishment) =
-          await _calculateRewardAndPunishment(email, dates[0]);
-
-            final (taskReward, taskPunishment) = await _calculateTaskRewardAndPunishment(email, dates[0]);
-
-
-      if (!mounted) return;
-      Navigator.pop(context);
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Givingsalary(
-            name: name,
-            adminemail: widget.email,
-            email: email,
-            date: dates[0],
-            totalworkedtime: totalWorkedTime,
-            worktarget: monthlyTarget,
-            salary: salary,
-            loan: loan,
-            monthlypayback: monthlyPayback,
-            reward: reward,
-            punishment: punishment,
-                    taskreward: taskReward,
-        taskpunishment: taskPunishment,
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    }
+  } catch (e) {
+    if (!mounted) return;
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
   }
+}
+
+// New method to calculate absence days
+Future<int> _calculateAbsenceDays(String email, DateTime date) async {
+  final firstDay = DateTime(date.year, date.month, 1);
+  final lastDay = DateTime(date.year, date.month + 1, 0);
+
+  final absenceSnapshot = await FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('absentmanagement')
+      .where('status', isEqualTo: 'accepted')
+      .where('start', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
+      .where('end', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDay))
+      .get();
+
+  int totalAbsenceDays = 0;
+
+  for (var doc in absenceSnapshot.docs) {
+    final start = doc['start'].toDate();
+    final end = doc['end'].toDate();
+
+    // Adjust start and end to be within the selected month
+    final effectiveStart = start.isBefore(firstDay) ? firstDay : start;
+    final effectiveEnd = end.isAfter(lastDay) ? lastDay : end;
+
+    // Calculate days between effective start and end
+    int days = effectiveEnd.difference(effectiveStart).inDays + 1;
+    totalAbsenceDays += days;
+  }
+
+  return totalAbsenceDays;
+}
 
   Future<int> calculateWorkingDays(DateTime month, List<int> workDays) async {
     final firstDay = DateTime(month.year, month.month, 1);

@@ -19,6 +19,9 @@ class Givingsalary extends StatefulWidget {
   final num punishment;
   final num taskreward;
   final num taskpunishment;
+  final int absenceDays; // New parameter for absence days
+  final int dailyWorkHours; // New parameter for daily work hours
+
   const Givingsalary({
     super.key,
     required this.email,
@@ -34,6 +37,8 @@ class Givingsalary extends StatefulWidget {
     required this.punishment,
     required this.taskreward,
     required this.taskpunishment,
+    required this.absenceDays,
+    required this.dailyWorkHours,
   });
 
   @override
@@ -102,7 +107,20 @@ class _GivingsalaryState extends State<Givingsalary> {
                   fontWeight: FontWeight.bold),
             ),
           ),
-
+          Container(
+            width: 100.w,
+            alignment: Alignment.centerRight,
+            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
+            child: Text(
+              'ژمارەی ڕۆژانی مۆڵەت : ${widget.absenceDays} ڕۆژ واتە ${widget.absenceDays * widget.dailyWorkHours}  کاتژمێر',
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+         
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
