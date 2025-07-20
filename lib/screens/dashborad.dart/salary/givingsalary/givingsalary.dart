@@ -1,8 +1,11 @@
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/screens/dashborad.dart/salary/invoice/widgets/invoice_generator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sizer/sizer.dart';
 
 class Givingsalary extends StatefulWidget {
@@ -74,6 +77,80 @@ class _GivingsalaryState extends State<Givingsalary> {
     return '$hours کاتژمێر و $minutes خولەک';
   }
 
+  Future<void> _generateAndPrintInvoice() async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            content: Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text('Generating invoice...'),
+              ],
+            ),
+          );
+        },
+      );
+
+      final invoiceGenerator = InvoiceGenerator();
+      final file = await invoiceGenerator.generateInvoice(
+        employeeName: widget.name,
+        employeeEmail: widget.email,
+        paymentDate: widget.date,
+        salary: widget.salary,
+        totalWorkedTime: widget.totalworkedtime,
+        workTarget: widget.worktarget,
+        absenceDays: widget.absenceDays,
+        dailyWorkHours: widget.dailyWorkHours,
+        reward: widget.reward,
+        punishment: widget.punishment,
+        taskReward: widget.taskreward,
+        taskPunishment: widget.taskpunishment,
+        adminEmail: widget.adminemail,
+        monthlyPayback: int.parse(monthlypaymentcontroller.text.isNotEmpty
+            ? monthlypaymentcontroller.text
+            : '0'),
+        punishmentPerHour: int.parse(punishmentamountcontroller.text.isNotEmpty
+            ? punishmentamountcontroller.text
+            : '0'),
+        givenSalary: widget.salary -
+            _calculatePunishment() -
+            int.parse(monthlypaymentcontroller.text.isNotEmpty
+                ? monthlypaymentcontroller.text
+                : '0') +
+            widget.reward -
+            widget.punishment +
+            (widget.taskreward - widget.taskpunishment),
+        loan: widget.loan,
+      );
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      // Try to open the file
+      final result = await OpenFile.open(file.path);
+      print('OpenFile result: ${result.message}');
+
+      // Try to share the file
+      await Share.shareXFiles([XFile(file.path)],
+          text: 'Invoice for ${widget.name}');
+
+      print('Invoice generated successfully at: ${file.path}');
+    } catch (e) {
+      // Close loading dialog if it's still open
+      Navigator.of(context, rootNavigator: true).pop();
+
+      print('Error generating invoice: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generating invoice: $e')),
+      );
+    }
+  }
+
   @override
   void initState() {
     punishmentamountcontroller.text = 500.toString();
@@ -91,6 +168,15 @@ class _GivingsalaryState extends State<Givingsalary> {
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
+        actions: [
+          // Generate and show invoice
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () async {
+              await _generateAndPrintInvoice();
+            },
+          ),
+        ],
       ),
       body: ListView(
         children: [
@@ -120,7 +206,7 @@ class _GivingsalaryState extends State<Givingsalary> {
                   fontWeight: FontWeight.bold),
             ),
           ),
-         
+
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -390,57 +476,72 @@ class _GivingsalaryState extends State<Givingsalary> {
                                 label: 'بەڵێ',
                                 buttoncolor: Material1.primaryColor,
                                 textcolor: Colors.white,
-                                function: () {
-                                  FirebaseFirestore.instance
-                                      .collection('user')
-                                      .doc(widget.email)
-                                      .collection('salary')
-                                      .doc(
-                                          '${widget.date.year}-${widget.date.month}')
-                                      .set({
-                                    'totalworkedhours':
-                                        widget.totalworkedtime.inHours,
-                                    'givenby': widget.adminemail,
-                                    'date': widget.date,
-                                    'totalmissedworkhours': (widget.worktarget -
-                                        widget.totalworkedtime.inHours),
-                                    'punishmentformissingwork': ((widget
-                                                .worktarget -
-                                            widget.totalworkedtime.inHours) *
-                                        int.parse(punishmentamountcontroller
-                                            .value.text)),
-                                    'punishmentpermissedworkinghour':
-                                        punishmentamountcontroller.value.text,
-                                    'totalpunishment': ((widget.worktarget -
-                                                widget
-                                                    .totalworkedtime.inHours) *
-                                            int.parse(punishmentamountcontroller
-                                                .value.text)) +
-                                        widget.punishment,
-                                    'monthlypayback':
-                                        monthlypaymentcontroller.value.text,
-                                    'salary': widget.salary,
-                                    'reward': widget.reward,
-                                    'punishmentgiven': widget.punishment,
-                                    'missedhoursofwork': (widget.worktarget -
-                                        widget.totalworkedtime.inHours),
-                                    'isreceived': false,
-                                    'givensalary': (widget.salary -
-                                        _calculatePunishment() -
-                                        int.parse(monthlypaymentcontroller
-                                            .value.text) +
-                                        widget.reward -
-                                        widget.punishment +
-                                        (widget.taskreward -
-                                            widget.taskpunishment))
-                                  }).then((value) {
+                                function: () async {
+                                  try {
+                                    // Save to Firestore first
+                                    await FirebaseFirestore.instance
+                                        .collection('user')
+                                        .doc(widget.email)
+                                        .collection('salary')
+                                        .doc(
+                                            '${widget.date.year}-${widget.date.month}')
+                                        .set({
+                                      'totalworkedhours':
+                                          widget.totalworkedtime.inHours,
+                                      'givenby': widget.adminemail,
+                                      'date': widget.date,
+                                      'totalmissedworkhours':
+                                          (widget.worktarget -
+                                              widget.totalworkedtime.inHours),
+                                      'punishmentformissingwork':
+                                          _calculatePunishment(),
+                                      'punishmentpermissedworkinghour':
+                                          int.parse(punishmentamountcontroller
+                                                  .text.isNotEmpty
+                                              ? punishmentamountcontroller.text
+                                              : '0'),
+                                      'totalpunishment':
+                                          _calculatePunishment() +
+                                              widget.punishment,
+                                      'monthlypayback': int.parse(
+                                          monthlypaymentcontroller
+                                                  .text.isNotEmpty
+                                              ? monthlypaymentcontroller.text
+                                              : '0'),
+                                      'salary': widget.salary,
+                                      'reward': widget.reward,
+                                      'punishmentgiven': widget.punishment,
+                                      'taskreward': widget.taskreward,
+                                      'taskpunishment': widget.taskpunishment,
+                                      'missedhoursofwork': (widget.worktarget -
+                                          widget.totalworkedtime.inHours),
+                                      'isreceived': false,
+                                      'givensalary': (widget.salary -
+                                          _calculatePunishment() -
+                                          int.parse(monthlypaymentcontroller
+                                                  .text.isNotEmpty
+                                              ? monthlypaymentcontroller.text
+                                              : '0') +
+                                          widget.reward -
+                                          widget.punishment +
+                                          (widget.taskreward -
+                                              widget.taskpunishment))
+                                    });
+
+                                    // Show success message
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                             content: Text(
                                                 'موچەی مانگی ${widget.date.month} بەسەرکەوتووی درا بە ${widget.name}')));
+
+                                    // Navigate back
                                     Navigator.popUntil(
                                         context, (route) => route.isFirst);
-                                  });
+                                  } catch (e) {
+                                    print('Error in button action: $e');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Error: $e')));
+                                  }
                                 }),
                             Material1.button(
                                 label: 'نەخێر',

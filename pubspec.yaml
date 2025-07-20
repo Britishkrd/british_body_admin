@@ -74,6 +74,7 @@ dependencies:
   google_fonts: ^6.2.1
   google_maps_flutter: any
   location: ^8.0.0
+  share_plus: ^11.0.0
   
 dev_dependencies:
   flutter_test:
@@ -99,8 +100,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+  
     - lib/assets/
     - lib/assets/sounds/
+    - assets/img/logo.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -118,6 +121,10 @@ flutter:
     - family: kurdish
       fonts:
         - asset: lib/assets/kurdish.ttf
+
+    - family: arabic
+      fonts:
+        - asset: assets/fonts/arabic.ttf
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
