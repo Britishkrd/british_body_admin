@@ -35,7 +35,6 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
   @override
   void initState() {
     super.initState();
-    // Set the selected month to current month by default
     _selectedMonth = DateTime.now();
   }
 
@@ -48,7 +47,6 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
         .doc(taskId)
         .update({'status': newStatus});
 
-    // Only add punishment if amount is greater than 0
     if (newStatus == 'unfinished' &&
         deductionAmount != null &&
         deductionAmount > 0 &&
@@ -93,7 +91,6 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
   }
 
   Future<void> _launchURL(String url) async {
-    // Ensure URL has a scheme
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = 'https://$url';
     }
@@ -156,7 +153,7 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         );
-      default: // pending
+      default:
         return LinearGradient(
           colors: [Colors.orange.shade400, Colors.orange.shade700],
           begin: Alignment.topLeft,
@@ -165,7 +162,6 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
     }
   }
 
-  // Updated method to use the custom month/year picker
   Future<void> _selectMonth(BuildContext context) async {
     final DateTime? picked = await MonthYearPickerDialog.show(
       context: context,
@@ -184,7 +180,7 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
 
   void _clearFilter() {
     setState(() {
-      _selectedMonth = DateTime.now(); // Reset to current month instead of null
+      _selectedMonth = DateTime.now();
     });
   }
 
@@ -249,11 +245,8 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
             onTap: () {
               setState(() {
                 if (_selectedMonth == null) {
-                  // If currently showing "View All" (i.e., _selectedMonth is null),
-                  // set _selectedMonth to the current month
                   _selectedMonth = DateTime.now();
                 } else {
-                  // If currently showing a specific month, switch to "View All" by setting _selectedMonth to null
                   _selectedMonth = null;
                 }
               });
@@ -374,10 +367,10 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                           final deductionAmount =
                               task['deductionAmount']?.toDouble() ?? 0.0;
                           final taskData = task.data() as Map<String, dynamic>?;
-                          final submissionLink = taskData != null &&
-                                  taskData.containsKey('submissionLink')
-                              ? task['submissionLink'] as String?
-                              : null;
+                          final submissionLinks = taskData != null &&
+                                  taskData.containsKey('submissionLinks')
+                              ? List<String>.from(task['submissionLinks'] ?? [])
+                              : [];
 
                           return GestureDetector(
                             onTap: () {
@@ -455,19 +448,16 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                                       intl.DateFormat('dd/MM/yyyy, hh:mm a')
                                           .format(deadline),
                                     ),
-
-                                    // Display link for completed tasks
                                     if ((status == 'completed' ||
                                             status ==
                                                 'complete after unfinished') &&
-                                        submissionLink?.isNotEmpty == true) ...[
+                                        submissionLinks.isNotEmpty) ...[
                                       SizedBox(height: 1.h),
                                       _buildClickableLinkRow(
                                         Icons.link,
-                                        submissionLink!,
+                                        submissionLinks[0], // Display only the first link
                                       ),
                                     ],
-
                                     SizedBox(height: 2.h),
                                     Row(
                                       mainAxisAlignment:
@@ -655,7 +645,6 @@ class _YearMonthPickerState extends State<YearMonthPicker> {
 
     return Column(
       children: [
-        // Header with year navigation
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
@@ -694,7 +683,6 @@ class _YearMonthPickerState extends State<YearMonthPicker> {
             ],
           ),
         ),
-        // Month grid
         Expanded(
           child: GridView.count(
             padding: const EdgeInsets.all(16),
