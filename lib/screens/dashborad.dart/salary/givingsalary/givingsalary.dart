@@ -17,13 +17,13 @@ class Givingsalary extends StatefulWidget {
   final int worktarget;
   final num salary;
   final String loan;
-  final num monthlypayback;
+  final int monthlypayback; // Changed to int
   final num reward;
   final num punishment;
   final num taskreward;
   final num taskpunishment;
-  final int absenceDays; // New parameter for absence days
-  final int dailyWorkHours; // New parameter for daily work hours
+  final int absenceDays;
+  final int dailyWorkHours;
 
   const Givingsalary({
     super.key,
@@ -52,25 +52,20 @@ class _GivingsalaryState extends State<Givingsalary> {
   TextEditingController punishmentamountcontroller = TextEditingController();
   TextEditingController monthlypaymentcontroller = TextEditingController();
 
-  // Add this helper function to your _GivingsalaryState class
   int calculateMonthlyTarget(int dailyHours, DateTime date) {
     final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
     return dailyHours * daysInMonth;
   }
 
   String _formatRemainingTime(int workTargetHours, Duration totalWorkedTime) {
-    // Convert work target (in hours) to minutes
     final targetMinutes = workTargetHours * 60;
-    // Get total worked time in minutes
     final workedMinutes = totalWorkedTime.inMinutes;
-    // Calculate remaining minutes
     final remainingMinutes = targetMinutes - workedMinutes;
 
     if (remainingMinutes <= 0) {
       return '0 کاتژمێر و 0 خولەک';
     }
 
-    // Convert remaining minutes to hours and minutes
     final hours = remainingMinutes ~/ 60;
     final minutes = remainingMinutes % 60;
 
@@ -79,7 +74,6 @@ class _GivingsalaryState extends State<Givingsalary> {
 
   Future<void> _generateAndPrintInvoice() async {
     try {
-      // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -128,22 +122,17 @@ class _GivingsalaryState extends State<Givingsalary> {
         loan: widget.loan,
       );
 
-      // Close loading dialog
       Navigator.of(context).pop();
 
-      // Try to open the file
       final result = await OpenFile.open(file.path);
       print('OpenFile result: ${result.message}');
 
-      // Try to share the file
       await Share.shareXFiles([XFile(file.path)],
           text: 'Invoice for ${widget.name}');
 
       print('Invoice generated successfully at: ${file.path}');
     } catch (e) {
-      // Close loading dialog if it's still open
       Navigator.of(context, rootNavigator: true).pop();
-
       print('Error generating invoice: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error generating invoice: $e')),
@@ -154,12 +143,14 @@ class _GivingsalaryState extends State<Givingsalary> {
   @override
   void initState() {
     punishmentamountcontroller.text = 500.toString();
-    monthlypaymentcontroller.text = widget.monthlypayback.toString();
+    monthlypaymentcontroller.text = widget.monthlypayback.toString(); // Already an int
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final loanAmount = num.tryParse(widget.loan) ?? 0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -169,7 +160,6 @@ class _GivingsalaryState extends State<Givingsalary> {
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
         actions: [
-          // Generate and show invoice
           IconButton(
             icon: const Icon(Icons.print),
             onPressed: () async {
@@ -188,9 +178,10 @@ class _GivingsalaryState extends State<Givingsalary> {
               '${widget.name} : ناوی کارمەند',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -198,15 +189,15 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'ژمارەی ڕۆژانی مۆڵەت : ${widget.absenceDays} ڕۆژ واتە ${widget.absenceDays * widget.dailyWorkHours}  کاتژمێر',
+              'ژمارەی ڕۆژانی مۆڵەت : ${widget.absenceDays} ڕۆژ واتە ${widget.absenceDays * widget.dailyWorkHours} کاتژمێر',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -215,9 +206,10 @@ class _GivingsalaryState extends State<Givingsalary> {
               'کۆی پاداشتی ئەرکەکان : ${NumberFormat("#,###").format(widget.taskreward)} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -228,9 +220,10 @@ class _GivingsalaryState extends State<Givingsalary> {
               'کۆی سزای ئەرکەکان : ${NumberFormat("#,###").format(widget.taskpunishment)} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -241,9 +234,10 @@ class _GivingsalaryState extends State<Givingsalary> {
               'کۆی پاداشتی پێدراو : ${NumberFormat("#,###").format(widget.reward)} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -251,12 +245,13 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'سزا پێدراو  : ${NumberFormat("#,###").format(widget.punishment)} دینار',
+              'سزا پێدراو : ${NumberFormat("#,###").format(widget.punishment)} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -264,12 +259,13 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'کۆی کاتی کارکردن :  ${widget.totalworkedtime.inHours} کاتژمێر و ${widget.totalworkedtime.inMinutes.remainder(60)} خولەک',
+              'کۆی کاتی کارکردن : ${widget.totalworkedtime.inHours} کاتژمێر و ${widget.totalworkedtime.inMinutes.remainder(60)} خولەک',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -286,7 +282,6 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
-// In Givingsalary widget, update the target display
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -295,12 +290,12 @@ class _GivingsalaryState extends State<Givingsalary> {
               'ئامانجی کارکردن : ${widget.worktarget} کاتژمێر (${(widget.worktarget / 8).toStringAsFixed(0)} ڕۆژ)',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -309,9 +304,10 @@ class _GivingsalaryState extends State<Givingsalary> {
               'بڕی سزای کەمی کاتی کارکردن : ${NumberFormat("#,###").format(_calculatePunishment())} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -322,9 +318,10 @@ class _GivingsalaryState extends State<Givingsalary> {
               'بڕی موچە : ${NumberFormat("#,###").format(widget.salary)} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -332,12 +329,13 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'بڕی سولفەی وەرگیراو : ${NumberFormat("#,###").format(int.parse(widget.loan))} دینار',
+              'بڕی سولفەی وەرگیراو : ${NumberFormat("#,###").format((num.tryParse(widget.loan) ?? 0).toInt())} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -345,12 +343,13 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'بڕی پارەدانەوەی مانگانە : ${NumberFormat("#,###").format(int.parse(monthlypaymentcontroller.value.text))} دینار',
+              'بڕی پارەدانەوەی مانگانە : ${NumberFormat("#,###").format(num.parse(monthlypaymentcontroller.text.isNotEmpty ? monthlypaymentcontroller.text : '0').toInt())} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -361,9 +360,10 @@ class _GivingsalaryState extends State<Givingsalary> {
               'بڕی پارەدانەوەی مانگانە',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -371,30 +371,29 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Material1.textfield(
-                hint: 'بڕی پارەدانەوەی مانگانە',
-                textColor: Colors.black,
-                onchange: (p0) {
-                  setState(() {});
-                },
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  TextInputFormatter.withFunction(
-                    (oldValue, newValue) {
-                      if (newValue.text.isEmpty) {
-                        return TextEditingValue(text: '0');
-                      }
-
-                      if (int.parse(newValue.text) < 0 &&
-                          int.tryParse(newValue.text) != null) {
-                        return TextEditingValue(text: '0');
-                      }
-
-                      return newValue;
-                    },
-                  ),
-                ],
-                inputType: TextInputType.number,
-                controller: monthlypaymentcontroller),
+              hint: 'بڕی پارەدانەوەی مانگانە',
+              textColor: Colors.black,
+              onchange: (p0) {
+                setState(() {});
+              },
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                TextInputFormatter.withFunction(
+                  (oldValue, newValue) {
+                    if (newValue.text.isEmpty) {
+                      return const TextEditingValue(text: '0');
+                    }
+                    if (int.parse(newValue.text) < 0 &&
+                        int.tryParse(newValue.text) != null) {
+                      return const TextEditingValue(text: '0');
+                    }
+                    return newValue;
+                  },
+                ),
+              ],
+              inputType: TextInputType.number,
+              controller: monthlypaymentcontroller,
+            ),
           ),
           Container(
             width: 100.w,
@@ -404,9 +403,10 @@ class _GivingsalaryState extends State<Givingsalary> {
               'بڕی سزا',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -414,42 +414,42 @@ class _GivingsalaryState extends State<Givingsalary> {
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Material1.textfield(
-                hint: 'بڕی سزا بۆ هەموو کاتژمێرێک کارنەکردن',
-                onchange: (p0) {
-                  setState(() {});
-                },
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  TextInputFormatter.withFunction(
-                    (oldValue, newValue) {
-                      if (newValue.text.isEmpty) {
-                        return TextEditingValue(text: '0');
-                      }
-
-                      if (int.parse(newValue.text) < 0 &&
-                          int.tryParse(newValue.text) != null) {
-                        return TextEditingValue(text: '0');
-                      }
-
-                      return newValue;
-                    },
-                  ),
-                ],
-                inputType: TextInputType.number,
-                textColor: Colors.black,
-                controller: punishmentamountcontroller),
+              hint: 'بڕی سزا بۆ هەموو کاتژمێرێک کارنەکردن',
+              onchange: (p0) {
+                setState(() {});
+              },
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                TextInputFormatter.withFunction(
+                  (oldValue, newValue) {
+                    if (newValue.text.isEmpty) {
+                      return const TextEditingValue(text: '0');
+                    }
+                    if (int.parse(newValue.text) < 0 &&
+                        int.tryParse(newValue.text) != null) {
+                      return const TextEditingValue(text: '0');
+                    }
+                    return newValue;
+                  },
+                ),
+              ],
+              inputType: TextInputType.number,
+              textColor: Colors.black,
+              controller: punishmentamountcontroller,
+            ),
           ),
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 5.h),
             child: Text(
-              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - _calculatePunishment() - int.parse(monthlypaymentcontroller.value.text) + widget.reward - widget.punishment + (widget.taskreward - widget.taskpunishment))} دینار',
+              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - _calculatePunishment() - (num.parse(monthlypaymentcontroller.text.isNotEmpty ? monthlypaymentcontroller.text : '0').toInt()) + widget.reward - widget.punishment + (widget.taskreward - widget.taskpunishment))} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
-                  fontSize: 18.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                fontSize: 18.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Container(
@@ -457,118 +457,112 @@ class _GivingsalaryState extends State<Givingsalary> {
             height: 6.h,
             margin: EdgeInsets.fromLTRB(10.w, 3.h, 10.w, 3.h),
             decoration: BoxDecoration(
-                color: Material1.primaryColor,
-                borderRadius: BorderRadius.circular(15)),
+              color: Material1.primaryColor,
+              borderRadius: BorderRadius.circular(15),
+            ),
             child: Material1.button(
-                label: 'پێدانی موچە',
-                buttoncolor: Material1.primaryColor,
-                textcolor: Colors.white,
-                function: () {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('پێدانی موچە'),
-                          content: Text(
-                              'دڵنیایت لە پێدانی موچەی مانگی  ${widget.date.month} بە بڕی ${NumberFormat("#,###").format(widget.salary - (int.parse(monthlypaymentcontroller.value.text) + ((widget.worktarget - widget.totalworkedtime.inHours) * int.parse(punishmentamountcontroller.value.text))) + widget.reward - widget.punishment + (widget.taskreward - widget.taskpunishment))} دینار'),
-                          actions: [
-                            Material1.button(
-                                label: 'بەڵێ',
-                                buttoncolor: Material1.primaryColor,
-                                textcolor: Colors.white,
-                                function: () async {
-                                  try {
-                                    // Save to Firestore first
-                                    await FirebaseFirestore.instance
-                                        .collection('user')
-                                        .doc(widget.email)
-                                        .collection('salary')
-                                        .doc(
-                                            '${widget.date.year}-${widget.date.month}')
-                                        .set({
-                                      'totalworkedhours':
-                                          widget.totalworkedtime.inHours,
-                                      'givenby': widget.adminemail,
-                                      'date': widget.date,
-                                      'totalmissedworkhours':
-                                          (widget.worktarget -
-                                              widget.totalworkedtime.inHours),
-                                      'punishmentformissingwork':
-                                          _calculatePunishment(),
-                                      'punishmentpermissedworkinghour':
-                                          int.parse(punishmentamountcontroller
-                                                  .text.isNotEmpty
-                                              ? punishmentamountcontroller.text
-                                              : '0'),
-                                      'totalpunishment':
-                                          _calculatePunishment() +
-                                              widget.punishment,
-                                      'monthlypayback': int.parse(
-                                          monthlypaymentcontroller
-                                                  .text.isNotEmpty
-                                              ? monthlypaymentcontroller.text
-                                              : '0'),
-                                      'salary': widget.salary,
-                                      'reward': widget.reward,
-                                      'punishmentgiven': widget.punishment,
-                                      'taskreward': widget.taskreward,
-                                      'taskpunishment': widget.taskpunishment,
-                                      'missedhoursofwork': (widget.worktarget -
-                                          widget.totalworkedtime.inHours),
-                                      'isreceived': false,
-                                      'givensalary': (widget.salary -
-                                          _calculatePunishment() -
-                                          int.parse(monthlypaymentcontroller
-                                                  .text.isNotEmpty
-                                              ? monthlypaymentcontroller.text
-                                              : '0') +
-                                          widget.reward -
-                                          widget.punishment +
-                                          (widget.taskreward -
-                                              widget.taskpunishment))
-                                    });
+              label: 'پێدانی موچە',
+              buttoncolor: Material1.primaryColor,
+              textcolor: Colors.white,
+              function: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('پێدانی موچە'),
+                      content: Text(
+                        'دڵنیایت لە پێدانی موچەی مانگی ${widget.date.month} بە بڕی ${NumberFormat("#,###").format(widget.salary - (_calculatePunishment() + (num.parse(monthlypaymentcontroller.text.isNotEmpty ? monthlypaymentcontroller.text : '0').toInt())) + widget.reward - widget.punishment + (widget.taskreward - widget.taskpunishment))} دینار',
+                      ),
+                      actions: [
+                        Material1.button(
+                          label: 'بەڵێ',
+                          buttoncolor: Material1.primaryColor,
+                          textcolor: Colors.white,
+                          function: () async {
+                            try {
+                              await FirebaseFirestore.instance
+                                  .collection('user')
+                                  .doc(widget.email)
+                                  .collection('salary')
+                                  .doc('${widget.date.year}-${widget.date.month}')
+                                  .set({
+                                'totalworkedhours': widget.totalworkedtime.inHours,
+                                'givenby': widget.adminemail,
+                                'date': widget.date,
+                                'totalmissedworkhours':
+                                    (widget.worktarget - widget.totalworkedtime.inHours),
+                                'punishmentformissingwork': _calculatePunishment(),
+                                'punishmentpermissedworkinghour': int.parse(
+                                  punishmentamountcontroller.text.isNotEmpty
+                                      ? punishmentamountcontroller.text
+                                      : '0',
+                                ),
+                                'totalpunishment': _calculatePunishment() + widget.punishment,
+                                'monthlypayback': int.parse(
+                                  monthlypaymentcontroller.text.isNotEmpty
+                                      ? monthlypaymentcontroller.text
+                                      : '0',
+                                ),
+                                'salary': widget.salary,
+                                'reward': widget.reward,
+                                'punishmentgiven': widget.punishment,
+                                'taskreward': widget.taskreward,
+                                'taskpunishment': widget.taskpunishment,
+                                'missedhoursofwork':
+                                    (widget.worktarget - widget.totalworkedtime.inHours),
+                                'isreceived': false,
+                                'givensalary': (widget.salary -
+                                    _calculatePunishment() -
+                                    int.parse(monthlypaymentcontroller.text.isNotEmpty
+                                        ? monthlypaymentcontroller.text
+                                        : '0') +
+                                    widget.reward -
+                                    widget.punishment +
+                                    (widget.taskreward - widget.taskpunishment)),
+                              });
 
-                                    // Show success message
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                            content: Text(
-                                                'موچەی مانگی ${widget.date.month} بەسەرکەوتووی درا بە ${widget.name}')));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'موچەی مانگی ${widget.date.month} بەسەرکەوتووی درا بە ${widget.name}',
+                                  ),
+                                ),
+                              );
 
-                                    // Navigate back
-                                    Navigator.popUntil(
-                                        context, (route) => route.isFirst);
-                                  } catch (e) {
-                                    print('Error in button action: $e');
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Error: $e')));
-                                  }
-                                }),
-                            Material1.button(
-                                label: 'نەخێر',
-                                buttoncolor: Material1.primaryColor,
-                                textcolor: Colors.white,
-                                function: () {
-                                  Navigator.pop(context);
-                                }),
-                          ],
-                        );
-                      });
-                }),
-          )
+                              Navigator.popUntil(context, (route) => route.isFirst);
+                            } catch (e) {
+                              print('Error in button action: $e');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                            }
+                          },
+                        ),
+                        Material1.button(
+                          label: 'نەخێر',
+                          buttoncolor: Material1.primaryColor,
+                          textcolor: Colors.white,
+                          function: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
   }
 
-// In your Givingsalary widget
   num _calculatePunishment() {
-    // Only punish if they worked less than expected, excluding holidays
     final missedHours = widget.worktarget - widget.totalworkedtime.inHours;
-
-    // If worked enough or more, no punishment
     if (missedHours <= 0) return 0;
-
-    // Calculate punishment based on missed hours
-    return missedHours * int.parse(punishmentamountcontroller.value.text);
+    return missedHours * int.parse(punishmentamountcontroller.text.isNotEmpty
+        ? punishmentamountcontroller.text
+        : '0');
   }
 }
