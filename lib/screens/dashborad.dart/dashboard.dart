@@ -28,7 +28,6 @@ import 'package:british_body_admin/screens/dashborad.dart/target/admintarget/cho
 import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/selftargetview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/task_view_detail.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
 import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
@@ -276,7 +275,7 @@ class _DashboardState extends State<Dashboard> {
                                           email: email)));
                         },
                         child: controlpanelcard(
-                            Icons.attach_money, 'وەرگربدانی موچە', 8),
+                            Icons.attach_money, 'وەرگرتنی موچە', 8),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -663,7 +662,6 @@ class _DashboardState extends State<Dashboard> {
                           child: controlpanelcard(Icons.add_location_outlined,
                               'British Body لقەکانی', 35),
                         ),
-
                     ],
                   ),
                 ),
