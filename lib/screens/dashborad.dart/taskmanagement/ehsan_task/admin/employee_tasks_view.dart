@@ -1,21 +1,23 @@
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/send_task_details.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/admin/employee_task_details_view.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/employee/send_task_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class TaskViewDetail extends StatefulWidget {
+class EmployeeTasksView extends StatefulWidget {
   final String email;
+  final String name;
 
-  const TaskViewDetail({super.key, required this.email});
+  const EmployeeTasksView({super.key, required this.email, required this.name});
 
   @override
-  State<TaskViewDetail> createState() => _TaskViewDetailState();
+  State<EmployeeTasksView> createState() => _EmployeeTasksViewState();
 }
 
-class _TaskViewDetailState extends State<TaskViewDetail> {
+class _EmployeeTasksViewState extends State<EmployeeTasksView> {
   DateTime? _selectedMonth;
   final List<String> _monthNames = [
     'January',
@@ -288,6 +290,13 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+        appBar: AppBar(
+          title: Text('بینینی ئەرکی ${widget.name}'),
+          elevation: 0,
+          foregroundColor: Colors.white,
+          backgroundColor: Material1.primaryColor,
+          centerTitle: true,
+        ),
         body: Column(
           children: [
             _buildDateFilterButton(),
@@ -377,7 +386,7 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => SendTaskDetails(
+                                  builder: (context) => EmployeeTaskDetailsView(
                                     email: widget.email,
                                     taskId: task['taskId'],
                                     taskName: task['taskName'],
@@ -455,7 +464,8 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                                       SizedBox(height: 1.h),
                                       _buildClickableLinkRow(
                                         Icons.link,
-                                        submissionLinks[0], // Display only the first link
+                                        submissionLinks[
+                                            0], // Display only the first link
                                       ),
                                     ],
                                     SizedBox(height: 2.h),

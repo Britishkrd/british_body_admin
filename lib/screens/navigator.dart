@@ -2,7 +2,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/checkincheckout/check_in_out_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/dashboard.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/task_view_detail.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/employee/task_view_detail.dart';
 import 'package:british_body_admin/screens/email/email.dart';
 import 'package:british_body_admin/screens/notifications/notifications.dart';
 import 'package:flutter/material.dart';

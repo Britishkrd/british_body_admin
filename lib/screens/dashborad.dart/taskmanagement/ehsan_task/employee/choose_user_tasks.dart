@@ -1,5 +1,6 @@
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/task_view_detail.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/admin/employee_tasks_view.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/employee/task_view_detail.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
@@ -53,17 +54,10 @@ class _ChooseUserForTasksState extends State<ChooseUserForTasks> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                        backgroundColor: Material1.primaryColor,
-                        appBar: AppBar(
-                          title: Text(' $name بینینی ئەرکی'),
-                          elevation: 0,
-                          foregroundColor: Colors.white,
-                          backgroundColor: Material1.primaryColor,
-                          centerTitle: true,
-                        ),
-                        body: TaskViewDetail(email: email),
-                      ),
+                      builder: (context) => EmployeeTasksView(
+                        email: email,
+                        name: name,
+                      )
                     ),
                   );
                 },
