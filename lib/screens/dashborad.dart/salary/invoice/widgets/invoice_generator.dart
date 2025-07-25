@@ -21,6 +21,7 @@ class InvoiceGenerator {
     required num taskReward,
     required num taskPunishment,
     required String adminEmail,
+    required String adminName,
     required int monthlyPayback,
     required int punishmentPerHour,
     required num givenSalary,
@@ -84,6 +85,7 @@ class InvoiceGenerator {
                 taskReward: taskReward,
                 taskPunishment: taskPunishment,
                 adminEmail: adminEmail,
+                adminName: adminName,
                 monthlyPayback: monthlyPayback,
                 punishmentPerHour: punishmentPerHour,
                 givenSalary: givenSalary,
@@ -102,9 +104,10 @@ class InvoiceGenerator {
 
       // Save the PDF
       final directory = await getTemporaryDirectory();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      // final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final formattedDate = DateFormat('MM-yyyy').format(paymentDate);
       final file = File(
-        '${directory.path}/salary_invoice_${employeeEmail.replaceAll('@', '_').replaceAll('.', '_')}_$timestamp.pdf',
+        '${directory.path}/salary_invoice_${employeeName}_$formattedDate.pdf',
       );
 
       final pdfBytes = await pdf.save();
@@ -254,6 +257,7 @@ pw.Widget buildCompleteDetailsSection({
   required num taskReward,
   required num taskPunishment,
   required String adminEmail,
+  required String adminName,
   required int monthlyPayback,
   required int punishmentPerHour,
   required num givenSalary,
@@ -429,10 +433,7 @@ pw.Widget buildCompleteDetailsSection({
 
         // Admin Email
         buildTableRow(
-            label: 'پارەدەر',
-            value: adminEmail,
-            theme: theme,
-            ttfFont: ttfFont),
+            label: 'پارەدەر', value: adminName, theme: theme, ttfFont: ttfFont),
       ],
     ),
   );
