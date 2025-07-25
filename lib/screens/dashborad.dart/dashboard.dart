@@ -26,6 +26,7 @@ import 'package:british_body_admin/screens/dashborad.dart/selftaskview/selftaskv
 import 'package:british_body_admin/screens/dashborad.dart/sound-preview/soundpreview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/admintarget/choosinguserfortarget.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/selftargetview.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/Ehsan%20Task/choose_user_tasks.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
@@ -214,26 +215,36 @@ class _DashboardState extends State<Dashboard> {
                         child: controlpanelcard(Icons.note_add,
                             'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم', 3),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return Viewingalerts(email: email);
-                          }));
-                        },
-                        child: controlpanelcard(
-                            Icons.alarm_add, 'ئاگاداریەکان', 4),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return Viewchangeworktimerequest(email: email);
-                          }));
-                        },
-                        child: controlpanelcard(
-                            Icons.work_history, 'گۆڕینی کارتی کار', 5),
-                      ),
+
+                      if (permissions.contains('adding task'))
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return ChoosingUserFoTaskManagement(email: email);
+                            }));
+                          },
+                          child: controlpanelcard(Icons.note_add_outlined,
+                              'زیادکردنی ئەرک بۆ کارمەندان', 16),
+                        ),
+                      if (permissions.contains('adding task'))
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return ChooseUserForTasks(
+                                    adminEmail: email,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          child: controlpanelcard(Icons.task_outlined,
+                              'بینینی ئەرکی کارمەندەکان', 36),
+                        ),
+
                       GestureDetector(
                         onTap: () {
                           Navigator.push(context,
@@ -255,6 +266,26 @@ class _DashboardState extends State<Dashboard> {
                             Icons.playlist_add_check_circle_rounded,
                             'بینینی پاداشت و سزای ئەرکەکان',
                             33),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return Viewingalerts(email: email);
+                          }));
+                        },
+                        child: controlpanelcard(
+                            Icons.alarm_add, 'ئاگاداریەکان', 4),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return Viewchangeworktimerequest(email: email);
+                          }));
+                        },
+                        child: controlpanelcard(
+                            Icons.work_history, 'گۆڕینی کارتی کار', 5),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -417,17 +448,7 @@ class _DashboardState extends State<Dashboard> {
                           child: controlpanelcard(
                               Icons.task_alt, 'بینینی وردەکاری کارەکان', 15),
                         ),
-                      if (permissions.contains('adding task'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return ChoosingUserFoTaskManagement(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.task_alt, 'زیادکردنی ئەرک وەک ئەدمین', 16),
-                        ),
+
                       if (permissions.contains('sending alert'))
                         GestureDetector(
                           onTap: () {
@@ -662,6 +683,21 @@ class _DashboardState extends State<Dashboard> {
                           child: controlpanelcard(Icons.add_location_outlined,
                               'British Body لقەکانی', 35),
                         ),
+
+                      // Material1.button(
+                      //   label: 'View User Tasks',
+                      //   buttoncolor: Material1.primaryColor,
+                      //   textcolor: Colors.white,
+                      //   function: () {
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) =>
+                      //             ChooseUserForTasks(adminEmail: email),
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
                     ],
                   ),
                 ),
