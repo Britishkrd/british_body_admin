@@ -195,6 +195,362 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
     }).toList();
   }
 
+  // Show dialog to edit task title and links
+  // Future<void> _showEditTaskDialog({
+  //   required String taskId,
+  //   required String taskName,
+  //   required List<String> submissionLinks,
+  //   required String? submissionTitle,
+  // }) async {
+  //   final titleController = TextEditingController(text: submissionTitle ?? '');
+  //   final List<TextEditingController> linkControllers = submissionLinks
+  //       .map((link) => TextEditingController(text: link))
+  //       .toList();
+  //   if (linkControllers.isEmpty) {
+  //     linkControllers.add(TextEditingController());
+  //   }
+
+  //   await showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setDialogState) {
+  //           void addLinkField() {
+  //             setDialogState(() {
+  //               linkControllers.add(TextEditingController());
+  //             });
+  //           }
+
+  //           void removeLinkField(int index) {
+  //             if (linkControllers.length > 1) {
+  //               setDialogState(() {
+  //                 linkControllers[index].dispose();
+  //                 linkControllers.removeAt(index);
+  //               });
+  //             }
+  //           }
+
+  //           return AlertDialog(
+  //             shape: RoundedRectangleBorder(
+  //               borderRadius: BorderRadius.circular(12),
+  //             ),
+  //             title: Text(
+  //               'دەستکاریکردنی ئەرک: $taskName',
+  //               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+  //               textDirection: TextDirection.rtl,
+  //             ),
+  //             content: SingleChildScrollView(
+  //               child: Column(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   TextField(
+  //                     controller: titleController,
+  //                     decoration: InputDecoration(
+  //                       labelText: 'ناونیشان',
+  //                       prefixIcon:
+  //                           Icon(Icons.title, color: Material1.primaryColor),
+  //                       border: OutlineInputBorder(
+  //                         borderRadius: BorderRadius.circular(8),
+  //                       ),
+  //                     ),
+  //                     textDirection: TextDirection.rtl,
+  //                   ),
+  //                   SizedBox(height: 2.h),
+  //                   ...linkControllers.asMap().entries.map((entry) {
+  //                     final index = entry.key;
+  //                     final controller = entry.value;
+  //                     return Padding(
+  //                       padding: EdgeInsets.only(bottom: 1.h),
+  //                       child: Row(
+  //                         children: [
+  //                           Expanded(
+  //                             child: TextField(
+  //                               controller: controller,
+  //                               decoration: InputDecoration(
+  //                                 labelText: 'لینک ${index + 1}',
+  //                                 prefixIcon: Icon(Icons.link,
+  //                                     color: Material1.primaryColor),
+  //                                 border: OutlineInputBorder(
+  //                                   borderRadius: BorderRadius.circular(8),
+  //                                 ),
+  //                               ),
+  //                               textDirection: TextDirection.rtl,
+  //                             ),
+  //                           ),
+  //                           if (linkControllers.length > 1)
+  //                             IconButton(
+  //                               icon: Icon(Icons.remove_circle,
+  //                                   color: Colors.red, size: 20.sp),
+  //                               onPressed: () => removeLinkField(index),
+  //                             ),
+  //                         ],
+  //                       ),
+  //                     );
+  //                   }),
+  //                   Align(
+  //                     alignment: Alignment.centerRight,
+  //                     child: TextButton.icon(
+  //                       onPressed: addLinkField,
+  //                       icon: Icon(Icons.add_circle,
+  //                           color: Material1.primaryColor, size: 20.sp),
+  //                       label: Text(
+  //                         'زیادکردنی لینک',
+  //                         style: TextStyle(
+  //                           fontSize: 16.sp,
+  //                           color: Material1.primaryColor,
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () => Navigator.pop(context),
+  //                 child: Text(
+  //                   'هەڵوەشاندنەوە',
+  //                   style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+  //                 ),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: () async {
+  //                   if (titleController.text.isEmpty ||
+  //                       linkControllers
+  //                           .any((controller) => controller.text.isEmpty)) {
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       const SnackBar(
+  //                         content:
+  //                             Text('هەردوو ناونیشان و هەموو لینکەکان پڕ بکەوە'),
+  //                         backgroundColor: Colors.red,
+  //                       ),
+  //                     );
+  //                     return;
+  //                   }
+
+  //                   await FirebaseFirestore.instance
+  //                       .collection('user')
+  //                       .doc(widget.email)
+  //                       .collection('tasks')
+  //                       .doc(taskId)
+  //                       .update({
+  //                     'submissionTitle': titleController.text,
+  //                     'submissionLinks':
+  //                         linkControllers.map((c) => c.text).toList(),
+  //                   });
+
+  //                   for (var controller in linkControllers) {
+  //                     controller.dispose();
+  //                   }
+  //                   titleController.dispose();
+
+  //                   Navigator.pop(context);
+  //                   ScaffoldMessenger.of(context).showSnackBar(
+  //                     const SnackBar(
+  //                       content: Text('ئەرکەکە بە سەرکەوتویی دەستکاری کرا'),
+  //                       backgroundColor: Colors.green,
+  //                     ),
+  //                   );
+  //                 },
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: Material1.primaryColor,
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(8),
+  //                   ),
+  //                 ),
+  //                 child: Text(
+  //                   'نوێکردنەوە',
+  //                   style: TextStyle(fontSize: 16.sp, color: Colors.white),
+  //                 ),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+  Future<void> _showEditTaskDialog({
+    required String taskId,
+    required String taskName,
+    required List<String> submissionLinks,
+    required String? submissionTitle,
+  }) async {
+    final titleController = TextEditingController(text: submissionTitle ?? '');
+    final List<TextEditingController> linkControllers =
+        submissionLinks.isNotEmpty
+            ? submissionLinks
+                .map((link) => TextEditingController(text: link))
+                .toList()
+            : [
+                TextEditingController()
+              ]; // Initialize with one empty field if no links
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            void addLinkField() {
+              setDialogState(() {
+                linkControllers.add(TextEditingController());
+              });
+            }
+
+            void removeLinkField(int index) {
+              if (linkControllers.length > 1) {
+                setDialogState(() {
+                  linkControllers[index].dispose();
+                  linkControllers.removeAt(index);
+                });
+              }
+            }
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              title: Text(
+                'دەستکاریکردنی ئەرک: $taskName',
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                textDirection: TextDirection.rtl,
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        labelText: 'ناونیشان',
+                        prefixIcon:
+                            Icon(Icons.title, color: Material1.primaryColor),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      textDirection: TextDirection.rtl,
+                    ),
+                    SizedBox(height: 2.h),
+                    ...linkControllers.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final controller = entry.value;
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 1.h),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: controller,
+                                decoration: InputDecoration(
+                                  labelText: 'لینک ${index + 1}',
+                                  prefixIcon: Icon(Icons.link,
+                                      color: Material1.primaryColor),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                textDirection: TextDirection.rtl,
+                              ),
+                            ),
+                            if (linkControllers.length > 1)
+                              IconButton(
+                                icon: Icon(Icons.remove_circle,
+                                    color: Colors.red, size: 20.sp),
+                                onPressed: () => removeLinkField(index),
+                              ),
+                          ],
+                        ),
+                      );
+                    }),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: addLinkField,
+                        icon: Icon(Icons.add_circle,
+                            color: Material1.primaryColor, size: 20.sp),
+                        label: Text(
+                          'زیادکردنی لینک',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: Material1.primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'هەڵوەشاندنەوە',
+                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Require title to be non-empty, but allow links to be optional
+                    if (titleController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('ناونیشان نابێت بەتاڵ بێت'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Filter out empty links to avoid storing them
+                    final updatedLinks = linkControllers
+                        .map((c) => c.text.trim())
+                        .where((link) => link.isNotEmpty)
+                        .toList();
+
+                    await FirebaseFirestore.instance
+                        .collection('user')
+                        .doc(widget.email)
+                        .collection('tasks')
+                        .doc(taskId)
+                        .update({
+                      'submissionTitle': titleController.text.trim(),
+                      'submissionLinks': updatedLinks,
+                    });
+
+                    // Clean up controllers
+                    for (var controller in linkControllers) {
+                      controller.dispose();
+                    }
+                    titleController.dispose();
+
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('ئەرکەکە بە سەرکەوتویی دەستکاری کرا'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Material1.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'نوێکردنەوە',
+                    style: TextStyle(fontSize: 16.sp, color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildDateFilterButton() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
@@ -367,10 +723,15 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                           final deductionAmount =
                               task['deductionAmount']?.toDouble() ?? 0.0;
                           final taskData = task.data() as Map<String, dynamic>?;
-                          final submissionLinks = taskData != null &&
+                          final List<String> submissionLinks = taskData !=
+                                      null &&
                                   taskData.containsKey('submissionLinks')
                               ? List<String>.from(task['submissionLinks'] ?? [])
                               : [];
+                          final submissionTitle = taskData != null &&
+                                  taskData.containsKey('submissionTitle')
+                              ? task['submissionTitle'] as String?
+                              : null;
 
                           return GestureDetector(
                             onTap: () {
@@ -405,23 +766,30 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(height: 1.h),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(
-                                          child: Text(
-                                            task['taskName'],
-                                            style: TextStyle(
-                                              fontSize: 18.sp,
-                                              fontWeight: FontWeight.bold,
+                                        if ((status == 'completed' ||
+                                                status ==
+                                                    'complete after unfinished') &&
+                                            submissionLinks.isNotEmpty)
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.edit,
                                               color: Colors.white,
+                                              size: 20.sp,
                                             ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
+                                            onPressed: () =>
+                                                _showEditTaskDialog(
+                                              taskId: task['taskId'],
+                                              taskName: task['taskName'],
+                                              submissionLinks: submissionLinks,
+                                              submissionTitle: submissionTitle,
+                                            ),
+                                          )
+                                        else
+                                          SizedBox(width: 20.sp),
                                         Container(
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 3.w, vertical: 0.5.h),
@@ -442,6 +810,17 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                                         ),
                                       ],
                                     ),
+                                    SizedBox(height: 1.h),
+                                    Text(
+                                      task['taskName'],
+                                      style: TextStyle(
+                                        fontSize: 18.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                     SizedBox(height: 2.h),
                                     _buildDetailRow(
                                       Icons.calendar_today,
@@ -455,7 +834,7 @@ class _TaskViewDetailState extends State<TaskViewDetail> {
                                       SizedBox(height: 1.h),
                                       _buildClickableLinkRow(
                                         Icons.link,
-                                        submissionLinks[0], // Display only the first link
+                                        submissionLinks[0],
                                       ),
                                     ],
                                     SizedBox(height: 2.h),

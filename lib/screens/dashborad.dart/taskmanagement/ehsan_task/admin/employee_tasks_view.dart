@@ -1,5 +1,5 @@
 import 'package:british_body_admin/material/materials.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/admin/employee_task_details_view.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/employee/employee_task_details_view.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/employee/send_task_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';

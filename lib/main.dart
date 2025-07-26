@@ -378,15 +378,6 @@ class _MyAppState extends State<MyApp> {
     city = preference.getString('city') ?? '';
   }
 
-  // locationsfunction() async {
-  //   final SharedPreferences preference = await SharedPreferences.getInstance();
-
-  //   List<String> locations = preference.getStringList('locations') ?? [];
-  //   context.read<Listprovider>().setinglocations(locations);
-  //   String location = preference.getString('location') ?? locations.first;
-  //   context.read<Listprovider>().setinglocation(location);
-  // }
-
   @override
   Widget build(BuildContext context) {
     // final FlutterLocalization localization = FlutterLocalization.instance;
