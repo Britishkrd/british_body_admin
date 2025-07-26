@@ -4,7 +4,6 @@ import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/auth/login_screen.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/absentmanagement.dart';
 import 'package:british_body_admin/screens/dashborad.dart/absentmanagement/acceptingabsence.dart';
-import 'package:british_body_admin/screens/dashborad.dart/addingnotes/choosingtaskforaddingnotes.dart';
 import 'package:british_body_admin/screens/dashborad.dart/alert/viewingalerts.dart';
 import 'package:british_body_admin/screens/dashborad.dart/changingworkerphone/changingworkerphone.dart';
 import 'package:british_body_admin/screens/dashborad.dart/feedback/adminfeedback.dart/adminfeedback.dart';
@@ -22,14 +21,11 @@ import 'package:british_body_admin/screens/dashborad.dart/rulesandguidelines/cho
 import 'package:british_body_admin/screens/dashborad.dart/salary/givingsalary/choosingusertogivesalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/salary/receivingsalary/choosingmonthtoreceiversalary.dart';
 import 'package:british_body_admin/screens/dashborad.dart/selfnotification/selfnotification.dart';
-import 'package:british_body_admin/screens/dashborad.dart/selftaskview/selftaskview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/sound-preview/soundpreview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/admintarget/choosinguserfortarget.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/selftargetview.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/admin/choose_user_tasks.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/addingowntask.dart';
 import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/viewingtaskdetails/choosinguserfortaskdetails.dart';
+import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/admin/choose_user_tasks.dart';
 import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
@@ -195,26 +191,26 @@ class _DashboardState extends State<Dashboard> {
                         },
                         child: controlpanelcard(Icons.more_time, 'مۆڵەت', 1),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return AddingOwnTask(email: email);
-                          }));
-                        },
-                        child: controlpanelcard(
-                            Icons.task_outlined, 'زیادکردنی ئەرک بۆ خۆم', 2),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return Choosingtaskforaddingnotes(email: email);
-                          }));
-                        },
-                        child: controlpanelcard(Icons.note_add,
-                            'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم', 3),
-                      ),
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     Navigator.push(context,
+                      //         MaterialPageRoute(builder: (context) {
+                      //       return AddingOwnTask(email: email);
+                      //     }));
+                      //   },
+                      //   child: controlpanelcard(
+                      //       Icons.task_outlined, 'زیادکردنی ئەرک بۆ خۆم', 2),
+                      // ),
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     Navigator.push(context,
+                      //         MaterialPageRoute(builder: (context) {
+                      //       return Choosingtaskforaddingnotes(email: email);
+                      //     }));
+                      //   },
+                      //   child: controlpanelcard(Icons.note_add,
+                      //       'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم', 3),
+                      // ),
 
                       if (permissions.contains('adding task'))
                         GestureDetector(
@@ -285,7 +281,7 @@ class _DashboardState extends State<Dashboard> {
                           }));
                         },
                         child: controlpanelcard(
-                            Icons.work_history, 'گۆڕینی کارتی کار', 5),
+                            Icons.work_history, 'گۆڕینی کاتی کار', 5),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -321,16 +317,16 @@ class _DashboardState extends State<Dashboard> {
                         child: controlpanelcard(
                             Icons.track_changes_outlined, 'تارگێتەکان', 9),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return Selftaskview(email: email);
-                          }));
-                        },
-                        child: controlpanelcard(Icons.add_task_outlined,
-                            'بینینی وەردەکاری کارەکانی خۆم', 29),
-                      ),
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     Navigator.push(context,
+                      //         MaterialPageRoute(builder: (context) {
+                      //       return Selftaskview(email: email);
+                      //     }));
+                      //   },
+                      //   child: controlpanelcard(Icons.add_task_outlined,
+                      //       'بینینی وەردەکاری کارەکانی خۆم', 29),
+                      // ),
                       GestureDetector(
                         onTap: () {
                           Navigator.push(context,
@@ -341,6 +337,18 @@ class _DashboardState extends State<Dashboard> {
                         child: controlpanelcard(Icons.notification_add,
                             'دانانی ئاگادارکردنەوە بۆ خۆم', 31),
                       ),
+                      if (permissions.contains('adding rules'))
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return Adminrules(email: email);
+                            }));
+                          },
+                          child: controlpanelcard(
+                              Icons.category_sharp, 'یاساکان', 27),
+                        ),
+
                       GestureDetector(
                         onTap: () {
                           Navigator.push(context,
@@ -436,18 +444,18 @@ class _DashboardState extends State<Dashboard> {
                           child: controlpanelcard(
                               Icons.more_time, 'قبوڵکردنی مۆڵەت', 14),
                         ),
-                      if (permissions.contains('viewing task detail'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return ChoosingUserToViewTaskDetails(
-                                  email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.task_alt, 'بینینی وردەکاری کارەکان', 15),
-                        ),
+                      // if (permissions.contains('viewing task detail'))
+                      //   GestureDetector(
+                      //     onTap: () {
+                      //       Navigator.push(context,
+                      //           MaterialPageRoute(builder: (context) {
+                      //         return ChoosingUserToViewTaskDetails(
+                      //             email: email);
+                      //       }));
+                      //     },
+                      //     child: controlpanelcard(
+                      //         Icons.task_alt, 'بینینی وردەکاری کارەکان', 15),
+                      //   ),
 
                       if (permissions.contains('sending alert'))
                         GestureDetector(
@@ -566,17 +574,7 @@ class _DashboardState extends State<Dashboard> {
                           child: controlpanelcard(
                               Icons.phone_iphone, 'گۆڕینی مۆبایلی کارمەند', 26),
                         ),
-                      if (permissions.contains('adding rules'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Adminrules(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.category_sharp, 'یاساکان', 27),
-                        ),
+
                       if (permissions.contains('testing sounds'))
                         GestureDetector(
                           onTap: () {
