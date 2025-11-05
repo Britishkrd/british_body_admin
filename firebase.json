@@ -1,1 +1,16 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"british-body-admin","appId":"1:528586385117:android:319b547ffed11fafe99d34","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"british-body-admin","configurations":{"android":"1:528586385117:android:319b547ffed11fafe99d34","ios":"1:528586385117:ios:03cdd3dfaba4d6c3e99d34","macos":"1:528586385117:ios:03cdd3dfaba4d6c3e99d34","web":"1:528586385117:web:512b9dd642a8426ce99d34","windows":"1:528586385117:web:12e0de4ed36a2b2fe99d34"}}}}}}
+{
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

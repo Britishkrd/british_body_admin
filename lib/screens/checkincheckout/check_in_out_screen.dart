@@ -66,6 +66,8 @@ class _CheckInOutScreenState extends State<CheckInOutScreen>
 
 bool _isWeb = kIsWeb;
 
+bool _isProcessingEnterExit = false;
+
 @override
 void initState() {
   super.initState();
@@ -368,49 +370,58 @@ void initState() {
   }
 
   Widget _buildModernActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback? onPressed,
-    bool isFullWidth = false,
-  }) {
-    return SizedBox(
-      width: isFullWidth ? double.infinity : null,
-      height: 56,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: onPressed == null ? Colors.grey : color,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 4,
-          shadowColor: color.withOpacity(0.3),
-          padding: EdgeInsets.symmetric(horizontal: 24),
+  required IconData icon,
+  required String label,
+  required Color color,
+  required VoidCallback? onPressed,
+  bool isFullWidth = false,
+}) {
+  return SizedBox(
+    width: isFullWidth ? double.infinity : null,
+    height: 56,
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _isProcessingEnterExit || onPressed == null ? Colors.grey : color,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        onPressed: onPressed,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 20),
-            SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+        elevation: 4,
+        shadowColor: color.withOpacity(0.3),
+        padding: EdgeInsets.symmetric(horizontal: 24),
       ),
-    );
-  }
+      onPressed: _isProcessingEnterExit ? null : onPressed, // Disable button when processing
+      child: _isProcessingEnterExit
+          ? SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 20),
+                SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+    ),
+  );
+}
 
   // Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
   //   try {
@@ -447,11 +458,13 @@ void initState() {
   //   }
   // }
   Future<void> _handleCheckIn(bool isOutsideWorkplace) async {
+  if (_isProcessingEnterExit) return; // Prevent multiple clicks
+  setState(() {
+    _isProcessingEnterExit = true;
+  });
+
   try {
-    // First load user info to get workplace coordinates
     await _loadUserInfo();
-    
-    // Then get current position
     await _getCurrentPosition();
 
     if (kDebugMode) {
@@ -460,9 +473,11 @@ void initState() {
     }
 
     if (!isOutsideWorkplace) {
-      // Verify we have valid coordinates
       if (CheckInState.workplaceLatitude == 0.0 || CheckInState.workplaceLongitude == 0.0) {
         _showErrorDialog('هەڵە', 'شوێنی کار بەرێکراو نیە');
+        setState(() {
+          _isProcessingEnterExit = false;
+        });
         return;
       }
 
@@ -482,21 +497,60 @@ void initState() {
           'هەڵە',
           'تکایە لە ناوچەی کاری خۆت چوونەژوورەوە بکە. دووری لە شوێنی کار: ${distance.toStringAsFixed(0)} مەتر',
         );
+        setState(() {
+          _isProcessingEnterExit = false;
+        });
         return;
       }
     }
 
     if (CheckInState.isCheckedIn) {
       _showErrorDialog('هەڵە', 'تکایە چوونەدەرەووە بکە');
+      setState(() {
+        _isProcessingEnterExit = false;
+      });
       return;
     }
 
     final isNewDay = await _isNewDayCheckIn();
-    _showLoadingDialog('تکایە چاوەڵێکەوە');
+    _showLoadingDialog('تکایە چاوەڕێکەوە');
     await _processCheckIn(isNewDay);
   } catch (e) {
     if (kDebugMode) print('Error in _handleCheckIn: $e');
     _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+  } finally {
+    setState(() {
+      _isProcessingEnterExit = false;
+    });
+  }
+}
+
+Future<void> _handleCheckOut() async {
+  if (_isProcessingEnterExit) return; // Prevent multiple clicks
+  setState(() {
+    _isProcessingEnterExit = true;
+  });
+
+  try {
+    await _loadUserInfo();
+    await _getCurrentPosition();
+
+    if (!CheckInState.isCheckedIn) {
+      _showErrorDialog('هەڵە', 'تکایە چوونەژوورەوە بکە');
+      setState(() {
+        _isProcessingEnterExit = false;
+      });
+      return;
+    }
+
+    _showLoadingDialog('تکایە چاوەڕێکەوە');
+    await _processCheckOut();
+  } catch (e) {
+    _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
+  } finally {
+    setState(() {
+      _isProcessingEnterExit = false;
+    });
   }
 }
 
@@ -615,22 +669,7 @@ void initState() {
     }
   }
 
-  Future<void> _handleCheckOut() async {
-    try {
-      await _loadUserInfo();
-      await _getCurrentPosition();
 
-      if (!CheckInState.isCheckedIn) {
-        _showErrorDialog('هەڵە', 'تکایە چوونەژوورەوە بکە');
-        return;
-      }
-
-      _showLoadingDialog('تکایە چاوەڕێکەوە');
-      _processCheckOut();
-    } catch (e) {
-      _showErrorDialog('هەڵە', 'هەڵەیەک ڕوویدا: ${e.toString()}');
-    }
-  }
 
   Future<void> _processCheckOut() async {
     _showLoadingDialog('تکایە چاوەڕێکەوە');

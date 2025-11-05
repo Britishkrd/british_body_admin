@@ -242,47 +242,113 @@ class _ChoosingUserForGivingSalaryState
     return totalAbsenceDays;
   }
 
+
+
+  // Future<Duration> _calculateTotalWorkedTime(String email, DateTime date) async {
+  //   Duration totalWorkedTime = Duration.zero;
+
+  //   final holidays = await FirebaseFirestore.instance
+  //       .collection('holidays')
+  //       .where('endDate',
+  //           isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
+  //       .where('startDate',
+  //           isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
+  //       .get();
+
+  //   final checkinCheckouts = await FirebaseFirestore.instance
+  //       .collection('user')
+  //       .doc(email)
+  //       .collection('checkincheckouts')
+  //       .where('time',
+  //           isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
+  //       .where('time',
+  //           isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
+  //       .orderBy('time')
+  //       .get();
+
+  //   for (var i = 0; i < checkinCheckouts.docs.length; i += 2) {
+  //     if (i + 1 >= checkinCheckouts.docs.length) break;
+
+  //     final checkinTime = checkinCheckouts.docs[i]['time'].toDate();
+  //     final checkoutTime = checkinCheckouts.docs[i + 1]['time'].toDate();
+
+  //     bool isHoliday = holidays.docs.any((holiday) {
+  //       final holidayStart = holiday['startDate'].toDate();
+  //       final holidayEnd = holiday['endDate'].toDate();
+  //       return isDateInRange(checkinTime, holidayStart, holidayEnd);
+  //     });
+
+  //     if (!isHoliday) {
+  //       totalWorkedTime += checkoutTime.difference(checkinTime);
+  //     }
+  //   }
+
+  //   return totalWorkedTime;
+  // }
   Future<Duration> _calculateTotalWorkedTime(String email, DateTime date) async {
-    Duration totalWorkedTime = Duration.zero;
+  Duration totalWorkedTime = Duration.zero;
 
-    final holidays = await FirebaseFirestore.instance
-        .collection('holidays')
-        .where('endDate',
-            isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
-        .where('startDate',
-            isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
-        .get();
+  final firstDay = DateTime(date.year, date.month, 1);
+  final lastDay = DateTime(date.year, date.month + 1, 0);
 
-    final checkinCheckouts = await FirebaseFirestore.instance
-        .collection('user')
-        .doc(email)
-        .collection('checkincheckouts')
-        .where('time',
-            isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
-        .where('time',
-            isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
-        .orderBy('time')
-        .get();
+  // Fetch holidays
+  final holidays = await FirebaseFirestore.instance
+      .collection('holidays')
+      .where('endDate', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDay))
+      .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
+      .get();
 
-    for (var i = 0; i < checkinCheckouts.docs.length; i += 2) {
-      if (i + 1 >= checkinCheckouts.docs.length) break;
+  // Fetch check-in/check-out records
+  final checkinCheckouts = await FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('checkincheckouts')
+      .where('time', isGreaterThanOrEqualTo: firstDay)
+      .where('time', isLessThanOrEqualTo: lastDay)
+      .orderBy('time')
+      .get();
 
-      final checkinTime = checkinCheckouts.docs[i]['time'].toDate();
-      final checkoutTime = checkinCheckouts.docs[i + 1]['time'].toDate();
+  DateTime? lastCheckInTime;
+  for (var doc in checkinCheckouts.docs) {
+    final data = doc.data();
+    final timestamp = data['time'] as Timestamp;
+    final time = timestamp.toDate();
+    final isCheckIn = data['checkin'] == true;
 
-      bool isHoliday = holidays.docs.any((holiday) {
-        final holidayStart = holiday['startDate'].toDate();
-        final holidayEnd = holiday['endDate'].toDate();
-        return isDateInRange(checkinTime, holidayStart, holidayEnd);
+    if (isCheckIn) {
+      lastCheckInTime = time;
+    } else if (!isCheckIn && lastCheckInTime != null) {
+      // Check if this period overlaps with any holiday
+      bool isHolidayPeriod = holidays.docs.any((holiday) {
+        final holidayStart = (holiday['startDate'] as Timestamp).toDate();
+        final holidayEnd = (holiday['endDate'] as Timestamp).toDate();
+        return isDateInRange(lastCheckInTime!, holidayStart, holidayEnd) ||
+               isDateInRange(time, holidayStart, holidayEnd);
       });
 
-      if (!isHoliday) {
-        totalWorkedTime += checkoutTime.difference(checkinTime);
+      if (!isHolidayPeriod) {
+        totalWorkedTime += time.difference(lastCheckInTime!);
       }
+      lastCheckInTime = null; // Reset after processing a pair
     }
-
-    return totalWorkedTime;
   }
+
+  // If currently checked in (last entry is check-in), add time up to now
+  if (lastCheckInTime != null) {
+    final now = DateTime.now();
+    bool isHolidayPeriod = holidays.docs.any((holiday) {
+      final holidayStart = (holiday['startDate'] as Timestamp).toDate();
+      final holidayEnd = (holiday['endDate'] as Timestamp).toDate();
+      return isDateInRange(lastCheckInTime!, holidayStart, holidayEnd) ||
+             isDateInRange(now, holidayStart, holidayEnd);
+    });
+    if (!isHolidayPeriod) {
+      totalWorkedTime += now.difference(lastCheckInTime!);
+    }
+  }
+
+  return totalWorkedTime;
+}
 
   bool isDateInRange(DateTime date, DateTime rangeStart, DateTime rangeEnd) {
     return date.isAfter(rangeStart.subtract(const Duration(days: 1))) &&
