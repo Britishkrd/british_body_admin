@@ -1,4 +1,5 @@
 import 'package:british_body_admin/material/materials.dart';
+import 'package:british_body_admin/sendingnotification.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -312,7 +313,7 @@ class _CreateabsentState extends State<Createabsent> {
                                             ? 'urgent'
                                             : 'normal',
                                   }).then(
-                                    (value) {
+                                    (value) async{
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
@@ -320,8 +321,23 @@ class _CreateabsentState extends State<Createabsent> {
                                               'مۆڵەتکە بەسەرکەوتویی داواکرا'),
                                         ),
                                       );
-                                      Navigator.popUntil(
-                                          context, (route) => route.isFirst);
+                                     
+  // --- NEW: Notify all admins ---
+  await _notifyAdminsAboutNewAbsence(
+    requesterEmail: widget.email,
+    note: notecontroller.text,
+    start: start!,
+    end: end!,
+    urgency: isEmergency
+        ? 'زۆر گرنگ'
+        : isUregent
+            ? 'گرنگ'
+            : 'ئاسایی',
+  );
+
+  // Close loading & go back
+  Navigator.pop(context); // close loading dialog
+  Navigator.popUntil(context, (route) => route.isFirst);
                                     },
                                   ).catchError((error) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -344,4 +360,40 @@ class _CreateabsentState extends State<Createabsent> {
       ),
     );
   }
+  Future<void> _notifyAdminsAboutNewAbsence({
+  required String requesterEmail,
+  required String note,
+  required DateTime start,
+  required DateTime end,
+  required String urgency,
+}) async {
+  try {
+    // Get all users
+    final usersSnapshot = await FirebaseFirestore.instance.collection('user').get();
+
+    for (var userDoc in usersSnapshot.docs) {
+      final data = userDoc.data();
+      final permissions = data['permissions'] as List<dynamic>? ?? [];
+
+      // Check if user is admin
+      if (permissions.contains('isAdmin')) {
+        final token = data['token'] as String?;
+        if (token != null && token.isNotEmpty) {
+          // Send notification to this admin
+          await sendingnotification(
+        
+           'داواکاری مۆڵەتی نوێ',
+            
+                'بەکارهێنەر ($requesterEmail) داوای مۆڵەت کردووە\nتێبینی: $note\nلە ${formatDate(start)} بۆ ${formatDate(end)}\nگرنگی: $urgency',
+             token,
+             'default1', // or let admin choose later
+          );
+        }
+      }
+    }
+  } catch (e) {
+    print("Error notifying admins: $e");
+    // Optionally show error in UI
+  }
+}
 }
