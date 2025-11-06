@@ -56,6 +56,7 @@ class _AdduserState extends State<Adduser> {
   }
 
   List<String> permissions = [
+    'isAdmin',
     'workoutside',
     'accepting absence',
     'adding task',
@@ -204,7 +205,7 @@ class _AdduserState extends State<Adduser> {
                   contentPadding: EdgeInsets.symmetric(horizontal: 4.w),
                 ),
                 hint: const Text('Select Work Place'),
-                value: selectedPlaceId,
+                initialValue: selectedPlaceId,
                 items: places.map((place) {
                   return DropdownMenuItem<String>(
                     value: place['id'],
@@ -218,7 +219,6 @@ class _AdduserState extends State<Adduser> {
                 },
               ),
             ),
-
             TextButton(
               onPressed: () {
                 Navigator.of(context).push(

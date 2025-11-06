@@ -24,8 +24,6 @@ import 'package:british_body_admin/screens/dashborad.dart/selfnotification/selfn
 import 'package:british_body_admin/screens/dashborad.dart/sound-preview/soundpreview.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/admintarget/choosinguserfortarget.dart';
 import 'package:british_body_admin/screens/dashborad.dart/target/selftarget/selftargetview.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/admin-task-management/choosinguserfortaskmanagement.dart';
-import 'package:british_body_admin/screens/dashborad.dart/taskmanagement/ehsan_task/admin/choose_user_tasks.dart';
 import 'package:british_body_admin/screens/dashborad.dart/user-status/userstatus.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/adminacceptingchangeworktime.dart';
 import 'package:british_body_admin/screens/dashborad.dart/worktime/viewchangeworktimerequest.dart';
@@ -191,55 +189,6 @@ class _DashboardState extends State<Dashboard> {
                         },
                         child: controlpanelcard(Icons.more_time, 'مۆڵەت', 1),
                       ),
-                      // GestureDetector(
-                      //   onTap: () {
-                      //     Navigator.push(context,
-                      //         MaterialPageRoute(builder: (context) {
-                      //       return AddingOwnTask(email: email);
-                      //     }));
-                      //   },
-                      //   child: controlpanelcard(
-                      //       Icons.task_outlined, 'زیادکردنی ئەرک بۆ خۆم', 2),
-                      // ),
-                      // GestureDetector(
-                      //   onTap: () {
-                      //     Navigator.push(context,
-                      //         MaterialPageRoute(builder: (context) {
-                      //       return Choosingtaskforaddingnotes(email: email);
-                      //     }));
-                      //   },
-                      //   child: controlpanelcard(Icons.note_add,
-                      //       'زیادکردنی تێبینی بۆ ئەرکەکانی خۆم', 3),
-                      // ),
-
-                      if (permissions.contains('adding task'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return ChoosingUserFoTaskManagement(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(Icons.note_add_outlined,
-                              'زیادکردنی ئەرک بۆ کارمەندان', 16),
-                        ),
-                      if (permissions.contains('adding task'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return ChooseUserForTasks(
-                                    adminEmail: email,
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                          child: controlpanelcard(Icons.task_outlined,
-                              'بینینی ئەرکی کارمەندەکان', 36),
-                        ),
 
                       GestureDetector(
                         onTap: () {
@@ -337,17 +286,7 @@ class _DashboardState extends State<Dashboard> {
                         child: controlpanelcard(Icons.notification_add,
                             'دانانی ئاگادارکردنەوە بۆ خۆم', 31),
                       ),
-                      if (permissions.contains('adding rules'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Adminrules(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.category_sharp, 'یاساکان', 27),
-                        ),
+                     
 
                       GestureDetector(
                         onTap: () {
@@ -433,269 +372,13 @@ class _DashboardState extends State<Dashboard> {
                         },
                         child: controlpanelcard(Icons.logout, 'دەرچوون', 13),
                       ),
-                      if (permissions.contains('accepting absence'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return const Acceptingabsence();
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.more_time, 'قبوڵکردنی مۆڵەت', 14),
-                        ),
-                      // if (permissions.contains('viewing task detail'))
-                      //   GestureDetector(
-                      //     onTap: () {
-                      //       Navigator.push(context,
-                      //           MaterialPageRoute(builder: (context) {
-                      //         return ChoosingUserToViewTaskDetails(
-                      //             email: email);
-                      //       }));
-                      //     },
-                      //     child: controlpanelcard(
-                      //         Icons.task_alt, 'بینینی وردەکاری کارەکان', 15),
-                      //   ),
+                     
 
-                      if (permissions.contains('sending alert'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Choosingforalerts(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.alarm_add, 'ناردنی ئاگادارکردنەوە', 17),
-                        ),
-                      if (permissions.contains('accepting change time'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return const Adminacceptingchangeworktime();
-                            }));
-                          },
-                          child: controlpanelcard(Icons.work_history,
-                              'گۆڕینی کارتی کار بۆ ئەدمین', 18),
-                        ),
-                      if (permissions.contains('reward and punishment'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Choosinguser(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(Icons.card_giftcard_outlined,
-                              'زیادکردنی پاداشت و سزا', 19),
-                        ),
-                      if (permissions.contains('accepting loan'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return const AcceptingLoan();
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.monetization_on_outlined,
-                              'قبۆڵکردنی سولفە',
-                              20),
-                        ),
-                      if (permissions.contains('giving salary'))
-                        GestureDetector(
-                          onTap: () async {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChoosingUserForGivingSalary(
-                                            email: email)));
-                          },
-                          child: controlpanelcard(
-                              Icons.monetization_on, 'پێدانی موچە', 21),
-                        ),
-                      if (permissions.contains('login and logout'))
-                        GestureDetector(
-                          onTap: () async {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChoosingUseroForLoginLogout(
-                                            email: email)));
-                          },
-                          child: controlpanelcard(Icons.login_sharp,
-                              'چوونەژوورەوە / دەرچوونەوە', 22),
-                        ),
-                      if (permissions.contains('setting feedback'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Adminfeedback(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.feedback, 'ڕەخنە و پێشنیار بۆ ئەدمین', 23),
-                        ),
-                      if (permissions.contains('setting target'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Choosinguserfortarget(email: email);
-                            }));
-                          },
-                          child: controlpanelcard(Icons.track_changes_outlined,
-                              'تارگێت بۆ ئەدمین', 24),
-                        ),
-                      if (permissions.contains('add user'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Choosinguserforusermanagement(
-                                  email: email);
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.group_add, 'کارمەندەکان', 25),
-                        ),
-                      if (permissions.contains('changing worker phone'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return const Changingworkerphone();
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.phone_iphone, 'گۆڕینی مۆبایلی کارمەند', 26),
-                        ),
-
-                      if (permissions.contains('testing sounds'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return const Soundpreview();
-                            }));
-                          },
-                          child: controlpanelcard(
-                              Icons.music_note, 'دەنگەکان', 28),
-                        ),
-                      if (permissions.contains('user status'))
-                        GestureDetector(
-                          onTap: () async {
-                            Map<String, bool> haslogedintoday = {};
-                            FirebaseFirestore.instance
-                                .collection('user')
-                                .get()
-                                .then(
-                              (value) async {
-                                for (var element in value.docs) {
-                                  await FirebaseFirestore.instance
-                                      .collection('user')
-                                      .doc(element['email'])
-                                      .collection('checkincheckouts')
-                                      .orderBy('time', descending: true)
-                                      .limit(1)
-                                      .get()
-                                      .then((value2) {
-                                    if (value2.docs.isNotEmpty) {
-                                      if ((value2.docs.first.data()['time']
-                                                  as Timestamp)
-                                              .toDate()
-                                              .day ==
-                                          DateTime.now().day) {
-                                        haslogedintoday[element['email']] =
-                                            true;
-                                      } else {
-                                        haslogedintoday[element['email']] =
-                                            false;
-                                      }
-                                    } else {
-                                      haslogedintoday[element['email']] = false;
-                                    }
-                                  });
-                                }
-                              },
-                            ).then((value) {
-                              log(haslogedintoday.toString());
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) {
-                                return UsersStatus(
-                                  email: email,
-                                  haslogeding: haslogedintoday,
-                                );
-                              }));
-                            });
-                          },
-                          child: controlpanelcard(
-                              Icons.person_off_sharp, 'بارو دۆخی کارمەند', 30),
-                        ),
-                      if (permissions.contains('holiday management'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return const HolidayManagementScreen();
-                                },
-                              ),
-                            );
-                          },
-                          child: controlpanelcard(
-                              Icons.beach_access, 'پشووە فەڕمییەکان', 32),
-                        ),
-                      if (permissions.contains('view user location'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return const UsersMapView();
-                                },
-                              ),
-                            );
-                          },
-                          child: controlpanelcard(Icons.location_on_outlined,
-                              'شوێنی کارمەندەکان', 34),
-                        ),
-                      if (permissions.contains('view user location'))
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return const PlacePickerScreen();
-                                },
-                              ),
-                            );
-                          },
-                          child: controlpanelcard(Icons.add_location_outlined,
-                              'British Body لقەکانی', 35),
-                        ),
-
-                      // Material1.button(
-                      //   label: 'View User Tasks',
-                      //   buttoncolor: Material1.primaryColor,
-                      //   textcolor: Colors.white,
-                      //   function: () {
-                      //     Navigator.push(
-                      //       context,
-                      //       MaterialPageRoute(
-                      //         builder: (context) =>
-                      //             ChooseUserForTasks(adminEmail: email),
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
+                    
+                     
+                     
+                     
+                    
                     ],
                   ),
                 ),

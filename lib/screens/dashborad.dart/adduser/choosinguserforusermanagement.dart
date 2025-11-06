@@ -124,7 +124,7 @@ class _ChoosinguserforusermanagementState
                                                         onPressed: () {
                                                           if (passwordcontroller
                                                                   .text ==
-                                                              'admin123456') {
+                                                              'admin') {
                                                             FirebaseFirestore
                                                                 .instance
                                                                 .collection(
