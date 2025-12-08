@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/auth/forgetpassword.dart';
+import 'package:british_body_admin/screens/auth/tester_home_screen.dart';
 import 'package:british_body_admin/screens/navigator.dart';
 import 'package:british_body_admin/shared/confirm_dialog.dart';
 import 'package:british_body_admin/shared/custom_email.dart';
@@ -164,151 +165,312 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         SizedBox(height: 3.h),
-                        ElevatedButton(
-                          onPressed: () async {
-                            // Login logic remains the same
-                            String? email = emailcontroller.text.toLowerCase();
-                            String? password = passwordcontroller.text;
-                            UserCredential? userCredential;
-                            try {
-                              userCredential = await FirebaseAuth.instance
-                                  .signInWithCredential(
-                                      EmailAuthProvider.credential(
-                                          email: email, password: password));
-                            } catch (e) {
-                              await LoginConfirmationDialog(
-                                      // Add await here
-                                      context: context,
-                                      content: 'ئیمێڵ یان وشەی نهێنی هەڵەیە')
-                                  .show(); // Add .show() here
-                              return;
-                            }
-                            FirebaseFirestore.instance
-                                .collection('user')
-                                .doc(email)
-                                .get()
-                                .then((value) async {
-                              if (value.exists) {
-                                if (value.data()?['password'] != password ||
-                                    userCredential?.user == null) {
-                                  Material1.showdialog(
-                                      context, 'هەڵە', 'وشەی نهێنی هەڵەیە', [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('باشە',
-                                          style: TextStyle(
-                                              color: Material1.primaryColor)),
-                                    )
-                                  ]);
-                                  return;
-                                }
-                                if (value.data()?['email'] != email) {
-                                  Material1.showdialog(
-                                      context, 'هەڵە', 'ئیمێڵ هەڵەیە', [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('باشە',
-                                          style: TextStyle(
-                                              color: Material1.primaryColor)),
-                                    )
-                                  ]);
-                                  return;
-                                }
-                                String deviceid = await getDeviceId();
+                        // ElevatedButton(
+                        //   onPressed: () async {
+                        //     // Login logic remains the same
+                        //     String? email = emailcontroller.text.toLowerCase();
+                        //     String? password = passwordcontroller.text;
+                        //     UserCredential? userCredential;
+                        //     try {
+                        //       userCredential = await FirebaseAuth.instance
+                        //           .signInWithCredential(
+                        //               EmailAuthProvider.credential(
+                        //                   email: email, password: password));
+                        //     } catch (e) {
+                        //       await LoginConfirmationDialog(
+                        //               // Add await here
+                        //               context: context,
+                        //               content: 'ئیمێڵ یان وشەی نهێنی هەڵەیە')
+                        //           .show(); // Add .show() here
+                        //       return;
+                        //     }
+                        //     FirebaseFirestore.instance
+                        //         .collection('user')
+                        //         .doc(email)
+                        //         .get()
+                        //         .then((value) async {
+                        //       if (value.exists) {
+                        //         if (value.data()?['password'] != password ||
+                        //             userCredential?.user == null) {
+                        //           Material1.showdialog(
+                        //               context, 'هەڵە', 'وشەی نهێنی هەڵەیە', [
+                        //             TextButton(
+                        //               onPressed: () {
+                        //                 Navigator.pop(context);
+                        //               },
+                        //               child: Text('باشە',
+                        //                   style: TextStyle(
+                        //                       color: Material1.primaryColor)),
+                        //             )
+                        //           ]);
+                        //           return;
+                        //         }
+                        //         if (value.data()?['email'] != email) {
+                        //           Material1.showdialog(
+                        //               context, 'هەڵە', 'ئیمێڵ هەڵەیە', [
+                        //             TextButton(
+                        //               onPressed: () {
+                        //                 Navigator.pop(context);
+                        //               },
+                        //               child: Text('باشە',
+                        //                   style: TextStyle(
+                        //                       color: Material1.primaryColor)),
+                        //             )
+                        //           ]);
+                        //           return;
+                        //         }
+                        //         String deviceid = await getDeviceId();
 
-                                if (value.data()?['deviceid'] != '' &&
-                                    value.data()?['deviceid'] != deviceid) {
-                                  LoginConfirmationDialog(
-                                          context: context,
-                                          content:
-                                              'ناتوانیت لەم ئامێرە چوونەژوورەوە بکەیت')
-                                      .show();
-                                  return;
-                                }
-                                String fcm = '';
-                                try {
-                                  fcm = await FirebaseMessaging.instance
-                                          .getToken() ??
-                                      '';
-                                } catch (e) {
-                                  fcm = '';
-                                }
+                        //         if (value.data()?['deviceid'] != '' &&
+                        //             value.data()?['deviceid'] != deviceid) {
+                        //           LoginConfirmationDialog(
+                        //                   context: context,
+                        //                   content:
+                        //                       'ناتوانیت لەم ئامێرە چوونەژوورەوە بکەیت')
+                        //               .show();
+                        //           return;
+                        //         }
+                        //         String fcm = '';
+                        //         try {
+                        //           fcm = await FirebaseMessaging.instance
+                        //                   .getToken() ??
+                        //               '';
+                        //         } catch (e) {
+                        //           fcm = '';
+                        //         }
 
-                                if (deviceid != '') {
-                                  value.reference.set({'deviceid': deviceid},
-                                      SetOptions(merge: true));
-                                }
+                        //         if (deviceid != '') {
+                        //           value.reference.set({'deviceid': deviceid},
+                        //               SetOptions(merge: true));
+                        //         }
 
-                                value.reference.set({
-                                  'token': fcm,
-                                  'lat': latitude,
-                                  'long': longtitude
-                                }, SetOptions(merge: true));
-                                Sharedpreference.setuser(
-                                    value.data()?['name'] ?? '',
-                                    value.data()?['email'] ?? '',
-                                    value.data()?['location'] ?? '',
-                                    value.data()?['email'] ?? '',
-                                    value.data()?['salary'] ?? '0',
-                                    value.data()?['age'] ?? '',
-                                    latitude,
-                                    longtitude,
-                                    // value.data()?['worklat'] ?? 0.0,
-                                    // value.data()?['worklong'] ?? 0.0,
-                                    (value.data()?['worklat'] ?? 0.0)
-                                        .toDouble(), // Convert to double
-                                    (value.data()?['worklong'] ?? 0.0)
-                                        .toDouble(), // Convert to double
-                                    value.data()?['starthour'] ?? 0,
-                                    value.data()?['endhour'] ?? 0,
-                                    value.data()?['startmin'] ?? 0,
-                                    value.data()?['endmin'] ?? 0,
-                                    true,
-                                    fcm,
-                                    value.data()?['checkin'] ?? false,
-                                    value.data()?['permissions'] ?? [],
-                                    value.data()?['weekdays'] ?? []);
-                                Navigator.pushReplacement(context,
-                                    MaterialPageRoute(
-                                  builder: (context) {
-                                    return Navigation(
-                                      email: email
-                                    );
-                                  },
-                                ));
-                              } else {
-                                LoginConfirmationDialog(
-                                        context: context,
-                                        content: 'ئیمێڵەکە هەڵەیە')
-                                    .show();
-                              }
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Material1.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            textStyle: TextStyle(fontSize: 18.sp),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'چوونەژوورەوە',
-                                style: kurdishTextStyle(14, whiteColor),
-                              ),
-                              SizedBox(width: 1.w),
-                              Icon(Icons.login),
-                            ],
-                          ),
-                        ),
+                        //         value.reference.set({
+                        //           'token': fcm,
+                        //           'lat': latitude,
+                        //           'long': longtitude
+                        //         }, SetOptions(merge: true));
+                        //         Sharedpreference.setuser(
+                        //             value.data()?['name'] ?? '',
+                        //             value.data()?['email'] ?? '',
+                        //             value.data()?['location'] ?? '',
+                        //             value.data()?['email'] ?? '',
+                        //             value.data()?['salary'] ?? '0',
+                        //             value.data()?['age'] ?? '',
+                        //             latitude,
+                        //             longtitude,
+                        //             // value.data()?['worklat'] ?? 0.0,
+                        //             // value.data()?['worklong'] ?? 0.0,
+                        //             (value.data()?['worklat'] ?? 0.0)
+                        //                 .toDouble(), // Convert to double
+                        //             (value.data()?['worklong'] ?? 0.0)
+                        //                 .toDouble(), // Convert to double
+                        //             value.data()?['starthour'] ?? 0,
+                        //             value.data()?['endhour'] ?? 0,
+                        //             value.data()?['startmin'] ?? 0,
+                        //             value.data()?['endmin'] ?? 0,
+                        //             true,
+                        //             fcm,
+                        //             value.data()?['checkin'] ?? false,
+                        //             value.data()?['permissions'] ?? [],
+                        //             value.data()?['weekdays'] ?? []);
+                        //         Navigator.pushReplacement(context,
+                        //             MaterialPageRoute(
+                        //           builder: (context) {
+                        //             return Navigation(
+                        //               email: email
+                        //             );
+                        //           },
+                        //         ));
+                        //       } else {
+                        //         LoginConfirmationDialog(
+                        //                 context: context,
+                        //                 content: 'ئیمێڵەکە هەڵەیە')
+                        //             .show();
+                        //       }
+                        //     });
+                        //   },
+                        //   style: ElevatedButton.styleFrom(
+                        //     backgroundColor: Material1.primaryColor,
+                        //     foregroundColor: Colors.white,
+                        //     padding: EdgeInsets.symmetric(vertical: 16.0),
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(8.0),
+                        //     ),
+                        //     textStyle: TextStyle(fontSize: 18.sp),
+                        //   ),
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.center,
+                        //     children: [
+                        //       Text(
+                        //         'چوونەژوورەوە',
+                        //         style: kurdishTextStyle(14, whiteColor),
+                        //       ),
+                        //       SizedBox(width: 1.w),
+                        //       Icon(Icons.login),
+                        //     ],
+                        //   ),
+                        // ),
+                        // In your login.dart file, find the ElevatedButton onPressed section
+// Replace the entire onPressed logic with this updated version:
+
+ElevatedButton(
+  onPressed: () async {
+    String? email = emailcontroller.text.toLowerCase();
+    String? password = passwordcontroller.text;
+    UserCredential? userCredential;
+    
+    try {
+      userCredential = await FirebaseAuth.instance
+          .signInWithCredential(
+              EmailAuthProvider.credential(
+                  email: email, password: password));
+    } catch (e) {
+      await LoginConfirmationDialog(
+              context: context,
+              content: 'ئیمێڵ یان وشەی نهێنی هەڵەیە')
+          .show();
+      return;
+    }
+    
+    FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .get()
+        .then((value) async {
+      if (value.exists) {
+        if (value.data()?['password'] != password ||
+            userCredential?.user == null) {
+          Material1.showdialog(
+              context, 'هەڵە', 'وشەی نهێنی هەڵەیە', [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('باشە',
+                  style: TextStyle(
+                      color: Material1.primaryColor)),
+            )
+          ]);
+          return;
+        }
+        
+        if (value.data()?['email'] != email) {
+          Material1.showdialog(
+              context, 'هەڵە', 'ئیمێڵ هەڵەیە', [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('باشە',
+                  style: TextStyle(
+                      color: Material1.primaryColor)),
+            )
+          ]);
+          return;
+        }
+        
+        String deviceid = await getDeviceId();
+
+        if (value.data()?['deviceid'] != '' &&
+            value.data()?['deviceid'] != deviceid) {
+          LoginConfirmationDialog(
+                  context: context,
+                  content:
+                      'ناتوانیت لەم ئامێرە چوونەژوورەوە بکەیت')
+              .show();
+          return;
+        }
+        
+        String fcm = '';
+        try {
+          fcm = await FirebaseMessaging.instance
+                  .getToken() ??
+              '';
+        } catch (e) {
+          fcm = '';
+        }
+
+        if (deviceid != '') {
+          value.reference.set({'deviceid': deviceid},
+              SetOptions(merge: true));
+        }
+
+        value.reference.set({
+          'token': fcm,
+          'lat': latitude,
+          'long': longtitude
+        }, SetOptions(merge: true));
+        
+        Sharedpreference.setuser(
+            value.data()?['name'] ?? '',
+            value.data()?['email'] ?? '',
+            value.data()?['location'] ?? '',
+            value.data()?['email'] ?? '',
+            value.data()?['salary'] ?? '0',
+            value.data()?['age'] ?? '',
+            latitude,
+            longtitude,
+            (value.data()?['worklat'] ?? 0.0).toDouble(),
+            (value.data()?['worklong'] ?? 0.0).toDouble(),
+            value.data()?['starthour'] ?? 0,
+            value.data()?['endhour'] ?? 0,
+            value.data()?['startmin'] ?? 0,
+            value.data()?['endmin'] ?? 0,
+            true,
+            fcm,
+            value.data()?['checkin'] ?? false,
+            value.data()?['permissions'] ?? [],
+            value.data()?['weekdays'] ?? []);
+        
+        // Check user permissions and navigate accordingly
+        List<dynamic> userPermissions = value.data()?['permissions'] ?? [];
+        
+        if (userPermissions.contains('isTester')) {
+          // Navigate to Tester Home Screen
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(
+            builder: (context) {
+              return TesterHomeScreen(email: email);
+            },
+          ));
+        } else {
+          // Navigate to regular Navigation screen
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(
+            builder: (context) {
+              return Navigation(email: email);
+            },
+          ));
+        }
+      } else {
+        LoginConfirmationDialog(
+                context: context,
+                content: 'ئیمێڵەکە هەڵەیە')
+            .show();
+      }
+    });
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Material1.primaryColor,
+    foregroundColor: Colors.white,
+    padding: EdgeInsets.symmetric(vertical: 16.0),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8.0),
+    ),
+    textStyle: TextStyle(fontSize: 18.sp),
+  ),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Text(
+        'چوونەژوورەوە',
+        style: kurdishTextStyle(14, whiteColor),
+      ),
+      SizedBox(width: 1.w),
+      Icon(Icons.login),
+    ],
+  ),
+)
                       ],
                     ),
                   ),

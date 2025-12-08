@@ -56,6 +56,7 @@ class _AdduserState extends State<Adduser> {
   }
 
   List<String> permissions = [
+    'isTester',
     'isAdmin',
     'workoutside',
     'accepting absence',
