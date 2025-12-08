@@ -145,6 +145,7 @@ class _EmailState extends State<Email> {
 
                 final combinedDocs = snapshot.data!
                     .expand((querySnapshot) => querySnapshot.docs)
+                    .where((doc) => doc['date'] != null) // Add this line
                     .toList();
                 combinedDocs.sort(
                     (a, b) => b['date'].toDate().compareTo(a['date'].toDate()));
@@ -204,7 +205,7 @@ class _EmailState extends State<Email> {
                                       )));
                         },
                         child: SizedBox(
-                            height: 15.h,
+                            height: 16.h,
                             width: 90.w,
                             child: Container(
                               margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),

@@ -7,9 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
-// import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:path/path.dart' as paths;
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' as paths;
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -20,14 +19,16 @@ class Sendingemail extends StatefulWidget {
   final String subject;
   final String content;
   final String from;
-  const Sendingemail(
-      {super.key,
-      required this.email,
-      required this.emailList,
-      required this.ccList,
-      required this.subject,
-      required this.content,
-      required this.from});
+
+  const Sendingemail({
+    super.key,
+    required this.email,
+    required this.emailList,
+    required this.ccList,
+    required this.subject,
+    required this.content,
+    required this.from,
+  });
 
   @override
   State<Sendingemail> createState() => _SendingemailState();
@@ -35,52 +36,62 @@ class Sendingemail extends StatefulWidget {
 
 class _SendingemailState extends State<Sendingemail> {
   List<String> emailList = [];
-  TextEditingController emailController = TextEditingController();
   List<String> ccList = [];
+  List<String> name = [];
+  List<File> images = [];
+  List<File> files = [];
+
+  TextEditingController emailController = TextEditingController();
   TextEditingController ccController = TextEditingController();
   TextEditingController subjectcontroller = TextEditingController();
   TextEditingController contentcontroller = TextEditingController();
-  Future pickimage(source) async {
-    try {
-      ImagePicker imagePicker = ImagePicker();
-      XFile? cimage = await imagePicker.pickImage(
-        source: source,
-        imageQuality: 85,
-      );
-      if (cimage == null) return;
 
-      final imageTemporary = File(cimage.path);
-      setState(() {
-        images.add(imageTemporary);
-      });
-      // ignore: empty_catches
-    } on PlatformException {}
-  }
-
-  List<String> name = [];
-
-  List<File> images = [];
-
-  UploadTask? task;
-
-  List<File> files = [];
+  bool isSending = false;
 
   @override
   void initState() {
-    emailController.text = widget.emailList.join(' ');
-    ccController.text = widget.ccList.join(' ');
-    for (var email in widget.emailList) {
-      emailList.add(email.trim());
-    }
-    for (var email in widget.ccList) {
-      ccList.add(email.trim());
-    }
-    subjectcontroller.text = widget.subject;
-    if (widget.content != '') {
-      contentcontroller.text =
-          "\n\n\n\n ------------------------------------------------------------\n ${widget.from}\n\n\n ${widget.content}";
-    }
     super.initState();
+
+    // Fill initial values
+    emailController.text = widget.emailList.join(', ');
+    ccController.text = widget.ccList.join(', ');
+    subjectcontroller.text = widget.subject;
+
+    if (widget.content.isNotEmpty) {
+      contentcontroller.text =
+          "\n\n\n\n------------------------------------------------------------\n${widget.from}\n\n\n${widget.content}";
+    }
+
+    // Parse valid emails
+    emailList = widget.emailList.map((e) => e.trim()).where((e) => _isValidEmail(e)).toList();
+    ccList = widget.ccList.map((e) => e.trim()).where((e) => _isValidEmail(e)).toList();
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+  }
+
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: source, imageQuality: 85);
+      if (image != null) {
+        setState(() {
+          images.add(File(image.path));
+        });
+      }
+    } on PlatformException catch (e) {
+      log('Failed to pick image: $e');
+    }
+  }
+
+  Future<void> pickFiles() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result != null) {
+      setState(() {
+        files = result.paths.map((path) => File(path!)).toList();
+      });
+    }
   }
 
   @override
@@ -93,572 +104,266 @@ class _SendingemailState extends State<Sendingemail> {
         centerTitle: true,
       ),
       body: ListView(
+        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
         children: [
-          Container(
-            alignment: Alignment.topRight,
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            child: Text(':ناردنی ئیمەیل بۆ',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  color: Colors.black,
-                )),
+          // TO Field
+          const Align(alignment: Alignment.topRight, child: Text(':ناردنی ئیمەیل بۆ', style: TextStyle(fontSize: 18))),
+          SizedBox(height: 1.h),
+          Material1.textfield(
+            textColor: Colors.black,
+            hint: 'TO',
+            controller: emailController,
+            maxLines: 4,
+            onchange: (input) {
+              final inputs = input.split(RegExp(r'[,;\s\n]+'));
+              emailList = inputs.map((e) => e.trim()).where(_isValidEmail).toList();
+              log('TO List: $emailList');
+              setState(() {});
+            },
           ),
-          Container(
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            height: 10.h,
-            child: Material1.textfield(
-              hint: 'TO',
-              textColor: Material1.primaryColor,
-              controller: emailController,
-              maxLines: 3,
-              fontsize: 16.sp,
-              onchange: (input) {
-                List<String> inputs = input.split(RegExp('[,; \n]'));
-                emailList.clear(); // Clear the list before updating
-                for (var email in inputs) {
-                  final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                  if (emailRegex.hasMatch(email.trim())) {
-                    emailList.add(email.trim());
-                  }
-                }
-                log(emailList.toString());
-                setState(() {});
-              },
-            ),
+
+          SizedBox(height: 2.h),
+
+          // CC Field
+          const Align(alignment: Alignment.topRight, child: Text(':ئەو کەسانەی ئاگادار دەکرێنەوە', style: TextStyle(fontSize: 18))),
+          SizedBox(height: 1.h),
+          Material1.textfield(
+            textColor: Colors.black,
+            hint: 'CC',
+            controller: ccController,
+            maxLines: 4,
+            onchange: (input) {
+              final inputs = input.split(RegExp(r'[,;\s\n]+'));
+              ccList = inputs.map((e) => e.trim()).where(_isValidEmail).toList();
+              log('CC List: $ccList');
+              setState(() {});
+            },
           ),
-          Container(
-            alignment: Alignment.topRight,
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            child: Text(':ئەو کەسانەوی کە ئاگادارن لە ئمەیڵەکە',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  color: Colors.black,
-                )),
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            height: 14.h,
-            child: Material1.textfield(
-              hint: 'cc',
-              textColor: Material1.primaryColor,
-              controller: ccController,
-              maxLines: 5,
-              fontsize: 16.sp,
-              onchange: (input) {
-                List<String> inputs = input.split(RegExp('[,; \n]'));
-                ccList.clear(); // Clear the list before updating
-                for (var email in inputs) {
-                  final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                  if (emailRegex.hasMatch(email.trim())) {
-                    ccList.add(email.trim());
-                  }
-                }
-                log(ccList.toString());
-                setState(() {});
-              },
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            height: 10.h,
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 30.w,
+
+          SizedBox(height: 2.h),
+
+          // Show Names Button
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
                   height: 8.h,
                   child: ListView.builder(
-                      itemCount: name.length,
-                      itemBuilder: (context, index) {
-                        return Text("${index + 1}.${name[index]}");
-                      }),
-                ),
-                SizedBox(
-                  width: 50.w,
-                  height: 6.h,
-                  child: Material1.button(
-                      label: 'دڵنیابوون لەناوەکان',
-                      buttoncolor: Material1.primaryColor,
-                      textcolor: Colors.white,
-                      function: () {
-                        name.clear();
-                        for (var i = 0; i < emailList.length; i++) {
-                          FirebaseFirestore.instance
-                              .collection('user')
-                              .doc(emailList[i])
-                              .get()
-                              .then((value) {
-                            if (value.data() != null) {
-                              setState(() {
-                                name.add(value.data()?['name']);
-                              });
-                            }
-                          });
-                        }
-                        for (var i = 0; i < ccList.length; i++) {
-                          FirebaseFirestore.instance
-                              .collection('user')
-                              .doc(ccList[i])
-                              .get()
-                              .then((value) {
-                            if (value.data() != null) {
-                              setState(() {
-                                name.add(value.data()?['name']);
-                              });
-                            }
-                          });
-                        }
-                      }),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            alignment: Alignment.topRight,
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            child: Text(':سەری بابەت',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  color: Colors.black,
-                )),
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            height: 14.h,
-            child: Material1.textfield(
-              hint: 'سەری بابەت',
-              textColor: Material1.primaryColor,
-              controller: subjectcontroller,
-              fontsize: 16.sp,
-            ),
-          ),
-          Container(
-            alignment: Alignment.topRight,
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            child: Text(':بابەت',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  color: Colors.black,
-                )),
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 2.h),
-            height: 30.h,
-            child: Material1.textfield(
-              hint: 'بابەت',
-              textColor: Material1.primaryColor,
-              maxLines: 30,
-              controller: contentcontroller,
-              fontsize: 16.sp,
-            ),
-          ),
-          images.isEmpty
-              ? Container(
-                  margin: EdgeInsets.all(5.w),
-                  width: 100.w,
-                  height: 30.h,
-                  child: Icon(Icons.image,
-                      size: 20.h, color: Material1.primaryColor),
-                )
-              : Container(
-                  margin: EdgeInsets.all(5.w),
-                  width: 100.w,
-                  height: 30.h,
-                  child: GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 10.0,
-                      mainAxisSpacing: 10.0,
-                    ),
-                    itemCount: images.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              image: DecorationImage(
-                                image: FileImage(images[index]),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('سڕینەوە'),
-                                    content:
-                                        Text('دڵنیاییت لە سڕینەوەی وێنەکەت؟'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('نەخێر',
-                                            style:
-                                                TextStyle(color: Colors.black)),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            images.removeAt(index);
-                                          });
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text(
-                                          'بەڵێ',
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            child: Container(
-                                alignment: Alignment.topRight,
-                                child: Icon(Icons.delete,
-                                    size: 20.sp, color: Colors.white)),
-                          ),
-                        ],
-                      );
-                    },
+                    itemCount: name.length,
+                    itemBuilder: (context, i) => Text('${i + 1}. ${name[i]}'),
                   ),
                 ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                height: 6.h,
-                width: 40.w,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(20)),
-                  color: Material1.primaryColor,
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      spreadRadius: -5,
-                    ),
-                  ],
-                ),
-                child: Material1.button(
-                  fontsize: 16.sp,
-                  label: 'هەڵبژاردنی وێنە',
-                  buttoncolor: Material1.primaryColor,
-                  function: () {
-                    pickimage(ImageSource.gallery);
-                  },
-                  textcolor: Colors.white,
-                ),
               ),
-              Container(
-                height: 6.h,
-                width: 40.w,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(20)),
-                  color: Material1.primaryColor,
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      spreadRadius: -5,
-                    ),
-                  ],
-                ),
+              SizedBox(
+                width: 45.w,
                 child: Material1.button(
-                  fontsize: 16.sp,
-                  label: 'گرتنی وێنە',
+                  label: 'دڵنیابوون لە ناوەکان',
                   buttoncolor: Material1.primaryColor,
-                  function: () {
-                    pickimage(ImageSource.camera);
-                  },
                   textcolor: Colors.white,
+                  function: () async {
+                    name.clear();
+                    final allEmails = [...emailList, ...ccList];
+                    for (String email in allEmails) {
+                      final doc = await FirebaseFirestore.instance.collection('user').doc(email).get();
+                      if (doc.exists && doc.data()?['name'] != null) {
+                        name.add(doc.data()!['name']);
+                      } else {
+                        name.add(email.split('@').first);
+                      }
+                    }
+                    setState(() {});
+                  },
                 ),
               ),
             ],
           ),
-          files.isEmpty
-              ? Container(
-                  margin: EdgeInsets.all(5.w),
-                  width: 100.w,
-                  height: 30.h,
-                  child: Icon(Icons.attach_file,
-                      size: 20.h, color: Material1.primaryColor),
-                )
-              : Container(
-                  margin: EdgeInsets.all(5.w),
-                  width: 100.w,
+
+          SizedBox(height: 2.h),
+
+          // Subject
+          const Align(alignment: Alignment.topRight, child: Text(':سەری بابەت', style: TextStyle(fontSize: 18))),
+          SizedBox(height: 1.h),
+          Material1.textfield(textColor: Colors.black,hint: 'سەری بابەت', controller: subjectcontroller),
+
+          SizedBox(height: 2.h),
+
+          // Content
+          const Align(alignment: Alignment.topRight, child: Text(':ناوەڕۆک', style: TextStyle(fontSize: 18))),
+          SizedBox(height: 1.h),
+          Material1.textfield(textColor: Colors.black,hint: 'ناوەڕۆک', controller: contentcontroller, maxLines: 15),
+
+          SizedBox(height: 3.h),
+
+          // Images Preview
+          images.isEmpty
+              ?  Icon(Icons.image, size: 100, color: Material1.primaryColor)
+              : SizedBox(
                   height: 30.h,
                   child: GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
-                      crossAxisSpacing: 10.0,
-                      mainAxisSpacing: 10.0,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
                     ),
-                    itemCount: files.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Stack(
-                        children: [
-                          Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: Center(
-                                  child:
-                                      Text(paths.basename(files[index].path)))),
-                          GestureDetector(
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('سڕینەوە'),
-                                    content: Text('دڵنیاییت لە سڕینەوەی فایل؟'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('نەخێر',
-                                            style:
-                                                TextStyle(color: Colors.black)),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            images.removeAt(index);
-                                          });
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text(
-                                          'بەڵێ',
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            child: Container(
-                                alignment: Alignment.topRight,
-                                child: Icon(Icons.delete,
-                                    size: 20.sp, color: Colors.red)),
+                    itemCount: images.length,
+                    itemBuilder: (context, i) => Stack(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            image: DecorationImage(image: FileImage(images[i]), fit: BoxFit.cover),
                           ),
-                        ],
-                      );
-                    },
+                        ),
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: GestureDetector(
+                            onTap: () => setState(() => images.removeAt(i)),
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-          Container(
-            height: 8.h,
-            width: 80.w,
-            margin: EdgeInsets.only(top: 5.h, left: 10.w, right: 10.w),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(15)),
-              color: Material1.primaryColor,
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10,
-                  spreadRadius: -5,
-                ),
-              ],
-            ),
-            child: Material1.button(
-                label: 'هەڵبژاردنی فایل',
-                buttoncolor: Material1.primaryColor,
-                textcolor: Colors.white,
-                function: () async {
-                  FilePickerResult? result =
-                      await FilePicker.platform.pickFiles(allowMultiple: true);
-                  if (result != null) {
-                    files = result.paths.map((path) => File(path!)).toList();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('هیچ فایلێک هەڵنەبژێردرا')));
-                  }
-                }),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Material1.button(buttoncolor: Material1.primaryColor, textcolor: Colors.white, label: 'وێنە لە گالەری', function: () => pickImage(ImageSource.gallery)),
+              Material1.button(buttoncolor: Material1.primaryColor, textcolor: Colors.white, label: 'وێنە لە کامێرا', function: () => pickImage(ImageSource.camera)),
+            ],
           ),
-          Container(
-              height: 8.h,
-              width: 80.w,
-              margin: EdgeInsets.only(top: 5.h, left: 10.w, right: 10.w),
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(15)),
-                color: Material1.primaryColor,
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    spreadRadius: -5,
+
+          SizedBox(height: 3.h),
+
+          // Files Preview
+          files.isEmpty
+              ?  Icon(Icons.attach_file, size: 100, color: Material1.primaryColor)
+              : SizedBox(
+                  height: 20.h,
+                  child: ListView.builder(
+                    itemCount: files.length,
+                    itemBuilder: (context, i) => ListTile(
+                      title: Text(paths.basename(files[i].path)),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => setState(() => files.removeAt(i)),
+                      ),
+                    ),
                   ),
-                ],
-              ),
-              child: Material1.button(
+                ),
+
+          Material1.button(
+            label: 'هەڵبژاردنی فایل',
+            buttoncolor: Material1.primaryColor,
+            textcolor: Colors.white,
+            function: pickFiles,
+          ),
+
+          SizedBox(height: 4.h),
+
+          // Send Button
+          isSending
+              ?  Center(child: CircularProgressIndicator(color: Material1.primaryColor))
+              : Material1.button(
                   label: 'ناردن',
                   buttoncolor: Material1.primaryColor,
                   textcolor: Colors.white,
                   function: () async {
                     if (emailList.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('تکایە ئیمەیلێک هەڵبژێرە')));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تکایە ئیمەیلێک بۆ TO بنووسە')));
                       return;
                     }
-                    if (subjectcontroller.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('تکایە سەردەری بابەت بنووسە')));
+                    if (subjectcontroller.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('سەری بابەت پێویستە')));
                       return;
                     }
-                    if (contentcontroller.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('تکایە ناوەڕۆکی بابەت بنووسە')));
+                    if (contentcontroller.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ناوەڕۆک پێویستە')));
                       return;
                     }
-                    //TODO fix uploading attachments
 
-                    // DateTime now = DateTime.now();
-                    // List<String> imagesurl = [];
-                    // List<String> filesurl = [];
-                    // if (images.isNotEmpty) {
-                    //   for (int i = 0; i < images.length; i++) {
-                    //     File file = images[i];
-                    //     String imageUrl = file.path;
-
-                    //     String extension = paths.extension(imageUrl);
-
-                    //     firebase_storage.Reference ref = firebase_storage
-                    //         .FirebaseStorage.instance
-                    //         .ref()
-                    //         .child('email-attachments')
-                    //         .child('${now.year}-${now.month}')
-                    //         .child(
-                    //             '${subjectcontroller.text}/image$i$extension');
-                    //     firebase_storage.UploadTask uploadTask =
-                    //         ref.putFile(file);
-                    //     firebase_storage.TaskSnapshot taskSnapshot =
-                    //         await uploadTask;
-                    //     imagesurl.add(await taskSnapshot.ref.getDownloadURL());
-                    //   }
-                    //   for (int i = 0; i < files.length; i++) {
-                    //     File file = files[i];
-                    //     String fileUrl = file.path;
-
-                    //     String extension = paths.extension(fileUrl);
-
-                    //     firebase_storage.Reference ref = firebase_storage
-                    //         .FirebaseStorage.instance
-                    //         .ref()
-                    //         .child('email-attachments')
-                    //         .child('${now.year}-${now.month}')
-                    //         .child(
-                    //             '${subjectcontroller.text}/file$i$extension');
-                    //     firebase_storage.UploadTask uploadTask =
-                    //         ref.putFile(file);
-                    //     firebase_storage.TaskSnapshot taskSnapshot =
-                    //         await uploadTask;
-                    //     filesurl.add(await taskSnapshot.ref.getDownloadURL());
-                    //   }
-                    // }
-                    List<String> subjects = [];
-                    List<String> subjectwords =
-                        subjectcontroller.text.split(' ');
-                    String temp = '';
-                    int counter = 0;
-                    for (var i = 0; i < subjectwords.length; i++) {
-                      temp = '';
-                      for (var j = 0; j < subjectwords[i].length; j++) {
-                        temp += subjectwords[i][j];
-                        subjects.add(temp);
-                      }
-                    }
+                    setState(() => isSending = true);
 
                     try {
-                      FirebaseFirestore.instance
-                          .collection('email')
-                          .doc('counter')
-                          .get()
-                          .then((value) {
-                        counter = value.data()!['counter'];
-                        String idString = counter.toString();
-                        String temp1 = '';
+                      // 1. Get or Create Counter
+                      int counter = 1;
+                      final counterRef = FirebaseFirestore.instance.collection('email').doc('counter');
+                      final counterSnap = await counterRef.get();
 
-                        for (var i = 0; i < idString.length; i++) {
-                          temp1 += idString[i];
-                          subjects.add(temp1);
+                      if (counterSnap.exists) {
+                        counter = (counterSnap.data()?['counter'] ?? 0) + 1;
+                      }
+                      await counterRef.set({'counter': counter});
+
+                      // 2. Generate searchable subjects
+                      List<String> subjects = [];
+                      final words = subjectcontroller.text.split(RegExp(r'\s+'));
+                      for (String word in words) {
+                        String temp = '';
+                        for (var char in word.characters) {
+                          temp += char;
+                          subjects.add(temp);
                         }
-                      }).then((value) {
-                        FirebaseFirestore.instance
-                            .collection('email')
-                            .doc('counter')
-                            .set({
-                          'counter': counter + 1,
-                        });
-                      }).then((value) {
-                        FirebaseFirestore.instance
-                            .collection('email')
-                            .doc(
-                                '${subjectcontroller.text}-${DateTime.now().toString()}')
-                            .set({
-                          'from': widget.email,
-                          'to': emailList,
-                          'cc': ccList,
-                          'id': counter + 1,
-                          'subject': subjectcontroller.text,
-                          'content': contentcontroller.text,
-                          'subjects': subjects,
-                          'attachments': [],
-                          'images': [],
-                          'readlist': [],
-                          'date': DateTime.now(),
-                        }).then((value) {
-                          for (var i = 0; i < emailList.length; i++) {
-                            FirebaseFirestore.instance
-                                .collection('user')
-                                .doc(emailList[i])
-                                .get()
-                                .then((value) {
-                              sendingnotification('ئیمەڵی نوێ', widget.subject,
-                                  value.data()?['token'] ?? 'a','default1');
-                            });
-                          }
-                          for (var i = 0; i < ccList.length; i++) {
-                            FirebaseFirestore.instance
-                                .collection('user')
-                                .doc(ccList[i])
-                                .get()
-                                .then((value) {
-                              sendingnotification('ئیمەڵی نوێ', widget.subject,
-                                  value.data()?['token'] ?? 'a','default1');
-                            });
-                          }
-                          counter++;
-                          FirebaseFirestore.instance
-                              .collection('email')
-                              .doc('counter')
-                              .set({'counter': counter});
-                          Navigator.popUntil(context, (route) => route.isFirst);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                  'ئیمەیلەکەت بەسەرکەوتویی نێردرا ژمارەکەی $counter')));
-                        });
+                      }
+                      // Add counter digits
+                      for (var char in counter.toString().characters) {
+                        subjects.add(char);
+                      }
+
+                      // 3. Upload attachments (optional later)
+                      List<String> imageUrls = [];
+                      List<String> fileUrls = [];
+                      // TODO: Implement upload if needed
+
+                      // 4. Save Email
+                      final emailDocId = '$counter-${subjectcontroller.text.trim()}';
+                      await FirebaseFirestore.instance.collection('email').doc(emailDocId).set({
+                        'from': widget.email,
+                        'to': emailList,
+                        'cc': ccList,
+                        'id': counter,
+                        'subject': subjectcontroller.text.trim(),
+                        'content': contentcontroller.text,
+                        'subjects': subjects,
+                        'images': imageUrls,
+                        'attachments': fileUrls,
+                        'readlist': [],
+                        'date': FieldValue.serverTimestamp(),
                       });
+
+                      // 5. Send Notifications
+                      final allRecipients = [...emailList, ...ccList];
+                      for (String recipient in allRecipients) {
+                        final userSnap = await FirebaseFirestore.instance.collection('user').doc(recipient).get();
+                        final token = userSnap.data()?['token']?.toString();
+                        if (token != null && token.isNotEmpty && token != 'a') {
+                          sendingnotification('ئیمەیلی نوێ', subjectcontroller.text, token, 'default1');
+                        }
+                      }
+
+                      // Success
+                      if (mounted) {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('ئیمەیل بەسەرکەوتویی نێردرا • ژمارە: $counter')),
+                        );
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text(
-                              'هەڵەیەک ڕوویدا، تکایە دووبارە هەول بەرەوە')));
+                      log('Error sending email: $e');
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('هەڵەیەک ڕوویدا، تکایە دووبارە هەوڵ بدەرەوە')),
+                        );
+                      }
+                    } finally {
+                      if (mounted) setState(() => isSending = false);
                     }
-                  })),
-          SizedBox(
-            height: 10.h,
-          ),
+                  },
+                ),
+
+          SizedBox(height: 10.h),
         ],
       ),
     );

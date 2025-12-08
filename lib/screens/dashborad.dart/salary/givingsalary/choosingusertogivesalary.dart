@@ -57,7 +57,8 @@ class _ChoosingUserForGivingSalaryState
                   : 0;
               final monthlyPayback = data.containsKey('monthlypayback')
                   ? (data['monthlypayback'] is String
-                      ? (num.tryParse(data['monthlypayback'] as String) ?? 0).toInt()
+                      ? (num.tryParse(data['monthlypayback'] as String) ?? 0)
+                          .toInt()
                       : (data['monthlypayback'] as num? ?? 0).toInt())
                   : 0;
 
@@ -175,8 +176,7 @@ class _ChoosingUserForGivingSalaryState
 
   // Rest of the methods remain unchanged
   Future<int> calculateWorkingDays(DateTime month, List<int> workDays) async {
-    final firstDay = DateTime(month.year, month.month, 1);
-    final lastDay = DateTime(month.year, month.month + 1, 0);
+  final (firstDay, lastDay) = _getSalaryPeriod(month); // گۆڕانکاری لێرە
 
     final holidaysSnapshot = await FirebaseFirestore.instance
         .collection('holidays')
@@ -214,8 +214,7 @@ class _ChoosingUserForGivingSalaryState
   }
 
   Future<int> _calculateAbsenceDays(String email, DateTime date) async {
-    final firstDay = DateTime(date.year, date.month, 1);
-    final lastDay = DateTime(date.year, date.month + 1, 0);
+  final (firstDay, lastDay) = _getSalaryPeriod(date); // گۆڕانکاری لێرە
 
     final absenceSnapshot = await FirebaseFirestore.instance
         .collection('user')
@@ -242,64 +241,22 @@ class _ChoosingUserForGivingSalaryState
     return totalAbsenceDays;
   }
 
+  Future<Duration> _calculateTotalWorkedTime(
+      String email, DateTime date) async {
+      Duration totalWorkedTime = Duration.zero;
 
 
-  // Future<Duration> _calculateTotalWorkedTime(String email, DateTime date) async {
-  //   Duration totalWorkedTime = Duration.zero;
+  final (firstDay, lastDay) = _getSalaryPeriod(date); // گۆڕانکاری لێرە
 
-  //   final holidays = await FirebaseFirestore.instance
-  //       .collection('holidays')
-  //       .where('endDate',
-  //           isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
-  //       .where('startDate',
-  //           isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
-  //       .get();
+    // Fetch holidays
+    final holidays = await FirebaseFirestore.instance
+        .collection('holidays')
+        .where('endDate', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDay))
+        .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
+        .get();
 
-  //   final checkinCheckouts = await FirebaseFirestore.instance
-  //       .collection('user')
-  //       .doc(email)
-  //       .collection('checkincheckouts')
-  //       .where('time',
-  //           isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
-  //       .where('time',
-  //           isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
-  //       .orderBy('time')
-  //       .get();
-
-  //   for (var i = 0; i < checkinCheckouts.docs.length; i += 2) {
-  //     if (i + 1 >= checkinCheckouts.docs.length) break;
-
-  //     final checkinTime = checkinCheckouts.docs[i]['time'].toDate();
-  //     final checkoutTime = checkinCheckouts.docs[i + 1]['time'].toDate();
-
-  //     bool isHoliday = holidays.docs.any((holiday) {
-  //       final holidayStart = holiday['startDate'].toDate();
-  //       final holidayEnd = holiday['endDate'].toDate();
-  //       return isDateInRange(checkinTime, holidayStart, holidayEnd);
-  //     });
-
-  //     if (!isHoliday) {
-  //       totalWorkedTime += checkoutTime.difference(checkinTime);
-  //     }
-  //   }
-
-  //   return totalWorkedTime;
-  // }
-  Future<Duration> _calculateTotalWorkedTime(String email, DateTime date) async {
-  Duration totalWorkedTime = Duration.zero;
-
-  final firstDay = DateTime(date.year, date.month, 1);
-  final lastDay = DateTime(date.year, date.month + 1, 0);
-
-  // Fetch holidays
-  final holidays = await FirebaseFirestore.instance
-      .collection('holidays')
-      .where('endDate', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDay))
-      .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
-      .get();
-
-  // Fetch check-in/check-out records
-  final checkinCheckouts = await FirebaseFirestore.instance
+    // Fetch check-in/check-out records
+      final checkinCheckouts = await FirebaseFirestore.instance
       .collection('user')
       .doc(email)
       .collection('checkincheckouts')
@@ -308,66 +265,67 @@ class _ChoosingUserForGivingSalaryState
       .orderBy('time')
       .get();
 
-  DateTime? lastCheckInTime;
-  for (var doc in checkinCheckouts.docs) {
-    final data = doc.data();
-    final timestamp = data['time'] as Timestamp;
-    final time = timestamp.toDate();
-    final isCheckIn = data['checkin'] == true;
+    DateTime? lastCheckInTime;
+    for (var doc in checkinCheckouts.docs) {
+      final data = doc.data();
+      final timestamp = data['time'] as Timestamp;
+      final time = timestamp.toDate();
+      final isCheckIn = data['checkin'] == true;
 
-    if (isCheckIn) {
-      lastCheckInTime = time;
-    } else if (!isCheckIn && lastCheckInTime != null) {
-      // Check if this period overlaps with any holiday
+      if (isCheckIn) {
+        lastCheckInTime = time;
+      } else if (!isCheckIn && lastCheckInTime != null) {
+        // Check if this period overlaps with any holiday
+        bool isHolidayPeriod = holidays.docs.any((holiday) {
+          final holidayStart = (holiday['startDate'] as Timestamp).toDate();
+          final holidayEnd = (holiday['endDate'] as Timestamp).toDate();
+          return isDateInRange(lastCheckInTime!, holidayStart, holidayEnd) ||
+              isDateInRange(time, holidayStart, holidayEnd);
+        });
+
+        if (!isHolidayPeriod) {
+          totalWorkedTime += time.difference(lastCheckInTime);
+        }
+        lastCheckInTime = null; // Reset after processing a pair
+      }
+    }
+
+    // If currently checked in (last entry is check-in), add time up to now
+    if (lastCheckInTime != null) {
+      final now = DateTime.now();
       bool isHolidayPeriod = holidays.docs.any((holiday) {
         final holidayStart = (holiday['startDate'] as Timestamp).toDate();
         final holidayEnd = (holiday['endDate'] as Timestamp).toDate();
         return isDateInRange(lastCheckInTime!, holidayStart, holidayEnd) ||
-               isDateInRange(time, holidayStart, holidayEnd);
+            isDateInRange(now, holidayStart, holidayEnd);
       });
-
       if (!isHolidayPeriod) {
-        totalWorkedTime += time.difference(lastCheckInTime!);
+        totalWorkedTime += now.difference(lastCheckInTime);
       }
-      lastCheckInTime = null; // Reset after processing a pair
     }
-  }
 
-  // If currently checked in (last entry is check-in), add time up to now
-  if (lastCheckInTime != null) {
-    final now = DateTime.now();
-    bool isHolidayPeriod = holidays.docs.any((holiday) {
-      final holidayStart = (holiday['startDate'] as Timestamp).toDate();
-      final holidayEnd = (holiday['endDate'] as Timestamp).toDate();
-      return isDateInRange(lastCheckInTime!, holidayStart, holidayEnd) ||
-             isDateInRange(now, holidayStart, holidayEnd);
-    });
-    if (!isHolidayPeriod) {
-      totalWorkedTime += now.difference(lastCheckInTime!);
-    }
+    return totalWorkedTime;
   }
-
-  return totalWorkedTime;
-}
 
   bool isDateInRange(DateTime date, DateTime rangeStart, DateTime rangeEnd) {
     return date.isAfter(rangeStart.subtract(const Duration(days: 1))) &&
         date.isBefore(rangeEnd.add(const Duration(days: 1)));
   }
 
-  Future<(num, num)> _calculateRewardAndPunishment(String email, DateTime date) async {
+  Future<(num, num)> _calculateRewardAndPunishment(
+      String email, DateTime date) async {
     num reward = 0;
     num punishment = 0;
+      final (firstDay, lastDay) = _getSalaryPeriod(date); // گۆڕانکاری لێرە
 
-    final rewardPunishment = await FirebaseFirestore.instance
-        .collection('user')
-        .doc(email)
-        .collection('rewardpunishment')
-        .where('date',
-            isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
-        .where('date',
-            isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
-        .get();
+
+  final rewardPunishment = await FirebaseFirestore.instance
+      .collection('user')
+      .doc(email)
+      .collection('rewardpunishment')
+      .where('date', isGreaterThanOrEqualTo: firstDay)
+      .where('date', isLessThanOrEqualTo: lastDay)
+      .get();
 
     for (var doc in rewardPunishment.docs) {
       final type = doc['type'] as String?;
@@ -385,19 +343,20 @@ class _ChoosingUserForGivingSalaryState
     return (reward, punishment);
   }
 
-  Future<(num, num)> _calculateTaskRewardAndPunishment(String email, DateTime date) async {
+  Future<(num, num)> _calculateTaskRewardAndPunishment(
+      String email, DateTime date) async {
     num taskReward = 0;
     num taskPunishment = 0;
 
+      final (firstDay, lastDay) = _getSalaryPeriod(date); // گۆڕانکاری لێرە
+
     final taskRewardPunishment = await FirebaseFirestore.instance
-        .collection('user')
-        .doc(email)
-        .collection('taskrewardpunishment')
-        .where('date',
-            isGreaterThanOrEqualTo: DateTime(date.year, date.month, 1))
-        .where('date',
-            isLessThanOrEqualTo: DateTime(date.year, date.month + 1, 0))
-        .get();
+      .collection('user')
+      .doc(email)
+      .collection('taskrewardpunishment')
+      .where('date', isGreaterThanOrEqualTo: firstDay)
+      .where('date', isLessThanOrEqualTo: lastDay)
+      .get();
 
     for (var doc in taskRewardPunishment.docs) {
       final type = doc['type'] as String?;
@@ -436,11 +395,22 @@ class _ChoosingUserForGivingSalaryState
               "$name : ناو",
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            Text("$phone : ژمارەی مۆبایل", style: const TextStyle(fontSize: 15)),
+            Text("$phone : ژمارەی مۆبایل",
+                style: const TextStyle(fontSize: 15)),
             Text("$email : ئیمەیل", style: const TextStyle(fontSize: 15)),
           ],
         ),
       ),
     );
   }
+  // Custom salary period: 26th of previous month to 25th of selected month
+(DateTime start, DateTime end) _getSalaryPeriod(DateTime selectedMonth) {
+  // Start date: 26th of previous month
+  final previousMonth = DateTime(selectedMonth.year, selectedMonth.month - 1, 26);
+  
+  // End date: 25th of selected month
+  final endDate = DateTime(selectedMonth.year, selectedMonth.month, 25, 23, 59, 59);
+  
+  return (previousMonth, endDate);
+}
 }
