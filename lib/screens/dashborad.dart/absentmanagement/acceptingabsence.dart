@@ -1,3 +1,4 @@
+
 import 'package:british_body_admin/sendingnotification.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,43 @@ class Acceptingabsence extends StatefulWidget {
 String formatDate(DateTime? date) {
   final DateFormat formatter = DateFormat('dd/MM/yyyy HH:mm');
   return formatter.format(date ?? DateTime.now());
+}
+
+// Helper function to convert Firestore Timestamp to DateTime
+DateTime? getDateFromTimestamp(dynamic timestamp) {
+  if (timestamp == null) return null;
+  if (timestamp is Timestamp) {
+    return timestamp.toDate();
+  }
+  return null;
+}
+
+// Helper function to get urgency text in Kurdish
+String getUrgencyText(String? urgency) {
+  switch (urgency) {
+    case 'emergency':
+      return 'زۆر گرنگ';
+    case 'urgent':
+      return 'گرنگ';
+    case 'normal':
+      return 'ئاسایی';
+    default:
+      return 'نادیار';
+  }
+}
+
+// Helper function to get urgency color
+Color getUrgencyColor(String? urgency) {
+  switch (urgency) {
+    case 'emergency':
+      return Colors.red;
+    case 'urgent':
+      return Colors.orange;
+    case 'normal':
+      return Colors.green;
+    default:
+      return Colors.grey;
+  }
 }
 
 const List<String> list = <String>[
@@ -41,7 +79,6 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
   Future<void> _deleteTasksForAbsence(
       String email, DateTime start, DateTime end) async {
     try {
-      // Query tasks where the deadline falls within the absence period
       final tasksSnapshot = await FirebaseFirestore.instance
           .collection('user')
           .doc(email)
@@ -52,7 +89,6 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                   end.add(Duration(days: 1)).subtract(Duration(seconds: 1))))
           .get();
 
-      // Delete each matching task
       for (var task in tasksSnapshot.docs) {
         await FirebaseFirestore.instance
             .collection('user')
@@ -102,20 +138,28 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   return SizedBox(
-                    height: ((snapshot.data?.docs.length ?? 0) * 38).h,
+                    height: ((snapshot.data?.docs.length ?? 0) * 50).h, // Increased height for more content
                     child: ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: snapshot.data?.docs.length ?? 0,
                       itemBuilder: (BuildContext context, int index) {
+                        // Get the absence data
+                        var absenceData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                        
+                        // Extract start and end dates
+                        DateTime? startDate = getDateFromTimestamp(absenceData['start']);
+                        DateTime? endDate = getDateFromTimestamp(absenceData['end']);
+                        String? urgency = absenceData['urgency'];
+                        
                         return SizedBox(
-                          height: 38.h,
+                          height: 48.h, // Increased height
                           width: 90.w,
                           child: Container(
                             margin: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
                             padding: EdgeInsets.all(1.h),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(5),
+                              borderRadius: BorderRadius.circular(10),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Colors.grey,
@@ -127,6 +171,7 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
+                                // Email
                                 Text(
                                   email,
                                   style: TextStyle(
@@ -134,42 +179,175 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                                
+                                // Status
                                 SizedBox(
                                   height: 3.h,
                                   child: Text(
-                                    snapshot.data!.docs[index]['status'] ==
-                                            'accepted'
+                                    absenceData['status'] == 'accepted'
                                         ? 'قبوڵکراوە'
-                                        : snapshot.data!.docs[index]['status'] ==
-                                                'pending'
+                                        : absenceData['status'] == 'pending'
                                             ? 'لە چاوەڕوانی دایە'
                                             : 'ڕەتکراوەتەوە',
                                     style: TextStyle(
-                                      fontSize: 16.sp,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
+                                      color: absenceData['status'] == 'pending' 
+                                          ? Colors.orange 
+                                          : absenceData['status'] == 'accepted'
+                                              ? Colors.green
+                                              : Colors.red,
                                     ),
                                   ),
                                 ),
+                                
+                                // Urgency
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                                      decoration: BoxDecoration(
+                                        color: getUrgencyColor(urgency),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      child: Text(
+                                        getUrgencyText(urgency),
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 2.w),
+                                    Text(
+                                      'گرنگی:',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                
+                                // START DATE & TIME
+                                Container(
+                                  padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        startDate != null 
+                                            ? formatDate(startDate)
+                                            : 'نادیار',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: Material1.primaryColor,
+                                        ),
+                                      ),
+                                      SizedBox(width: 2.w),
+                                      Text(
+                                        'لە:',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(width: 1.w),
+                                      Icon(
+                                        Icons.calendar_today,
+                                        color: Material1.primaryColor,
+                                        size: 16.sp,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                
+                                // END DATE & TIME
+                                Container(
+                                  padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        endDate != null 
+                                            ? formatDate(endDate)
+                                            : 'نادیار',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: Material1.primaryColor,
+                                        ),
+                                      ),
+                                      SizedBox(width: 2.w),
+                                      Text(
+                                        'بۆ:',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(width: 1.w),
+                                      Icon(
+                                        Icons.calendar_today,
+                                        color: Colors.red,
+                                        size: 16.sp,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                
+                                // Duration (Optional - shows how many days)
+                                if (startDate != null && endDate != null)
+                                  Container(
+                                    padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '${endDate.difference(startDate).inDays + 1} ڕۆژ',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                        SizedBox(width: 2.w),
+                                        Text(
+                                          'ماوە:',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                
+                                // Note
                                 SizedBox(
                                   height: 6.h,
                                   child: Text(
-                                    "${snapshot.data!.docs[index]['note']} : تێبینی ",
+                                    "${absenceData['note']} :تێبینی",
                                     style: TextStyle(
-                                      fontSize: 16.sp,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
+                                    textAlign: TextAlign.right,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
                                   ),
                                 ),
+                                
+                                // Sound selection dropdown
                                 Container(
-                                  margin:
-                                      EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
-                                  height: 8.h,
+                                  margin: EdgeInsets.only(top: 1.h),
+                                  height: 6.h,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       SizedBox(
-                                        height: 6.h,
+                                        height: 5.h,
                                         width: 30.w,
                                         child: DropdownButton<String>(
                                           isExpanded: true,
@@ -191,9 +369,7 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                               dropdownValue = value!;
                                             });
                                           },
-                                          items: list
-                                              .map<DropdownMenuItem<String>>(
-                                                  (String value) {
+                                          items: list.map<DropdownMenuItem<String>>((String value) {
                                             return DropdownMenuItem<String>(
                                               value: value,
                                               child: Text(value),
@@ -202,24 +378,26 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                         ),
                                       ),
                                       SizedBox(
-                                        height: 6.h,
+                                        height: 5.h,
                                         width: 30.w,
                                         child: Center(
                                           child: Text(
                                             'هەڵبژاردنی دەنگ',
-                                            style: TextStyle(fontSize: 16.sp),
+                                            style: TextStyle(fontSize: 14.sp),
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
+                                
+                                // Accept/Reject buttons
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
                                     TextButton(
                                       onPressed: () async {
+                                        // ... your existing accept logic
                                         String password = '';
                                         if ('default1' != dropdownValue) {
                                           await showDialog(
@@ -243,8 +421,7 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                                       Navigator.pop(context);
                                                     },
                                                     textcolor: Colors.white,
-                                                    buttoncolor:
-                                                        Material1.primaryColor,
+                                                    buttoncolor: Material1.primaryColor,
                                                   ),
                                                 ],
                                               );
@@ -252,19 +429,15 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                           );
                                         }
 
-                                        if (password != '1010' &&
-                                            'default1' != dropdownValue) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
+                                        if (password != '1010' && 'default1' != dropdownValue) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             const SnackBar(
-                                              content: Text(
-                                                  'Password is incorrect'),
+                                              content: Text('Password is incorrect'),
                                             ),
                                           );
                                           return;
                                         }
 
-                                        // Update absence status to accepted
                                         await FirebaseFirestore.instance
                                             .collection('user')
                                             .doc(email)
@@ -272,19 +445,10 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                             .doc(snapshot.data!.docs[index].id)
                                             .update({'status': 'accepted'});
 
-                                        // Get absence start and end dates
-                                        DateTime start = snapshot
-                                            .data!.docs[index]['start']
-                                            .toDate();
-                                        DateTime end = snapshot
-                                            .data!.docs[index]['end']
-                                            .toDate();
+                                        if (startDate != null && endDate != null) {
+                                          await _deleteTasksForAbsence(email, startDate, endDate);
+                                        }
 
-                                        // Delete tasks within the absence period
-                                        await _deleteTasksForAbsence(
-                                            email, start, end);
-
-                                        // Send notification
                                         await FirebaseFirestore.instance
                                             .collection('user')
                                             .doc(email)
@@ -298,11 +462,9 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                           );
                                         });
 
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
+                                        ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(
-                                            content: Text(
-                                                'مۆڵەت قبوڵکرا و ئەرکەکان سڕانەوە'),
+                                            content: Text('مۆڵەت قبوڵکرا و ئەرکەکان سڕانەوە'),
                                             behavior: SnackBarBehavior.floating,
                                             backgroundColor: Colors.green,
                                           ),
@@ -313,11 +475,13 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16.sp,
+                                          color: Colors.green,
                                         ),
                                       ),
                                     ),
                                     TextButton(
                                       onPressed: () async {
+                                        // ... your existing reject logic
                                         String password = '';
                                         if ('default1' != dropdownValue) {
                                           await showDialog(
@@ -341,8 +505,7 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                                       Navigator.pop(context);
                                                     },
                                                     textcolor: Colors.white,
-                                                    buttoncolor:
-                                                        Material1.primaryColor,
+                                                    buttoncolor: Material1.primaryColor,
                                                   ),
                                                 ],
                                               );
@@ -350,19 +513,15 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                           );
                                         }
 
-                                        if (password != '1010' &&
-                                            'default1' != dropdownValue) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
+                                        if (password != '1010' && 'default1' != dropdownValue) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             const SnackBar(
-                                              content: Text(
-                                                  'Password is incorrect'),
+                                              content: Text('Password is incorrect'),
                                             ),
                                           );
                                           return;
                                         }
 
-                                        // Update absence status to rejected
                                         await FirebaseFirestore.instance
                                             .collection('user')
                                             .doc(email)
@@ -370,7 +529,6 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                             .doc(snapshot.data!.docs[index].id)
                                             .update({'status': 'rejected'});
 
-                                        // Send notification
                                         await FirebaseFirestore.instance
                                             .collection('user')
                                             .doc(email)
@@ -384,8 +542,7 @@ class _AcceptingabsenceState extends State<Acceptingabsence> {
                                           );
                                         });
 
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
+                                        ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(
                                             content: Text('مۆڵەت ڕەتکرایەوە'),
                                             behavior: SnackBarBehavior.floating,
