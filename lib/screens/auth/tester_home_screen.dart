@@ -1,6 +1,5 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:british_body_admin/screens/auth/login_screen.dart';
-import 'package:british_body_admin/sharedprefrences/sharedprefernences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,16 +35,16 @@ class _TesterHomeScreenState extends State<TesterHomeScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('دەرچوون'),
-          content: const Text('دڵنیایت لە دەرچوون؟'),
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('نەخێر', style: TextStyle(color: Colors.grey[600])),
+              child: Text('No', style: TextStyle(color: Colors.grey[600])),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('بەڵێ', style: TextStyle(color: Material1.primaryColor)),
+              child: Text('Yes', style: TextStyle(color: Material1.primaryColor)),
             ),
           ],
         );
@@ -71,7 +70,7 @@ class _TesterHomeScreenState extends State<TesterHomeScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('هەڵە لە دەرچوون: $e')),
+            SnackBar(content: Text('Error logging out: $e')),
           );
         }
       }
@@ -83,7 +82,7 @@ class _TesterHomeScreenState extends State<TesterHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Material1.primaryColor,
-        title: const Text('پەڕەی تاقیکار'),
+        title: const Text('Tester Page'),
         foregroundColor: Colors.white,
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -91,7 +90,7 @@ class _TesterHomeScreenState extends State<TesterHomeScreen> {
           IconButton(
             onPressed: _handleLogout,
             icon: const Icon(Icons.logout, color: Colors.white),
-            tooltip: 'دەرچوون',
+            tooltip: 'Logout',
           ),
         ],
       ),
@@ -108,7 +107,7 @@ class _TesterHomeScreenState extends State<TesterHomeScreen> {
               ),
               SizedBox(height: 3.h),
               Text(
-                'بەخێربێیت، $userName',
+                'Welcome, $userName',
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
@@ -118,7 +117,7 @@ class _TesterHomeScreenState extends State<TesterHomeScreen> {
               ),
               SizedBox(height: 2.h),
               Text(
-                'ئەمە پەڕەی تایبەتە بە تاقیکارەکان',
+                'This is the page dedicated to testers',
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: Colors.grey[600],
@@ -145,7 +144,7 @@ class _TesterHomeScreenState extends State<TesterHomeScreen> {
                     ),
                     SizedBox(height: 1.h),
                     Text(
-                      'تۆ وەک تاقیکار چوویتە ژوورەوە\nتەنها دەستگەیشتنت هەیە بۆ تاقیکردنەوەی تایبەتمەندییەکان',
+                      'You are logged in as a tester\nYou only have access to test features',
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: Colors.black87,
