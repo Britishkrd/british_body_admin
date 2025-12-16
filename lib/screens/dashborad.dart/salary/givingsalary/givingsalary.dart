@@ -12,17 +12,27 @@ class Givingsalary extends StatefulWidget {
   final String email;
   final String name;
   final String adminemail;
+
+  /// This is the month you selected (for example: Jan 2025).
   final DateTime date;
+
   final Duration totalworkedtime;
-  final int worktarget;
+
+  /// Monthly target after subtracting approved leave (in Duration).
+  final Duration workTarget;
+
   final num salary;
   final String loan;
   final int monthlypayback;
+
   final num reward;
   final num punishment;
   final num taskreward;
   final num taskpunishment;
-  final int absenceDays;
+
+  /// Total approved leave time within salary period (Duration, hours/minutes).
+  final Duration absenceDuration;
+
   final int dailyWorkHours;
 
   const Givingsalary({
@@ -32,7 +42,7 @@ class Givingsalary extends StatefulWidget {
     required this.adminemail,
     required this.name,
     required this.totalworkedtime,
-    required this.worktarget,
+    required this.workTarget,
     required this.salary,
     required this.loan,
     required this.monthlypayback,
@@ -40,7 +50,7 @@ class Givingsalary extends StatefulWidget {
     required this.punishment,
     required this.taskreward,
     required this.taskpunishment,
-    required this.absenceDays,
+    required this.absenceDuration,
     required this.dailyWorkHours,
   });
 
@@ -49,18 +59,23 @@ class Givingsalary extends StatefulWidget {
 }
 
 class _GivingsalaryState extends State<Givingsalary> {
-  TextEditingController punishmentamountcontroller = TextEditingController();
-  TextEditingController monthlypaymentcontroller = TextEditingController();
+  final TextEditingController punishmentamountcontroller =
+      TextEditingController();
+  final TextEditingController monthlypaymentcontroller = TextEditingController();
 
-  int calculateMonthlyTarget(int dailyHours, DateTime date) {
-    final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
-    return dailyHours * daysInMonth;
+  int _parseIntController(TextEditingController c) {
+    return int.tryParse(c.text.trim()) ?? 0;
   }
 
-  String _formatRemainingTime(int workTargetHours, Duration totalWorkedTime) {
-    final targetMinutes = workTargetHours * 60;
-    final workedMinutes = totalWorkedTime.inMinutes;
-    final remainingMinutes = targetMinutes - workedMinutes;
+  String _formatHM(Duration d) {
+    if (d.inMinutes <= 0) return '0 کاتژمێر و 0 خولەک';
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    return '$h کاتژمێر و $m خولەک';
+  }
+
+  String _formatRemainingTime(Duration workTarget, Duration totalWorkedTime) {
+    final remainingMinutes = workTarget.inMinutes - totalWorkedTime.inMinutes;
 
     if (remainingMinutes <= 0) {
       return '0 کاتژمێر و 0 خولەک';
@@ -72,6 +87,41 @@ class _GivingsalaryState extends State<Givingsalary> {
     return '$hours کاتژمێر و $minutes خولەک';
   }
 
+  int _missedMinutes() {
+    final v = widget.workTarget.inMinutes - widget.totalworkedtime.inMinutes;
+    return v <= 0 ? 0 : v;
+  }
+
+  /// Punishment per missed hour, but calculated دقیقە-بە-دقیقە (pro-rated).
+  /// Example: perHour=500, missed=120 minutes => 1000.
+  int _calculatePunishment() {
+    final missedMinutes = _missedMinutes();
+    if (missedMinutes <= 0) return 0;
+
+    final perHour = _parseIntController(punishmentamountcontroller);
+    if (perHour <= 0) return 0;
+
+    final value = (missedMinutes * perHour) / 60.0;
+
+    // pick rounding style you want:
+    return value.ceil();
+  }
+
+  int _givenSalary() {
+    final monthlyPayback = _parseIntController(monthlypaymentcontroller);
+    final missingPunishment = _calculatePunishment();
+
+    final result = widget.salary -
+        missingPunishment -
+        monthlyPayback +
+        widget.reward -
+        widget.punishment +
+        (widget.taskreward - widget.taskpunishment);
+
+    // Dinar usually integer:
+    return result.round();
+  }
+
   Future<String> _fetchAdminName(String adminEmail) async {
     try {
       final userDoc = await FirebaseFirestore.instance
@@ -81,10 +131,11 @@ class _GivingsalaryState extends State<Givingsalary> {
       if (userDoc.exists) {
         return userDoc.data()?['name'] as String? ?? adminEmail;
       }
-      return adminEmail; // Fallback to email if name not found
+      return adminEmail;
     } catch (e) {
+      // ignore: avoid_print
       print('Error fetching admin name: $e');
-      return adminEmail; // Fallback to email on error
+      return adminEmail;
     }
   }
 
@@ -106,53 +157,55 @@ class _GivingsalaryState extends State<Givingsalary> {
         },
       );
 
-      // Fetch admin name
       final adminName = await _fetchAdminName(widget.adminemail);
 
       final invoiceGenerator = InvoiceGenerator();
+
+      // IMPORTANT:
+      // If your InvoiceGenerator still expects `workTarget` as int hours and `absenceDays`,
+      // we keep it compatible here by sending hours/days approximations.
+      final workTargetHoursForInvoice = (widget.workTarget.inMinutes / 60).ceil();
+      final absenceDaysForInvoice = widget.dailyWorkHours <= 0
+          ? 0
+          : (widget.absenceDuration.inMinutes /
+                  (widget.dailyWorkHours * 60.0))
+              .floor();
+
       final file = await invoiceGenerator.generateInvoice(
         employeeName: widget.name,
         employeeEmail: widget.email,
         paymentDate: widget.date,
         salary: widget.salary,
         totalWorkedTime: widget.totalworkedtime,
-        workTarget: widget.worktarget,
-        absenceDays: widget.absenceDays,
+        workTarget: workTargetHoursForInvoice,
+        absenceDays: absenceDaysForInvoice,
         dailyWorkHours: widget.dailyWorkHours,
         reward: widget.reward,
         punishment: widget.punishment,
         taskReward: widget.taskreward,
         taskPunishment: widget.taskpunishment,
         adminEmail: widget.adminemail,
-        adminName: adminName, // Pass admin name
-        monthlyPayback: int.parse(monthlypaymentcontroller.text.isNotEmpty
-            ? monthlypaymentcontroller.text
-            : '0'),
-        punishmentPerHour: int.parse(punishmentamountcontroller.text.isNotEmpty
-            ? punishmentamountcontroller.text
-            : '0'),
-        givenSalary: widget.salary -
-            _calculatePunishment() -
-            int.parse(monthlypaymentcontroller.text.isNotEmpty
-                ? monthlypaymentcontroller.text
-                : '0') +
-            widget.reward -
-            widget.punishment +
-            (widget.taskreward - widget.taskpunishment),
+        adminName: adminName,
+        monthlyPayback: _parseIntController(monthlypaymentcontroller),
+        punishmentPerHour: _parseIntController(punishmentamountcontroller),
+        givenSalary: _givenSalary(),
         loan: widget.loan,
       );
 
       Navigator.of(context).pop();
 
       final result = await OpenFile.open(file.path);
+      // ignore: avoid_print
       print('OpenFile result: ${result.message}');
 
       await Share.shareXFiles([XFile(file.path)],
           text: 'Invoice for ${widget.name}');
 
+      // ignore: avoid_print
       print('Invoice generated successfully at: ${file.path}');
     } catch (e) {
       Navigator.of(context, rootNavigator: true).pop();
+      // ignore: avoid_print
       print('Error generating invoice: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error generating invoice: $e')),
@@ -162,29 +215,33 @@ class _GivingsalaryState extends State<Givingsalary> {
 
   @override
   void initState() {
-    punishmentamountcontroller.text = 500.toString();
+    punishmentamountcontroller.text = '500';
     monthlypaymentcontroller.text = widget.monthlypayback.toString();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final loanAmount = num.tryParse(widget.loan) ?? 0;
+    final leaveText = _formatHM(widget.absenceDuration);
+
+    final targetHours = widget.workTarget.inMinutes / 60.0;
+    final daysEq = widget.dailyWorkHours <= 0
+        ? 0.0
+        : targetHours / widget.dailyWorkHours;
+
+    final missedMinutes = _missedMinutes();
+    final missedDuration = Duration(minutes: missedMinutes);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '${widget.date.year} / ${widget.date.month} بەروار',
-        ),
+        title: Text('${widget.date.year} / ${widget.date.month} بەروار'),
         foregroundColor: Colors.white,
         backgroundColor: Material1.primaryColor,
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.print),
-            onPressed: () async {
-              await _generateAndPrintInvoice();
-            },
+            onPressed: () async => _generateAndPrintInvoice(),
           ),
         ],
       ),
@@ -204,12 +261,14 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Leave in hours/minutes (NOT days)
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'ژمارەی ڕۆژانی مۆڵەت : ${widget.absenceDays} ڕۆژ واتە ${widget.absenceDays * widget.dailyWorkHours} کاتژمێر',
+              'کۆی کاتی مۆڵەت : $leaveText',
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: 16.sp,
@@ -218,6 +277,7 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -274,12 +334,14 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Worked time
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'کۆی کاتی کارکردن : ${widget.totalworkedtime.inHours} کاتژمێر و ${widget.totalworkedtime.inMinutes.remainder(60)} خولەک',
+              'کۆی کاتی کارکردن : ${_formatHM(widget.totalworkedtime)}',
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: 16.sp,
@@ -288,12 +350,14 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Remaining time
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'کاتی کارکردنی ماوە : ${_formatRemainingTime(widget.worktarget, widget.totalworkedtime)}',
+              'کاتی کارکردنی ماوە : ${_formatRemainingTime(widget.workTarget, widget.totalworkedtime)}',
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: 16.sp,
@@ -302,12 +366,14 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Target time
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'ئامانجی کارکردن : ${widget.worktarget} کاتژمێر (${(widget.worktarget / 8).toStringAsFixed(0)} ڕۆژ)',
+              'ئامانجی کارکردن : ${targetHours.toStringAsFixed(2)} کاتژمێر (~${daysEq.toStringAsFixed(1)} ڕۆژ)',
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: 16.sp,
@@ -316,6 +382,24 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Missed time (hours/minutes)
+          Container(
+            width: 100.w,
+            alignment: Alignment.centerRight,
+            margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
+            child: Text(
+              'کاتی دواکەوتن : ${_formatHM(missedDuration)}',
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          // Missing punishment
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -330,6 +414,8 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Salary
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -344,6 +430,8 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Loan
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -358,12 +446,14 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Monthly payback display
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Text(
-              'بڕی پارەدانەوەی مانگانە : ${NumberFormat("#,###").format(num.parse(monthlypaymentcontroller.text.isNotEmpty ? monthlypaymentcontroller.text : '0').toInt())} دینار',
+              'بڕی پارەدانەوەی مانگانە : ${NumberFormat("#,###").format(_parseIntController(monthlypaymentcontroller))} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: 16.sp,
@@ -372,6 +462,8 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Monthly payback input
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -393,28 +485,24 @@ class _GivingsalaryState extends State<Givingsalary> {
             child: Material1.textfield(
               hint: 'بڕی پارەدانەوەی مانگانە',
               textColor: Colors.black,
-              onchange: (p0) {
-                setState(() {});
-              },
+              onchange: (p0) => setState(() {}),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
-                TextInputFormatter.withFunction(
-                  (oldValue, newValue) {
-                    if (newValue.text.isEmpty) {
-                      return const TextEditingValue(text: '0');
-                    }
-                    if (int.parse(newValue.text) < 0 &&
-                        int.tryParse(newValue.text) != null) {
-                      return const TextEditingValue(text: '0');
-                    }
-                    return newValue;
-                  },
-                ),
+                TextInputFormatter.withFunction((oldValue, newValue) {
+                  if (newValue.text.isEmpty) {
+                    return const TextEditingValue(text: '0');
+                  }
+                  final v = int.tryParse(newValue.text) ?? 0;
+                  if (v < 0) return const TextEditingValue(text: '0');
+                  return newValue;
+                }),
               ],
               inputType: TextInputType.number,
               controller: monthlypaymentcontroller,
             ),
           ),
+
+          // Punishment per hour input
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
@@ -435,35 +523,31 @@ class _GivingsalaryState extends State<Givingsalary> {
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.h),
             child: Material1.textfield(
               hint: 'بڕی سزا بۆ هەموو کاتژمێرێک کارنەکردن',
-              onchange: (p0) {
-                setState(() {});
-              },
+              onchange: (p0) => setState(() {}),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
-                TextInputFormatter.withFunction(
-                  (oldValue, newValue) {
-                    if (newValue.text.isEmpty) {
-                      return const TextEditingValue(text: '0');
-                    }
-                    if (int.parse(newValue.text) < 0 &&
-                        int.tryParse(newValue.text) != null) {
-                      return const TextEditingValue(text: '0');
-                    }
-                    return newValue;
-                  },
-                ),
+                TextInputFormatter.withFunction((oldValue, newValue) {
+                  if (newValue.text.isEmpty) {
+                    return const TextEditingValue(text: '0');
+                  }
+                  final v = int.tryParse(newValue.text) ?? 0;
+                  if (v < 0) return const TextEditingValue(text: '0');
+                  return newValue;
+                }),
               ],
               inputType: TextInputType.number,
               textColor: Colors.black,
               controller: punishmentamountcontroller,
             ),
           ),
+
+          // Given salary
           Container(
             width: 100.w,
             alignment: Alignment.centerRight,
             margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 5.h),
             child: Text(
-              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(widget.salary - _calculatePunishment() - (num.parse(monthlypaymentcontroller.text.isNotEmpty ? monthlypaymentcontroller.text : '0').toInt()) + widget.reward - widget.punishment + (widget.taskreward - widget.taskpunishment))} دینار',
+              'بڕی موچەی پێدراو : ${NumberFormat("#,###").format(_givenSalary())} دینار',
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: 18.sp,
@@ -472,6 +556,8 @@ class _GivingsalaryState extends State<Givingsalary> {
               ),
             ),
           ),
+
+          // Pay button
           Container(
             width: 80.w,
             height: 6.h,
@@ -491,7 +577,7 @@ class _GivingsalaryState extends State<Givingsalary> {
                     return AlertDialog(
                       title: const Text('پێدانی موچە'),
                       content: Text(
-                        'دڵنیایت لە پێدانی موچەی مانگی ${widget.date.month} بە بڕی ${NumberFormat("#,###").format(widget.salary - (_calculatePunishment() + (num.parse(monthlypaymentcontroller.text.isNotEmpty ? monthlypaymentcontroller.text : '0').toInt())) + widget.reward - widget.punishment + (widget.taskreward - widget.taskpunishment))} دینار',
+                        'دڵنیایت لە پێدانی موچەی مانگی ${widget.date.month} بە بڕی ${NumberFormat("#,###").format(_givenSalary())} دینار',
                       ),
                       actions: [
                         Material1.button(
@@ -500,45 +586,64 @@ class _GivingsalaryState extends State<Givingsalary> {
                           textcolor: Colors.white,
                           function: () async {
                             try {
+                              final missedMinutes = _missedMinutes();
+                              final missedHoursDouble = missedMinutes / 60.0;
+
                               await FirebaseFirestore.instance
                                   .collection('user')
                                   .doc(widget.email)
                                   .collection('salary')
                                   .doc('${widget.date.year}-${widget.date.month}')
                                   .set({
-                                'totalworkedhours': widget.totalworkedtime.inHours,
+                                // Worked
+                                'totalworkedminutes':
+                                    widget.totalworkedtime.inMinutes,
+                                'totalworkedhours':
+                                    widget.totalworkedtime.inMinutes / 60.0,
+
+                                // Target (after leave)
+                                'worktargetminutes': widget.workTarget.inMinutes,
+                                'worktargethours': widget.workTarget.inMinutes / 60.0,
+
+                                // Leave (approved)
+                                'approvedleaveminutes':
+                                    widget.absenceDuration.inMinutes,
+                                'approvedleavehours':
+                                    widget.absenceDuration.inMinutes / 60.0,
+
+                                // Missing
+                                'totalmissedworkminutes': missedMinutes,
+                                'totalmissedworkhours': missedHoursDouble,
+
+                                // Old keys (keep if you have old UI reading them)
+                                'missedhoursofwork': missedHoursDouble,
+                                'totalmissedworkhours_legacyInt':
+                                    missedMinutes ~/ 60,
+
+                                // Meta
                                 'givenby': widget.adminemail,
                                 'date': widget.date,
-                                'totalmissedworkhours':
-                                    (widget.worktarget - widget.totalworkedtime.inHours),
+
+                                // Punishment
                                 'punishmentformissingwork': _calculatePunishment(),
-                                'punishmentpermissedworkinghour': int.parse(
-                                  punishmentamountcontroller.text.isNotEmpty
-                                      ? punishmentamountcontroller.text
-                                      : '0',
-                                ),
-                                'totalpunishment': _calculatePunishment() + widget.punishment,
-                                'monthlypayback': int.parse(
-                                  monthlypaymentcontroller.text.isNotEmpty
-                                      ? monthlypaymentcontroller.text
-                                      : '0',
-                                ),
+                                'punishmentpermissedworkinghour':
+                                    _parseIntController(punishmentamountcontroller),
+                                'totalpunishment':
+                                    _calculatePunishment() + widget.punishment,
+
+                                // Loan payback
+                                'monthlypayback':
+                                    _parseIntController(monthlypaymentcontroller),
+
+                                // Salary and reward/punishment
                                 'salary': widget.salary,
                                 'reward': widget.reward,
                                 'punishmentgiven': widget.punishment,
                                 'taskreward': widget.taskreward,
                                 'taskpunishment': widget.taskpunishment,
-                                'missedhoursofwork':
-                                    (widget.worktarget - widget.totalworkedtime.inHours),
+
                                 'isreceived': false,
-                                'givensalary': (widget.salary -
-                                    _calculatePunishment() -
-                                    int.parse(monthlypaymentcontroller.text.isNotEmpty
-                                        ? monthlypaymentcontroller.text
-                                        : '0') +
-                                    widget.reward -
-                                    widget.punishment +
-                                    (widget.taskreward - widget.taskpunishment)),
+                                'givensalary': _givenSalary(),
                               });
 
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -551,6 +656,7 @@ class _GivingsalaryState extends State<Givingsalary> {
 
                               Navigator.popUntil(context, (route) => route.isFirst);
                             } catch (e) {
+                              // ignore: avoid_print
                               print('Error in button action: $e');
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Error: $e')),
@@ -562,9 +668,7 @@ class _GivingsalaryState extends State<Givingsalary> {
                           label: 'نەخێر',
                           buttoncolor: Material1.primaryColor,
                           textcolor: Colors.white,
-                          function: () {
-                            Navigator.pop(context);
-                          },
+                          function: () => Navigator.pop(context),
                         ),
                       ],
                     );
@@ -576,13 +680,5 @@ class _GivingsalaryState extends State<Givingsalary> {
         ],
       ),
     );
-  }
-
-  num _calculatePunishment() {
-    final missedHours = widget.worktarget - widget.totalworkedtime.inHours;
-    if (missedHours <= 0) return 0;
-    return missedHours * int.parse(punishmentamountcontroller.text.isNotEmpty
-        ? punishmentamountcontroller.text
-        : '0');
   }
 }

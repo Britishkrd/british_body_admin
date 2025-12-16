@@ -16,6 +16,13 @@ class ChoosingUserForGivingSalary extends StatefulWidget {
 
 class _ChoosingUserForGivingSalaryState
     extends State<ChoosingUserForGivingSalary> {
+  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  bool _dayOverlapsRange(DateTime dayStart, DateTime rangeStart, DateTime rangeEnd) {
+    final dayEnd = dayStart.add(const Duration(days: 1));
+    return dayEnd.isAfter(rangeStart) && dayStart.isBefore(rangeEnd);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,11 +57,13 @@ class _ChoosingUserForGivingSalaryState
               final phone = data['phonenumber'] as String? ?? 'No Phone';
               final email = data['email'] as String? ?? 'No Email';
               final salary = (data['salary'] as num? ?? 0).toInt();
+
               final loan = data.containsKey('loan')
                   ? (data['loan'] is String
                       ? (num.tryParse(data['loan'] as String) ?? 0).toInt()
                       : (data['loan'] as num? ?? 0).toInt())
                   : 0;
+
               final monthlyPayback = data.containsKey('monthlypayback')
                   ? (data['monthlypayback'] is String
                       ? (num.tryParse(data['monthlypayback'] as String) ?? 0)
@@ -88,15 +97,17 @@ class _ChoosingUserForGivingSalaryState
     String email,
     int salary,
     int loan,
-    int monthlyPayback, // Changed to int
+    int monthlyPayback,
   ) async {
     final userDoc =
         await FirebaseFirestore.instance.collection('user').doc(email).get();
 
-    final dailyWorkHours = userDoc['worktarget'] as int? ?? 8;
+    final userData = (userDoc.data() as Map<String, dynamic>?) ?? {};
+
+    final dailyWorkHours = (userData['worktarget'] as num?)?.toInt() ?? 8;
 
     List<int> workDays = [];
-    final dynamicWeekdays = userDoc['weekdays'];
+    final dynamicWeekdays = userData['weekdays'];
 
     if (dynamicWeekdays is List) {
       workDays = dynamicWeekdays
@@ -131,14 +142,33 @@ class _ChoosingUserForGivingSalaryState
     );
 
     try {
-      final totalWorkedTime = await _calculateTotalWorkedTime(email, dates[0]);
-      final workingDays = await calculateWorkingDays(dates[0], workDays);
-      final absenceDays = await _calculateAbsenceDays(email, dates[0]);
-      final monthlyTarget = dailyWorkHours * (workingDays - absenceDays);
+      final selectedMonth = dates[0];
+
+      final totalWorkedTime = await _calculateTotalWorkedTime(email, selectedMonth);
+
+      // Working days in salary period (only workDays, excluding holidays)
+      final workingDays = await calculateWorkingDays(selectedMonth, workDays);
+
+      // Approved leave duration in salary period (hours/minutes)
+      final absenceDuration = await _calculateAbsenceDuration(
+        email: email,
+        selectedMonth: selectedMonth,
+        workDays: workDays,
+        dailyWorkHours: dailyWorkHours,
+      );
+
+      // Monthly target (minutes): workDays * dailyWorkHours minus approved leave minutes
+      final totalTargetMinutes = workingDays * dailyWorkHours * 60;
+      final targetAfterLeaveMinutes =
+          totalTargetMinutes - absenceDuration.inMinutes;
+      final monthlyTargetDuration = Duration(
+        minutes: targetAfterLeaveMinutes < 0 ? 0 : targetAfterLeaveMinutes,
+      );
+
       final (reward, punishment) =
-          await _calculateRewardAndPunishment(email, dates[0]);
+          await _calculateRewardAndPunishment(email, selectedMonth);
       final (taskReward, taskPunishment) =
-          await _calculateTaskRewardAndPunishment(email, dates[0]);
+          await _calculateTaskRewardAndPunishment(email, selectedMonth);
 
       if (!mounted) return;
       Navigator.pop(context);
@@ -150,9 +180,9 @@ class _ChoosingUserForGivingSalaryState
             name: name,
             adminemail: widget.email,
             email: email,
-            date: dates[0],
+            date: selectedMonth,
             totalworkedtime: totalWorkedTime,
-            worktarget: monthlyTarget,
+            workTarget: monthlyTargetDuration,
             salary: salary,
             loan: loan.toString(),
             monthlypayback: monthlyPayback,
@@ -160,7 +190,7 @@ class _ChoosingUserForGivingSalaryState
             punishment: punishment,
             taskreward: taskReward,
             taskpunishment: taskPunishment,
-            absenceDays: absenceDays,
+            absenceDuration: absenceDuration,
             dailyWorkHours: dailyWorkHours,
           ),
         ),
@@ -174,9 +204,16 @@ class _ChoosingUserForGivingSalaryState
     }
   }
 
-  // Rest of the methods remain unchanged
+  // Salary period: 26th of previous month to 25th of selected month
+  (DateTime start, DateTime end) _getSalaryPeriod(DateTime selectedMonth) {
+    final startDate = DateTime(selectedMonth.year, selectedMonth.month - 1, 26);
+    final endDate =
+        DateTime(selectedMonth.year, selectedMonth.month, 25, 23, 59, 59);
+    return (startDate, endDate);
+  }
+
   Future<int> calculateWorkingDays(DateTime month, List<int> workDays) async {
-  final (firstDay, lastDay) = _getSalaryPeriod(month); // گۆڕانکاری لێرە
+    final (firstDay, lastDay) = _getSalaryPeriod(month);
 
     final holidaysSnapshot = await FirebaseFirestore.instance
         .collection('holidays')
@@ -184,69 +221,144 @@ class _ChoosingUserForGivingSalaryState
         .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
         .get();
 
-    int workingDays = 0;
+    final holidayRanges = holidaysSnapshot.docs.map((d) {
+      final s = (d['startDate'] as Timestamp).toDate();
+      final e = (d['endDate'] as Timestamp).toDate();
+      return (s, e);
+    }).toList();
 
-    for (DateTime day = firstDay;
-        day.isBefore(lastDay) || day.isAtSameMomentAs(lastDay);
-        day = day.add(const Duration(days: 1))) {
-      if (workDays.contains(day.weekday)) {
-        bool isHoliday = false;
-
-        for (var holidayDoc in holidaysSnapshot.docs) {
-          final holidayStart = (holidayDoc['startDate'] as Timestamp).toDate();
-          final holidayEnd = (holidayDoc['endDate'] as Timestamp).toDate();
-
-          if ((day.isAfter(holidayStart) ||
-                  day.isAtSameMomentAs(holidayStart)) &&
-              (day.isBefore(holidayEnd) || day.isAtSameMomentAs(holidayEnd))) {
-            isHoliday = true;
-            break;
-          }
-        }
-
-        if (!isHoliday) {
-          workingDays++;
-        }
-      }
+    bool isHolidayDay(DateTime dayStart) {
+      final dayEnd = dayStart.add(const Duration(days: 1));
+      return holidayRanges.any((r) => dayEnd.isAfter(r.$1) && dayStart.isBefore(r.$2));
     }
 
-    return workingDays;
+    int workingDaysCount = 0;
+    DateTime day = _dateOnly(firstDay);
+    final last = _dateOnly(lastDay);
+
+    while (!day.isAfter(last)) {
+      if (workDays.contains(day.weekday)) {
+        if (!isHolidayDay(day)) {
+          workingDaysCount++;
+        }
+      }
+      day = day.add(const Duration(days: 1));
+    }
+
+    return workingDaysCount;
   }
 
-  Future<int> _calculateAbsenceDays(String email, DateTime date) async {
-  final (firstDay, lastDay) = _getSalaryPeriod(date); // گۆڕانکاری لێرە
+  Future<Duration> _calculateAbsenceDuration({
+    required String email,
+    required DateTime selectedMonth,
+    required List<int> workDays,
+    required int dailyWorkHours,
+  }) async {
+    final (periodStart, periodEnd) = _getSalaryPeriod(selectedMonth);
 
+    // Holidays in the salary period
+    final holidaysSnapshot = await FirebaseFirestore.instance
+        .collection('holidays')
+        .where('endDate', isGreaterThanOrEqualTo: Timestamp.fromDate(periodStart))
+        .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(periodEnd))
+        .get();
+
+    final holidayRanges = holidaysSnapshot.docs.map((d) {
+      final s = (d['startDate'] as Timestamp).toDate();
+      final e = (d['endDate'] as Timestamp).toDate();
+      return (s, e);
+    }).toList();
+
+    bool isHolidayDay(DateTime dayStart) {
+      final dayEnd = dayStart.add(const Duration(days: 1));
+      return holidayRanges.any((r) => dayEnd.isAfter(r.$1) && dayStart.isBefore(r.$2));
+    }
+
+    // Approved absences overlapping the salary period
     final absenceSnapshot = await FirebaseFirestore.instance
         .collection('user')
         .doc(email)
         .collection('absentmanagement')
         .where('status', isEqualTo: 'accepted')
-        .where('start', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
-        .where('end', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDay))
+        .where('start', isLessThanOrEqualTo: Timestamp.fromDate(periodEnd))
+        .where('end', isGreaterThanOrEqualTo: Timestamp.fromDate(periodStart))
         .get();
 
-    int totalAbsenceDays = 0;
+    // Collect intervals per day (to merge overlaps)
+    final Map<DateTime, List<(DateTime, DateTime)>> intervalsByDay = {};
 
-    for (var doc in absenceSnapshot.docs) {
-      final start = doc['start'].toDate();
-      final end = doc['end'].toDate();
+    for (final doc in absenceSnapshot.docs) {
+      final start = (doc['start'] as Timestamp).toDate();
+      final end = (doc['end'] as Timestamp).toDate();
 
-      final effectiveStart = start.isBefore(firstDay) ? firstDay : start;
-      final effectiveEnd = end.isAfter(lastDay) ? lastDay : end;
+      // clamp to salary period
+      final aStart = start.isBefore(periodStart) ? periodStart : start;
+      final aEnd = end.isAfter(periodEnd) ? periodEnd : end;
+      if (!aEnd.isAfter(aStart)) continue;
 
-      int days = effectiveEnd.difference(effectiveStart).inDays + 1;
-      totalAbsenceDays += days;
+      DateTime day = _dateOnly(aStart);
+      final lastDay = _dateOnly(aEnd);
+
+      while (!day.isAfter(lastDay)) {
+        final dayStart = day;
+        final dayEnd = dayStart.add(const Duration(days: 1));
+
+        final segStart = aStart.isAfter(dayStart) ? aStart : dayStart;
+        final segEnd = aEnd.isBefore(dayEnd) ? aEnd : dayEnd;
+
+        if (segEnd.isAfter(segStart)) {
+          intervalsByDay.putIfAbsent(dayStart, () => []).add((segStart, segEnd));
+        }
+
+        day = day.add(const Duration(days: 1));
+      }
     }
 
-    return totalAbsenceDays;
+    final maxMinutesPerDay = dailyWorkHours * 60;
+    int totalMinutes = 0;
+
+    for (final entry in intervalsByDay.entries) {
+      final dayStart = entry.key;
+
+      // only count on workdays and not holidays
+      if (!workDays.contains(dayStart.weekday)) continue;
+      if (isHolidayDay(dayStart)) continue;
+
+      final intervals = entry.value..sort((a, b) => a.$1.compareTo(b.$1));
+
+      // merge intervals to avoid double counting
+      DateTime curStart = intervals.first.$1;
+      DateTime curEnd = intervals.first.$2;
+
+      int dayMinutes = 0;
+
+      for (final interval in intervals.skip(1)) {
+        final s = interval.$1;
+        final e = interval.$2;
+
+        if (s.isAfter(curEnd)) {
+          dayMinutes += curEnd.difference(curStart).inMinutes;
+          curStart = s;
+          curEnd = e;
+        } else {
+          if (e.isAfter(curEnd)) curEnd = e;
+        }
+      }
+      dayMinutes += curEnd.difference(curStart).inMinutes;
+
+      // cap to dailyWorkHours per day
+      if (dayMinutes > maxMinutesPerDay) dayMinutes = maxMinutesPerDay;
+
+      totalMinutes += dayMinutes;
+    }
+
+    return Duration(minutes: totalMinutes);
   }
 
-  Future<Duration> _calculateTotalWorkedTime(
-      String email, DateTime date) async {
-      Duration totalWorkedTime = Duration.zero;
+  Future<Duration> _calculateTotalWorkedTime(String email, DateTime date) async {
+    Duration totalWorkedTime = Duration.zero;
 
-
-  final (firstDay, lastDay) = _getSalaryPeriod(date); // گۆڕانکاری لێرە
+    final (firstDay, lastDay) = _getSalaryPeriod(date);
 
     // Fetch holidays
     final holidays = await FirebaseFirestore.instance
@@ -256,14 +368,14 @@ class _ChoosingUserForGivingSalaryState
         .get();
 
     // Fetch check-in/check-out records
-      final checkinCheckouts = await FirebaseFirestore.instance
-      .collection('user')
-      .doc(email)
-      .collection('checkincheckouts')
-      .where('time', isGreaterThanOrEqualTo: firstDay)
-      .where('time', isLessThanOrEqualTo: lastDay)
-      .orderBy('time')
-      .get();
+    final checkinCheckouts = await FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .collection('checkincheckouts')
+        .where('time', isGreaterThanOrEqualTo: firstDay)
+        .where('time', isLessThanOrEqualTo: lastDay)
+        .orderBy('time')
+        .get();
 
     DateTime? lastCheckInTime;
     for (var doc in checkinCheckouts.docs) {
@@ -275,57 +387,59 @@ class _ChoosingUserForGivingSalaryState
       if (isCheckIn) {
         lastCheckInTime = time;
       } else if (!isCheckIn && lastCheckInTime != null) {
-        // Check if this period overlaps with any holiday
         bool isHolidayPeriod = holidays.docs.any((holiday) {
           final holidayStart = (holiday['startDate'] as Timestamp).toDate();
           final holidayEnd = (holiday['endDate'] as Timestamp).toDate();
-          return isDateInRange(lastCheckInTime!, holidayStart, holidayEnd) ||
-              isDateInRange(time, holidayStart, holidayEnd);
+          return _dayOverlapsRange(
+                _dateOnly(lastCheckInTime!),
+                holidayStart,
+                holidayEnd,
+              ) ||
+              _dayOverlapsRange(
+                _dateOnly(time),
+                holidayStart,
+                holidayEnd,
+              );
         });
 
         if (!isHolidayPeriod) {
-          totalWorkedTime += time.difference(lastCheckInTime);
+          totalWorkedTime += time.difference(lastCheckInTime!);
         }
-        lastCheckInTime = null; // Reset after processing a pair
+        lastCheckInTime = null;
       }
     }
 
-    // If currently checked in (last entry is check-in), add time up to now
+    // If currently checked in
     if (lastCheckInTime != null) {
       final now = DateTime.now();
       bool isHolidayPeriod = holidays.docs.any((holiday) {
         final holidayStart = (holiday['startDate'] as Timestamp).toDate();
         final holidayEnd = (holiday['endDate'] as Timestamp).toDate();
-        return isDateInRange(lastCheckInTime!, holidayStart, holidayEnd) ||
-            isDateInRange(now, holidayStart, holidayEnd);
+        return _dayOverlapsRange(_dateOnly(lastCheckInTime!), holidayStart, holidayEnd) ||
+            _dayOverlapsRange(_dateOnly(now), holidayStart, holidayEnd);
       });
       if (!isHolidayPeriod) {
-        totalWorkedTime += now.difference(lastCheckInTime);
+        totalWorkedTime += now.difference(lastCheckInTime!);
       }
     }
 
     return totalWorkedTime;
   }
 
-  bool isDateInRange(DateTime date, DateTime rangeStart, DateTime rangeEnd) {
-    return date.isAfter(rangeStart.subtract(const Duration(days: 1))) &&
-        date.isBefore(rangeEnd.add(const Duration(days: 1)));
-  }
-
   Future<(num, num)> _calculateRewardAndPunishment(
       String email, DateTime date) async {
     num reward = 0;
     num punishment = 0;
-      final (firstDay, lastDay) = _getSalaryPeriod(date); // گۆڕانکاری لێرە
 
+    final (firstDay, lastDay) = _getSalaryPeriod(date);
 
-  final rewardPunishment = await FirebaseFirestore.instance
-      .collection('user')
-      .doc(email)
-      .collection('rewardpunishment')
-      .where('date', isGreaterThanOrEqualTo: firstDay)
-      .where('date', isLessThanOrEqualTo: lastDay)
-      .get();
+    final rewardPunishment = await FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .collection('rewardpunishment')
+        .where('date', isGreaterThanOrEqualTo: firstDay)
+        .where('date', isLessThanOrEqualTo: lastDay)
+        .get();
 
     for (var doc in rewardPunishment.docs) {
       final type = doc['type'] as String?;
@@ -348,15 +462,15 @@ class _ChoosingUserForGivingSalaryState
     num taskReward = 0;
     num taskPunishment = 0;
 
-      final (firstDay, lastDay) = _getSalaryPeriod(date); // گۆڕانکاری لێرە
+    final (firstDay, lastDay) = _getSalaryPeriod(date);
 
     final taskRewardPunishment = await FirebaseFirestore.instance
-      .collection('user')
-      .doc(email)
-      .collection('taskrewardpunishment')
-      .where('date', isGreaterThanOrEqualTo: firstDay)
-      .where('date', isLessThanOrEqualTo: lastDay)
-      .get();
+        .collection('user')
+        .doc(email)
+        .collection('taskrewardpunishment')
+        .where('date', isGreaterThanOrEqualTo: firstDay)
+        .where('date', isLessThanOrEqualTo: lastDay)
+        .get();
 
     for (var doc in taskRewardPunishment.docs) {
       final type = doc['type'] as String?;
@@ -403,14 +517,4 @@ class _ChoosingUserForGivingSalaryState
       ),
     );
   }
-  // Custom salary period: 26th of previous month to 25th of selected month
-(DateTime start, DateTime end) _getSalaryPeriod(DateTime selectedMonth) {
-  // Start date: 26th of previous month
-  final previousMonth = DateTime(selectedMonth.year, selectedMonth.month - 1, 26);
-  
-  // End date: 25th of selected month
-  final endDate = DateTime(selectedMonth.year, selectedMonth.month, 25, 23, 59, 59);
-  
-  return (previousMonth, endDate);
-}
 }

@@ -27,6 +27,7 @@ TextEditingController notecontroller = TextEditingController();
 
 DateTime? start;
 DateTime? end;
+
 String formatDate(DateTime? date) {
   final DateFormat formatter = DateFormat('dd/MM/yyyy HH:mm');
   return formatter.format(date ?? DateTime.now());
@@ -100,7 +101,7 @@ class _CreateabsentState extends State<Createabsent> {
                       value: isEmergency,
                       onChanged: (bool? value) {
                         setState(() {
-                          isEmergency = value!;
+                          isEmergency = value ?? false;
                           isNormal = false;
                           isUregent = false;
                         });
@@ -124,7 +125,7 @@ class _CreateabsentState extends State<Createabsent> {
                       value: isUregent,
                       onChanged: (bool? value) {
                         setState(() {
-                          isUregent = value!;
+                          isUregent = value ?? false;
                           isNormal = false;
                           isEmergency = false;
                         });
@@ -148,7 +149,7 @@ class _CreateabsentState extends State<Createabsent> {
                       value: isNormal,
                       onChanged: (bool? value) {
                         setState(() {
-                          isNormal = value!;
+                          isNormal = value ?? false;
                           isEmergency = false;
                           isUregent = false;
                         });
@@ -205,195 +206,196 @@ class _CreateabsentState extends State<Createabsent> {
               }
             },
             child: Container(
-                margin: EdgeInsets.only(top: 3.h, left: 5.w, right: 5.w),
-                height: 10.h,
-                decoration: BoxDecoration(
-                    color: Material1.primaryColor,
-                    borderRadius: BorderRadius.circular(15)),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('هەڵبژاردنی کاتی مۆڵەت',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold)),
-                    Text(
-                        start == null
-                            ? ''
-                            : "${'لە'} ${formatDate(start == DateTime.now() ? null : start)} - ${'بۆ'} ${formatDate(end == DateTime.now() ? null : end)}",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold)),
-                  ],
-                )),
+              margin: EdgeInsets.only(top: 3.h, left: 5.w, right: 5.w),
+              height: 10.h,
+              decoration: BoxDecoration(
+                color: Material1.primaryColor,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'هەڵبژاردنی کاتی مۆڵەت',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    start == null || end == null
+                        ? ''
+                        : "لە ${formatDate(start)} - بۆ ${formatDate(end)}",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           Container(
             margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
             width: 90.w,
             height: 8.h,
             child: Material1.textfield(
-                hint: 'تێبینی',
-                controller: notecontroller,
-                textColor: Material1.primaryColor),
+              hint: 'تێبینی',
+              controller: notecontroller,
+              textColor: Material1.primaryColor,
+            ),
           ),
           Container(
             margin: EdgeInsets.only(top: 5.h, left: 5.w, right: 5.w),
             width: 90.w,
             height: 8.h,
             child: Material1.button(
-                label: 'داواکردن',
-                function: () async {
-                  if (start == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('تکایە کاتی مۆڵەت هەڵبژێرە'),
-                      ),
-                    );
-                    return;
-                  }
-                  if (notecontroller.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('تکایە تێبینی بنووسە'),
-                      ),
-                    );
-                    return;
-                  }
-                  if (!isEmergency && !isUregent && !isNormal) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('تکایە گرنگی مۆڵەت هەڵبژێرە'),
-                      ),
-                    );
-                    return;
-                  }
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('داواکردنی مۆڵەت'),
-                          content: Text('دڵنییایت لە داواکردنی مۆڵەت؟'),
-                          actions: [
-                            Material1.button(
-                                label: 'نەخێر',
-                                function: () {
-                                  Navigator.pop(context);
-                                },
-                                textcolor: Colors.white,
-                                buttoncolor: Material1.primaryColor),
-                            Material1.button(
-                                label: 'بەڵێ',
-                                function: () async {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Center(
-                                              child:
-                                                  const CircularProgressIndicator()),
-                                        );
-                                      });
-                                  FirebaseFirestore.instance
-                                      .collection('user')
-                                      .doc(widget.email)
-                                      .collection('absentmanagement')
-                                      .doc(DateTime.now().toString())
-                                      .set({
-                                    'note': notecontroller.text,
-                                    'time': DateTime.now(),
-                                    'start': start,
-                                    'end': end,
-                                    'status': 'pending',
-                                    'urgency': isEmergency
-                                        ? 'emergency'
-                                        : isUregent
-                                            ? 'urgent'
-                                            : 'normal',
-                                  }).then(
-                                    (value) async{
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              'مۆڵەتکە بەسەرکەوتویی داواکرا'),
-                                        ),
-                                      );
-                                     
-  // --- NEW: Notify all admins ---
-  await _notifyAdminsAboutNewAbsence(
-    requesterEmail: widget.email,
-    note: notecontroller.text,
-    start: start!,
-    end: end!,
-    urgency: isEmergency
-        ? 'زۆر گرنگ'
-        : isUregent
-            ? 'گرنگ'
-            : 'ئاسایی',
-  );
+              label: 'داواکردن',
+              function: () async {
+                if (start == null || end == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تکایە کاتی مۆڵەت هەڵبژێرە')),
+                  );
+                  return;
+                }
+                if (!end!.isAfter(start!)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('کاتی کۆتایی دەبێت دوای دەستپێکردن بێت')),
+                  );
+                  return;
+                }
+                if (notecontroller.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تکایە تێبینی بنووسە')),
+                  );
+                  return;
+                }
+                if (!isEmergency && !isUregent && !isNormal) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تکایە گرنگی مۆڵەت هەڵبژێرە')),
+                  );
+                  return;
+                }
 
-  // Close loading & go back
-  Navigator.pop(context); // close loading dialog
-  Navigator.popUntil(context, (route) => route.isFirst);
-                                    },
-                                  ).catchError((error) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('هەڵەیەک هەیە'),
-                                      ),
-                                    );
-                                  });
-                                },
-                                textcolor: Colors.white,
-                                buttoncolor: Material1.primaryColor),
-                          ],
-                        );
-                      });
-                },
-                textcolor: Colors.white,
-                buttoncolor: Material1.primaryColor),
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('داواکردنی مۆڵەت'),
+                      content: const Text('دڵنییایت لە داواکردنی مۆڵەت؟'),
+                      actions: [
+                        Material1.button(
+                          label: 'نەخێر',
+                          function: () => Navigator.pop(context),
+                          textcolor: Colors.white,
+                          buttoncolor: Material1.primaryColor,
+                        ),
+                        Material1.button(
+                          label: 'بەڵێ',
+                          function: () async {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return const AlertDialog(
+                                  title: Center(child: CircularProgressIndicator()),
+                                );
+                              },
+                            );
+
+                            FirebaseFirestore.instance
+                                .collection('user')
+                                .doc(widget.email)
+                                .collection('absentmanagement')
+                                .doc(DateTime.now().toString())
+                                .set({
+                              'note': notecontroller.text,
+                              'time': DateTime.now(),
+                              'start': start,
+                              'end': end,
+                              'status': 'pending',
+                              'urgency': isEmergency
+                                  ? 'emergency'
+                                  : isUregent
+                                      ? 'urgent'
+                                      : 'normal',
+                            }).then((value) async {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('مۆڵەتکە بەسەرکەوتویی داواکرا')),
+                              );
+
+                              await _notifyAdminsAboutNewAbsence(
+                                requesterEmail: widget.email,
+                                note: notecontroller.text,
+                                start: start!,
+                                end: end!,
+                                urgency: isEmergency
+                                    ? 'زۆر گرنگ'
+                                    : isUregent
+                                        ? 'گرنگ'
+                                        : 'ئاسایی',
+                              );
+
+                              Navigator.pop(context); // close loading
+                              Navigator.popUntil(context, (route) => route.isFirst);
+                            }).catchError((error) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('هەڵەیەک هەیە')),
+                              );
+                            });
+                          },
+                          textcolor: Colors.white,
+                          buttoncolor: Material1.primaryColor,
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              textcolor: Colors.white,
+              buttoncolor: Material1.primaryColor,
+            ),
           )
         ],
       ),
     );
   }
+
   Future<void> _notifyAdminsAboutNewAbsence({
-  required String requesterEmail,
-  required String note,
-  required DateTime start,
-  required DateTime end,
-  required String urgency,
-}) async {
-  try {
-    // Get all users
-    final usersSnapshot = await FirebaseFirestore.instance.collection('user').get();
+    required String requesterEmail,
+    required String note,
+    required DateTime start,
+    required DateTime end,
+    required String urgency,
+  }) async {
+    try {
+      final usersSnapshot =
+          await FirebaseFirestore.instance.collection('user').get();
 
-    for (var userDoc in usersSnapshot.docs) {
-      final data = userDoc.data();
-      final permissions = data['permissions'] as List<dynamic>? ?? [];
+      for (var userDoc in usersSnapshot.docs) {
+        final data = userDoc.data();
+        final permissions = data['permissions'] as List<dynamic>? ?? [];
 
-      // Check if user is admin
-      if (permissions.contains('isAdmin')) {
-        final token = data['token'] as String?;
-        if (token != null && token.isNotEmpty) {
-          // Send notification to this admin
-          await sendingnotification(
-        
-           'داواکاری مۆڵەتی نوێ',
-            
-                'بەکارهێنەر ($requesterEmail) داوای مۆڵەت کردووە\nتێبینی: $note\nلە ${formatDate(start)} بۆ ${formatDate(end)}\nگرنگی: $urgency',
-             token,
-             'default1', // or let admin choose later
-          );
+        if (permissions.contains('isAdmin')) {
+          final token = data['token'] as String?;
+          if (token != null && token.isNotEmpty) {
+            await sendingnotification(
+              'داواکاری مۆڵەتی نوێ',
+              'بەکارهێنەر ($requesterEmail) داوای مۆڵەت کردووە\n'
+                  'تێبینی: $note\n'
+                  'لە ${formatDate(start)} بۆ ${formatDate(end)}\n'
+                  'گرنگی: $urgency',
+              token,
+              'default1',
+            );
+          }
         }
       }
+    } catch (e) {
+      // ignore: avoid_print
+      print("Error notifying admins: $e");
     }
-  } catch (e) {
-    print("Error notifying admins: $e");
-    // Optionally show error in UI
   }
-}
 }

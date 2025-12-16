@@ -1,11 +1,8 @@
 import 'package:british_body_admin/material/materials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'hoursworked.dart';
 
 class Viewingselfloginlogout extends StatefulWidget {
   final String email;
@@ -522,86 +519,6 @@ class _ViewingselfloginlogoutState extends State<Viewingselfloginlogout> {
                   }).toList(),
                 ),
               ),
-
-              // ✅ دوگمەی خوارەوە
-              SafeArea(
-                child: Container(
-                  height: 6.h,
-                  width: 80.w,
-                  margin: EdgeInsets.all(5.w),
-                  child: Material1.button(
-                    label: 'بینینی بڕی ئیشکردن',
-                    buttoncolor: Material1.primaryColor,
-                    textcolor: Colors.white,
-                    function: () async {
-                      // ✅ حیسابکردنی ڕۆژەکانی کار لە ماوەی مووچە
-                      int totalWorkDays =
-                          _getWorkDaysInPeriod(startDate, endDate);
-
-                      final SharedPreferences preference =
-                          await SharedPreferences.getInstance();
-                      int starthour = preference.getInt('starthour') ?? 0;
-                      int endhour = preference.getInt('endhour') ?? 0;
-                      int startmin = preference.getInt('startmin') ?? 0;
-                      int endmin = preference.getInt('endmin') ?? 0;
-
-                      Duration targetWorkTime = Duration(
-                              hours: endhour - starthour,
-                              minutes: endmin - startmin) *
-                          totalWorkDays;
-
-                      FirebaseFirestore.instance
-                          .collection('user')
-                          .doc(widget.email)
-                          .collection('checkincheckouts')
-                          .where('time', isGreaterThanOrEqualTo: startDate)
-                          .where('time', isLessThanOrEqualTo: endDate)
-                          .orderBy('time')
-                          .get()
-                          .then((querySnapshot) {
-                        Duration totalworkedtime = Duration();
-                        List<QueryDocumentSnapshot> docs = querySnapshot.docs;
-
-                        for (var i = 0; i < docs.length - 1; i++) {
-                          if (docs[i]['checkin'] == true &&
-                              docs[i + 1]['checkin'] == false) {
-                            totalworkedtime += docs[i + 1]['time']
-                                .toDate()
-                                .difference(docs[i]['time'].toDate());
-                          }
-                        }
-
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('کاتی کارکردن'),
-                                content: Text(
-                                    'کاتی کارکردن : ${totalworkedtime.inHours} کاتژمێر ${totalworkedtime.inMinutes.remainder(60)} خولەک\n'
-                                    'کاتی ئامانج : ${targetWorkTime.inHours} کاتژمێر ${targetWorkTime.inMinutes.remainder(60)} خولەک'),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    Hoursworked(
-                                                        totalworkedtime:
-                                                            totalworkedtime,
-                                                        targettime:
-                                                            targetWorkTime,
-                                                        date: widget.date)));
-                                      },
-                                      child: const Text('دڵنیابوون')),
-                                ],
-                              );
-                            });
-                      });
-                    },
-                  ),
-                ),
-              )
             ],
           );
         },
