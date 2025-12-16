@@ -17,6 +17,7 @@ class LoginLogoutManagement extends StatefulWidget {
 }
 
 class _LoginLogoutManagementState extends State<LoginLogoutManagement> {
+
   (DateTime start, DateTime end) _getSalaryPeriod(DateTime selectedMonth) {
     final startDate = DateTime(selectedMonth.year, selectedMonth.month - 1, 26);
     final endDate =
